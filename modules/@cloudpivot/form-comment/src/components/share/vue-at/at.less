@@ -1,0 +1,78 @@
+.atwho-view {
+    color: black;
+    border-radius: 3px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    min-width: 120px;
+    z-index: 11110 !important;
+}
+.atwho-ul {
+    list-style:none;
+}
+.atwho-li {
+    display: block;
+}
+
+.atwho-view {
+  border-radius: 6px;
+  box-shadow: 0 0 10px 0 rgba(101, 111, 122, .5);
+}
+.atwho-ul {
+  height: 100%;
+  max-height: unset!important;
+  padding: 0;
+  margin: 0;
+}
+.atwho-li {
+  box-sizing: border-box;
+  height: 27px;
+  padding: 0 12px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+.atwho-cur {
+  background: #5BB8FF;
+  color: white;
+}
+
+.atwho-wrap {
+  position: relative;
+}
+.atwho-panel {
+  position: absolute;
+}
+.atwho-inner {
+  position: relative;
+}
+.atwho-view {
+  position: absolute;
+  top: 22px;
+  left: 0; // 抵消左边距
+  cursor: default;
+  background-color: rgba(255,255,255,.94);
+  min-width: 110px!important;
+  max-width: 150px!important;
+  max-height: 135px!important;
+  overflow-y: auto;
+  bottom: unset!important;
+  &::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: #F5F5F5;
+  }
+  &::-webkit-scrollbar-thumb {
+    min-height: 36px;
+    border: 2px solid transparent;
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    background-clip: padding-box;
+    border-radius: 7px;
+    background-color: #C4C4C4;
+  }
+}

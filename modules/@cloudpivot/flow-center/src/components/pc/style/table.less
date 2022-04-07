@@ -1,0 +1,101 @@
+.common-table{
+  overflow: auto;
+  height: 100%;
+  // 公共行样式
+  &__row{
+    display:flex;
+    flex-direction:row;
+    min-height:37px;
+    border-bottom:1px solid #e8e8e8;
+    .common-table__col{
+      position:relative;
+      z-index:1;
+      box-sizing:border-box;
+      padding:8px 16px;
+      white-space:nowrap;
+      overflow:hidden;
+      flex:0 1 auto;
+      background-color: #fff;
+      &.fixed-left-column{
+        position:sticky; -ms-position:aboslute; z-index:10;left: 0;
+      }
+      &.fixed-left-column-last{
+        overflow:visible!important;
+        &::after {
+          content: "\200B";
+          height: 100%;
+          width: 8px;
+          position: absolute;
+          top: 0;
+          z-index: 1;
+          transition:box-shadow .3s ease;
+          pointer-events:none;
+        }
+      }
+      &.fixed-left-column-last::after {
+        right: -7px;
+      }
+    }
+  }
+  &-contain{
+    &:not([data-h-pos=h-left]) .fixed-left-column-last::after,
+    &:not(.self-adaption):not([data-h-pos=h-right]) .fixed-right-column-last::after{
+      box-shadow: inset 8px 0px 6px -6px rgba(0, 0, 0, 0.15);
+    }
+  }
+  &__thead-wrap{
+    background: #f8fbff;
+    border-radius: 4px;
+    position: sticky;
+    z-index: 20;
+    top: 0;
+    .common-table__row{
+      .common-table__col{
+        color: rgba(0,0,0,0.65);
+        font-weight: 600;
+        background: #f8fbff;
+        &.resizing {
+          background-color:#e5effe;
+        }
+        /deep/.resize-bar {
+          position: absolute;
+          right: 0; 
+          top: 15%;
+          width: 5px; 
+          height: 70%;
+          border-right: 1px solid rgba(0, 0, 0, 0.15);
+          cursor: col-resize;
+        }
+      }
+    }
+  }
+  &__tbody-wrap{
+    position: relative;
+    background: #fff;
+    .common-table__row{
+      .common-table__col{
+        color: rgba(0,0,0,0.85);
+      }
+    } 
+  }
+  span.text-ellipsis {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/**
+* commtable 表格滚动条
+*/
+.common-table::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: unset;
+  transition: all ease .3s;
+}
+
+.common-table.active::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, .45);
+  box-shadow: auto;
+}

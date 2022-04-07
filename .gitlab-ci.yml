@@ -1,0 +1,18 @@
+image: $SONAR_SCANNER_CLI
+
+include:
+  # - template: Security/SAST.gitlab-ci.yml
+
+code_sonar:
+  stage: test
+  script:
+    - ls -lh
+    - npm -version
+    # - npm config set registry http://npm.h3yun.net:4873/
+    # - npm config set unsafe-perm true
+    # - npm install -g eslint
+    - echo "rd4-js-sonar-$CI_PROJECT_NAME"
+    - sonar-scanner -Dsonar.projectKey=rd4-js-sonar-$CI_PROJECT_NAME-v6.7 -Dsonar.projectName=rd4-js-h3bpm-$CI_PROJECT_NAME-v6.9 -Dsonar.sources=. -Dsonar.exclusions=entries/admin/public/kindeditor/**/*,entries/portal/public/kindeditor/**/*,entries/admin/src/assets/icons/demo_index.html,entries/mobile/src/assets/icons/demo_index.html,entries/portal/src/assets/icons/demo_index.html -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_ADMIN_TOKEN
+  only:
+    refs:
+      - 6.9.x

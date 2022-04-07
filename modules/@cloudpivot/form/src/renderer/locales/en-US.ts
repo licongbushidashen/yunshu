@@ -1,0 +1,110 @@
+export default {
+  opinion: "Opinion",
+  oftenOption: 'Commonly used approval opinions',
+  addDatas: "Add",
+  updateDatas: "Update",
+  displayOrder: 'Display Order',
+  TextPlaceholder: 'Please input your approval opinion',
+  setOften: 'Set as common',
+  opinionHint: 'You can set the content you input as frequently used',
+  attachment: "Attachment",
+  image: "Image",
+  total: "Total",
+  copy: "Copy",
+  delete: "Delete",
+  selectNumber: "Select number",
+  inputAddress: "Pelese input address",
+  cancel: "Cancel",
+  clear: "  Clear",
+  ok: "OK",
+  reset: "Reset",
+  addSign: "Add sign",
+  sign: "Sign",
+  addition: "Pelese add",
+  addData: 'Add',
+  expand: "Expand",
+  collapse: "Collapse",
+  peleseSelect: "Pelese select",
+  peleseInput: "Pelese input",
+  scanInput: "Scan code input",
+  city: "City",
+  countyArea: "County/Area",
+  filter: "Filter",
+  search: "Search",
+  back: "Back",
+  number: "NO.",
+  indexOf: "NO.{index}",
+  searching: "Searching...",
+  searchResultTip: "Search result: {total} records",
+  searchNoResultTip: 'No search result by "{text}"',
+  noMore: "No more",
+  noOptions: "No options",
+  ChooseNode: 'Choose Activity',
+  noData: "No data",
+  frozenColumn: "Frozen",
+  unFrozenColumn: "Unfrozen",
+
+  checkAll: "Check all",
+  clickUpload: "Click here upload",
+  action: "Action",
+  downloadAll: "Download all",
+  singleFileTips: "each file can't exceed ",
+
+  exportFile: "export",
+  importFile: "import",
+
+  label: {
+    creater: "Creater: ",
+    createTime: "Create time: ",
+    formStatus: "Status: ",
+    sum: "SUM: ",
+    avg: "AVG: ",
+    min: "MIN: ",
+    max: "MAX: "
+  },
+
+  formStatus: {
+    draft: "DRAFT",
+    processing: "PROCESSING",
+    completed: "COMPLETED",
+    canceled: "CANCELED"
+  },
+
+  sheet: {
+    clearRow: "Clear up",
+    addBefore: "Insert the line up",
+    addAfter: "Insert the line down",
+    logicFalseValue: "false",
+    logicTrueValue: "true"
+  },
+
+  tip: {
+    clickPosition: "Click position",
+    onlySupportMobileWrite: "only support mobile write",
+    onlySupportPcWrite: 'Only support enter by PC',
+    clickAndDropUpload: "click and drop upload",
+    position:
+      "PC may have positioning deviation , use mobile for precise positioning.",
+    frozenColumnMax:
+      "Up to 3 columns frozen, please cancel the frozen column first",
+    frozenColumnWidthMax:
+      "The total width of the frozen column has exceeded the width of the form. Please reset the column width",
+    previewError: "The file type is not supported. Please check it on PC",
+    importError: "Incorrect template, please check",
+    uploadError:'Failed to upload, please try again',
+    overSize: "The uploaded file can't  be greater than {label} MB",
+    fileNameCheck: "The file name can't contain special characters ','",
+    imageNameCHeck: "The picture name can't contain special characters ','",
+    imageSuport: `Wrong picture format，only supported format is {label}`,
+    fileSuport: 'Wrong file format，only supported format is {label}',
+    fileUnsuport: "Wrong file format，can't supported format is {lable}"
+  },
+  errorCode: {
+    min: "{label} can't be less than the minimum",
+    max: "{label} can't be greater than the maximum",
+    minCount: "The number of {label} cannot be greater than {num}",
+    maxCount: "The number of {label} cannot be less than {num}",
+    input:  "Please input {label}",
+    select: "Please select {label}",
+  }
+};

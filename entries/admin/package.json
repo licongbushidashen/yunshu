@@ -1,0 +1,50 @@
+{
+  "name": "cloudpivot-admin",
+  "version": "1.7.0-alpha.36",
+  "private": true,
+  "scripts": {
+    "dll": "webpack -p --progress --config ./webpack.dll.conf.js",
+    "serve": "vue-cli-service serve",
+    "dev": "rimraf node_modules/.cache && cross-env node --max-http-header-size=1024000 --max_old_space_size=8192 node_modules/@vue/cli-service/bin/vue-cli-service.js serve --mode debug",
+    "local": "rimraf node_modules/.cache && cross-env node --max_old_space_size=8192 node_modules/@vue/cli-service/bin/vue-cli-service.js serve --mode local",
+    "build-dev": "vue-cli-service build --mode development",
+    "build-prod": "rimraf node_modules/.cache && cross-env node --max_old_space_size=8192 node_modules/@vue/cli-service/bin/vue-cli-service.js build --mode production",
+    "build": "npm run build-prod",
+    "lint": "vue-cli-service lint",
+    "test": "vue-cli-service test:unit"
+  },
+  "dependencies": {
+    "animate.css": "^3.7.2",
+    "babel-polyfill": "6.26.0",
+    "canvg": "1.5.3",
+    "html2canvas": "1.0.0-rc.3",
+    "monaco-editor": "0.17.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "3.8.0",
+    "@vue/cli-plugin-eslint": "3.8.0",
+    "@vue/cli-plugin-typescript": "3.8.1",
+    "@vue/cli-service": "3.8.4",
+    "@vue/eslint-config-airbnb": "3.0.3",
+    "@vue/eslint-config-typescript": "3.2.1",
+    "@vue/test-utils": "1.0.0-beta.29",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-eslint": "10.0.2",
+    "babel-plugin-import": "1.12.0",
+    "babel-plugin-syntax-jsx": "6.18.0",
+    "babel-plugin-transform-vue-jsx": "^3.7.0",
+    "cross-env": "^6.0.0",
+    "eslint": "5.16.0",
+    "eslint-plugin-html": "4.0.6",
+    "eslint-plugin-typescript": "^0.13.0",
+    "eslint-plugin-vue": "5.2.3",
+    "less": "^3.0.4",
+    "less-loader": "^4.1.0",
+    "monaco-editor-webpack-plugin": "1.7.0",
+    "rimraf": "^2.6.3",
+    "ts-jest": "^23.0.0",
+    "typescript": "~3.1.1",
+    "uuidjs": "^4.2.8",
+    "vue-template-compiler": "2.6.10"
+  }
+}

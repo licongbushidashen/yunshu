@@ -1,0 +1,4 @@
+
+import {
+    DesignerComponentInstance
+} from './register';

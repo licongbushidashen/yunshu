@@ -1,0 +1,158 @@
+.CodeMirror.cm-s-formula {
+  color: #121933;
+  height: 100%;
+  width: 100%;
+  font-family: Fira Code, Menlo, Consolas, Courier, monospace;
+
+  /* 光标 */
+  .CodeMirror-cursor {
+    border-left: 1px solid #315efb;
+  }
+
+  .CodeMirror-placeholder {
+    line-height: 26px;
+    margin-left: 4px;
+    font-size: 13px;
+    font-weight: 400;
+    color: #b6bcc6;
+    pointer-events: none;
+  }
+
+  .CodeMirror-line {
+    line-height: 26px;
+  }
+  .cm-m-formula {
+    &.cm-field {
+      display: inline-flex;
+      height: 24px;
+      max-width: 100%;
+      .cm-field-name {
+        height: 24px;
+        line-height: 22px;
+        display: inline-block;
+        justify-content: center;
+        align-items: center;
+        border-radius: 14px;
+        font-size: 12px;
+        margin: 0 2.5px;
+        border: 1px solid #ff3640;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        color: rgba(0,0,0,0.65);
+        .cm-field-symbol {
+          color: transparent;
+          display: inline-block;
+          width: 8px;
+        }
+      }
+      &.cm-text .cm-field-name {
+        background: rgba(252, 227, 226, 0.8);
+        border: 1px solid rgba(252, 227, 226, 0.8);
+      }
+      &.cm-number .cm-field-name {
+        background: rgba(206, 245, 220, 0.8);
+        border: 1px solid rgba(206, 245, 220, 0.8);
+      }
+      &.cm-date .cm-field-name {
+        background: rgba(222, 248, 198, 0.8);
+        border: 1px solid rgba(222, 248, 198, 0.8);
+      }
+      &.cm-bool .cm-field-name {
+        background: rgba(236, 245, 187, 0.8);
+        border: 1px solid rgba(236, 245, 187, 0.8);
+      }
+      &.cm-address .cm-field-name {
+        background: rgba(252, 232, 193, 0.8);
+        border: 1px solid rgba(252, 232, 193, 0.8);
+      }
+      &.cm-radio .cm-field-name {
+        background: rgba(236, 215, 248, 0.8);
+        border: 1px solid rgba(236, 215, 248, 0.8);
+      }
+      &.cm-checkbox .cm-field-name {
+        background: rgba(236, 215, 248, 0.8);
+        border: 1px solid rgba(236, 215, 248, 0.8);
+      }
+      &.cm-dropdown .cm-field-name {
+        background: rgba(221, 226, 234, 0.8);
+        border: 1px solid rgba(221, 226, 234, 0.8);
+      }
+      &.cm-dropdownmulti .cm-field-name {
+        background: rgba(221, 226, 234, 0.8);
+        border: 1px solid rgba(221, 226, 234, 0.8);
+      }
+      &.cm-staffsingle .cm-field-name {
+        background: rgba(209, 238, 252, 0.8);
+        border: 1px solid rgba(209, 238, 252, 0.8);
+      }
+      &.cm-staffmulti .cm-field-name {
+        background: rgba(209, 238, 252, 0.8);
+        border: 1px solid rgba(209, 238, 252, 0.8);
+      }
+      &.cm-deptsingle .cm-field-name {
+        background: rgba(221, 232, 255, 0.8);
+        border: 1px solid rgba(221, 232, 255, 0.8);
+      }
+      &.cm-deptmulti .cm-field-name {
+        background: rgba(221, 232, 255, 0.8);
+        border: 1px solid rgba(221, 232, 255, 0.8);
+      }
+      &.cm-staffdeptmix .cm-field-name {
+        background: rgba(209, 238, 252, 0.8);
+        border: 1px solid rgba(209, 238, 252, 0.8);
+      }
+      &.cm-field-invalid .cm-field-name {
+        color: #ff3640;
+        background: #fbeaed;
+        border: 1px solid #ff3640;
+      }
+    }
+
+    &.cm-unknown {
+      color: #ff3640;
+    }
+  }
+}
+.CodeMirror-hints {
+  position: absolute;
+  overflow: hidden;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  z-index: 2500;
+  -webkit-box-shadow: 2px 3px 5px rgba(0, 2px, 6px, 0.1);
+  -moz-box-shadow: 2px 3px 5px rgba(0, 2px, 6px, 0.1);
+  box-shadow: 2px 3px 5px rgba(0, 2px, 6px, 0.1);
+  border-radius: 3px;
+  background: #fff;
+  font-size: 90%;
+  font-family: Fira Code, Menlo, Consolas, Courier, monospace;
+
+  max-height: 20em;
+  overflow-y: auto;
+}
+
+.CodeMirror-hint {
+  margin: 2px 0;
+  padding: 1px 10px;
+  border-radius: 2px;
+  white-space: pre;
+  color: #708;
+  cursor: pointer;
+}
+.CodeMirror-hint:hover {
+  background: #f2f9fe;
+}
+
+li.CodeMirror-hint-active {
+  background: #107fff !important;
+  color: #fff !important;
+}
+
+.CodeMirror-wrap pre.CodeMirror-line, .CodeMirror-wrap pre.CodeMirror-line-like {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: break-all;
+}

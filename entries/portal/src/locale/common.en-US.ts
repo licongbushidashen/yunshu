@@ -1,0 +1,78 @@
+export default {
+
+    ok: 'OK',
+    okAndDelete: 'OK And Delete',
+    cancel: 'Cancel',
+    workflowCenter: 'Workflow Center',
+    back: 'Back',
+    workflowTrack: 'Workflow Track',
+    personalInfo: 'Personal Info',
+    switch: 'Switch',
+    backStageManager: 'Management',
+    exitSys: 'Log out',
+    noData: 'No Data',
+    errTips: 'The server made a slip',
+    goBack: 'Manual return',
+    closePage: 'Close the current page',
+    close: 'Close',
+    changePwd: 'Change Password',
+    oldPwd: 'oldPwd',
+    oldPwdRequied: 'oldPwd cannot be empty',
+    newPwd: 'newPwd',
+    newPwdRequied: 'newPwd cannot be empty',
+    newPwdNotSame: 'Inconsistent password input',
+    surePwd: 'surePwd',
+    changePwdSuccess: 'Password modification succeeded!',
+    helpCenter: 'Help Center',
+    approval: 'Approval logs',
+    preEdit: 'before Edit',
+    postEdit: 'after Edit',
+    noHistoryRec: 'no history records',
+    userInfo: {
+      name: 'Name',
+      id: 'Username',
+      departmentName: 'Department',
+      appellation: 'Position',
+      email: 'Email',
+      employeeNo: 'Employee NO.',
+      mobile: 'Mobile',
+      officePhone: 'Telephone',
+      roleName: 'Role',
+      remark: 'Remarks'
+    },
+    tip: {
+      saveSuccess: 'Save Success',
+      operationFail: 'Operation failed, please try again',
+      paramsError: 'Params Error',
+      operationSucceed: 'Operation Succeed',
+      operationFailed: 'Operation Failed',
+      sureToLogOut: 'Are you sure you want to exit the current login?',
+      confirm: 'Ok',
+      cancel: 'Cancel'
+    },
+
+    formTitle: {
+      createWorkflow: 'Start Workflow',
+      createForm: 'Create Form',
+      editWorkflow: 'Edit Workflow',
+      editForm: 'Edit Form',
+      viewWorkflow: 'View Workflow',
+      viewForm: 'View Form'
+    },
+
+    approvalLog: {
+      circulateNum: 'Ciruation {num} persons',
+      circulatedNum: 'Finished {num} persons',
+      uncirculateNum: 'Unfinish {num} persons',
+      turnover: 'Turnover',
+      newOwner: 'New Owner',
+      handlingSuggestion: 'Handling Suggestion',
+      operator: 'Operator',
+      newHandler: 'New Handler',
+      workflowAdjust: 'WorkflowAdjust',
+      nodeAdjust: 'NodeAdjust',
+      whoseAdjustParticipant: "{who}'s Add-approver",
+      whoseTransfer: "{who}'s Transfer"
+    },
+  
+  };

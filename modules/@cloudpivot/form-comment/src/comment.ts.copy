@@ -1,0 +1,601 @@
+import { Vue, Component, Prop, Watch, Inject } from "vue-property-decorator";
+
+import { renderer } from '@cloudpivot/form';
+
+import * as FormCommentIns from '@cloudpivot/api'
+
+import {
+  Button, Input, Upload
+} from '@h3/antd-vue';
+
+import At from './components/share/vue-at/at.vue';
+
+@Component({
+  name: "pc-form-detail",
+  components: {
+    AButton: Button,
+    ATextarea: Input.TextArea ,
+    AUpload: Upload,
+    At,
+  }
+})
+
+export default class FormComment extends Vue {
+  comment:any = '';
+  reComment:string = '';
+  commentList:Array<any> = [];
+  isShowCMList:boolean = false;
+
+  fileLists:any = [];
+
+  num:number = 0; // 评论数
+
+  wordsLen:any = 0;
+
+  maxlength:number = 2000;
+
+  singleFileSize:number = 5242880;
+
+  members:any = [];
+
+  defaultMembers:any = []; // 缓存一份默认数据
+
+  page:number = 0;
+
+  pageSize:number = 15;
+
+  searchDataCache:any = []; // 实时搜索的数据
+
+  keyword:string = '';
+
+  isLazyload:boolean = true;
+
+  isShowCommentPanel:boolean = true;
+
+  loading:boolean = true; // 是否加载完成
+  
+  @Prop() formObj !:any;
+
+  get headers() {
+    return {
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`
+    }
+  }
+
+  get uploadUrl(){
+    return renderer.UploadControl.service.getUploadUrl();
+  }
+
+  get fileListDisplay(){
+    return this.fileLists.map((list:any) => {
+      return renderer.UploadControl.service.getDownloadUrl(list)
+    })
+  }
+
+  get bizObjectId(){
+    return this.formObj.bizObject ? this.formObj.bizObject.id : '';
+  }
+
+  get schemaCode(){
+    return this.formObj.bizObject ? this.formObj.bizObject.schemaCode : '';
+  }
+
+  get workflowInstanceId(){
+    return this.formObj.bizObject ? this.formObj.bizObject.workflowInstanceId : '';
+  }
+
+  conver(limit:any){  
+    let size = "";  
+    if( limit < 0.1 * 1024 ){ //如果小于0.1KB转化成B  
+        size = limit.toFixed(2) + "B";    
+    }else if(limit < 0.1 * 1024 * 1024 ){//如果小于0.1MB转化成KB  
+        size = (limit / 1024).toFixed(2) + "KB";              
+    }else if(limit < 0.1 * 1024 * 1024 * 1024){ //如果小于0.1GB转化成MB  
+        size = (limit / (1024 * 1024)).toFixed(2) + "MB";  
+    }else{ //其他转化成GB  
+        size = (limit / (1024 * 1024 * 1024)).toFixed(2) + "GB";  
+    }  
+      
+    const sizestr = size + "";   
+    const len = sizestr.indexOf("\.");  
+    const dec = sizestr.substr(len + 1, 2);  
+    if(dec == "00"){//当小数点后为00时 去掉小数部分  
+        return sizestr.substring(0,len) + sizestr.substr(len + 3,2);  
+    }  
+    return sizestr;  
+  } 
+
+  calculateWords () {
+     this.wordsLen = (this.$refs.atwhoEditWrap as any).innerText.length;
+    if (this.wordsLen > this.maxlength) {
+      this.comment = this.comment.substr(0, this.maxlength);
+    }
+  }
+  
+
+  getAttachmentUrl(item:any){
+    return renderer.UploadControl.service.getDownloadUrl(item)
+  }
+
+  onAtwhoViewBlur (index?:number) {
+    setTimeout(() => {
+      if (typeof index === 'number') {
+        (this.$refs[`atPane${index}`][0] as any).onAtwhoViewBlur();
+      } else {
+        (this.$refs.atPane as any).onAtwhoViewBlur();
+      }
+    }, 300);
+  }
+
+  // 去除字符串中的html标签及内容
+  filterHtmlOrContainer(str:any,isbool:boolean = false) {
+    // const reg =  /<[^>]+>/gi;  //过滤所有的html标签
+    const reg =  new RegExp('<[^>]+>','gi');  //过滤所有的html标签，不包括内容
+
+    // const reg2 = /<(img|br|hr|input)[^>]*>/gi;  //只匹配img、br、hr、input标签
+    const reg2 = new RegExp('<(img|br|hr|input)[^>]*>','gi');  //只匹配img、br、hr、input标签
+
+    // const reg3 = /<(\S*)[^>]*>[^<]*<\/(\1)>/gi;        //分组匹配，过滤所有的html标签，包括内容
+    const reg3 = new RegExp('<(\\S*)[^>]*>[^<]*<\\/(\\1)>','gi');  //分组匹配，过滤所有的html标签，包括内容
+    if(typeof str !='string'){  //不是字符串
+        return str;
+    }
+    var result = str;
+    if(!isbool){  //先把单标签过滤了
+        result = result.replace(reg2, '');
+    }
+    result = result.replace(reg3,'');    //先经过分组匹配，把双标签去除，如果是嵌套标签，则会先将嵌套标签内的双标签过滤掉
+    if(reg3.test(result)) { //如果为true，则代表还有标签
+        return this.filterHtmlOrContainer(result, true);
+    }else {
+        return result;
+    }
+  }
+
+  /*
+  * 将所有的标签过滤，不过滤标签内内容
+  * */
+  filterHtml(str:any){
+    const reg =  new RegExp('<[^>]+>','gi');  //过滤所有的html标签，不包括内容
+    if(typeof str !='string'){  //不是字符串
+        return str;
+    }
+
+    return str.replace(reg,'');
+  }
+
+  // 实时搜索
+  // 当最后输入的字符是@的时候
+  // 调用接口查找列表
+  /**
+   * @desc 先于当前列表中搜索，有则过滤，无则加载
+   * @params index 第几个
+   * */ 
+  handleInput(index?:any){
+    let htmlString:any = '';
+    if (typeof index === 'number') {
+      htmlString = (this.$refs[`atwhoEditWrap${index}`][0] as any).innerHTML;
+    } else {
+      htmlString = (this.$refs.atwhoEditWrap as any).innerHTML
+    }
+    
+
+    if (!htmlString) return ; 
+
+    const strWithoutHtmlTag = this.filterHtmlOrContainer(htmlString, false);
+
+    if (strWithoutHtmlTag.indexOf('@') <= -1) return ; // 没有输入@ 
+    
+    this.isLazyload = true; // 每次输入@  都允许懒加载
+    this.keyword = ''; // 每次输入@  重置关键词
+    this.page = 0; // // 每次输入@  重置页码
+
+    const strAfterAt:string = strWithoutHtmlTag.substr(strWithoutHtmlTag.lastIndexOf('@')).split('@')[1].trim();
+
+    if (!strAfterAt) {
+      if (this.searchDataCache.length <= 0) {
+        this.members = this.defaultMembers;
+      }
+      return;
+    }
+
+    console.log('搜索条件是：',strAfterAt);
+    
+    // 先在当前列表搜索, 存在即添加
+    // todo: 同名但是不在当前页如何处理
+    const filteredM:Array<any> = this.members.filter((m:any) => {
+      return m.name.indexOf(strAfterAt) > -1;
+    });
+
+    new Promise( async (resolve:any, reject:any) => {
+      if (filteredM.length > 0) {
+        this.members = filteredM;
+        resolve();
+      } else { // 调取接口获取
+        await this.getAtUsers(strAfterAt);
+        resolve();
+      }
+    }).then((res:any) => {
+      this.$nextTick(() => {
+        if (typeof index === 'number') {
+          (this.$refs[`atPane${index}`][0] as any).handleInput();
+        } else {
+          (this.$refs.atPane as any).handleInput();
+        }
+        
+      });
+    })
+  }
+
+  // 选矿触底
+  async onTouchBottom(index?:number){
+    const { isLazyload, keyword } = this;
+
+    console.log(isLazyload, 'isLazyload')
+
+    if (!isLazyload) return;
+    this.page += 1;
+    
+    const { bizObjectId, schemaCode, workflowInstanceId, page, pageSize } = this;
+    const params: FormCommentIns.formCommentParams.GetAtUser = {
+      bizObjectId,
+      schemaCode,
+      keyword,
+      wfInstanceId: workflowInstanceId,
+      page,
+      pageSize
+    }
+
+    const res:any = await FormCommentIns.FormCommentApi.getAtUsers(params);
+
+    if (res.errcode === 0) {
+      const { data } = res;
+      if (data.content.length > 0) {
+        this.isLazyload = true;
+        this.members = this.members.concat(data.content);
+        this.$nextTick(() => {
+          if (typeof index === 'number') {
+            (this.$refs[`atPane${index}`][0] as any).handleInput();
+            (this.$refs[`atPane${index}`][0] as any).scroll2Bottom();
+          } else {
+            (this.$refs.atPane as any).handleInput();
+            (this.$refs.atPane as any).scroll2Bottom();
+          }
+        });
+      } else {
+        this.isLazyload = false;
+      }
+      // this.members = JSON.parse(JSON.stringify(data.content));
+    } else {
+      console.error(res.errmsg);
+    }
+  }
+
+  // 选中人员
+  onSelectUser(){
+    // this.members = this.defaultMembers;
+  }
+
+  // 获取可 @ 人员
+  async getAtUsers(username?:string){
+    if (username) this.keyword =  username;
+    const { bizObjectId, schemaCode, workflowInstanceId, page, pageSize } = this;
+    
+    if (!bizObjectId || !schemaCode || !workflowInstanceId) return; 
+
+    const params: FormCommentIns.formCommentParams.GetAtUser = {
+      bizObjectId,
+      schemaCode,
+      keyword: username ? username : '' ,
+      wfInstanceId: workflowInstanceId,
+      page,
+      pageSize
+    }
+
+    const res:any = await FormCommentIns.FormCommentApi.getAtUsers(params);
+
+    if (res.errcode === 0) {
+      const { data } = res;
+      if (!username) { // 说明加载的是默认数据， 保存一份
+        this.defaultMembers = JSON.parse(JSON.stringify(data.content));
+      } else {
+        if (data.content.length > 0) { // 当搜索无结果的时候，把默认数据赋值回去
+          this.members = JSON.parse(JSON.stringify(data.content));
+          console.log(this.members);
+        } else {
+          this.searchDataCache = JSON.parse(JSON.stringify(data.content));
+          this.members = JSON.parse(JSON.stringify(data.content));
+        }
+      }
+      
+      // this.members = JSON.parse(JSON.stringify(data.content));
+    } else {
+      console.error(res.errmsg);
+    }
+  }
+
+  mounted(){
+    // todo 判断钉钉环境
+    // this.getCommList();
+    // this.getAtUsers();
+  }
+
+  // mounted(){
+  //   setTimeout(() => {
+  //     const o = [
+  //       {
+  //         id: 'q223213',
+  //         collspaned: true, 
+  //         isShowColspan: false,
+  //         isShowReplay: false,
+  //         reComment: '',
+  //         content: 'ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是'
+  //       },
+  //       {
+  //         id: '345yt',
+  //         collspaned: true, 
+  //         isShowColspan: false,
+  //         isShowReplay: false,
+  //         reComment: '',
+  //         content: 'ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是ds大数据量可是'
+  //       }
+  //   ]
+
+  //     this.commentList = o;
+  //     // 计算是否需要
+  //     this.$nextTick(() => {
+  //       this.commentList.forEach((item:any, index:number) => {
+  //         const selector:string = `#cc-${item.id}`;
+  //         const heightStandard:number = 61; // 判断是否需要折叠得标准高度
+  //         const height:number = (document.querySelector(selector) as any).getBoundingClientRect().height;
+  //         if (height > heightStandard) {
+  //           item.collspaned = true;
+  //           item.isShowColspan = true;
+  //         } else {
+  //           item.collspaned = false;
+  //           item.isShowColspan = false;
+  //         }
+  //       });
+  //     })
+  //   }, 2000);
+  // }
+
+  /**
+   * 获取评论列表
+   * */ 
+  async getCommList(){
+    const { formObj } = this;
+    if (!formObj || !formObj.bizObject) return;
+    const params:FormCommentIns.formCommentParams.CommentList = {
+      bizObjectId: formObj.bizObject.id as string,
+      schemaCode: formObj.bizObject.schemaCode as string
+    } 
+    const res:any = await FormCommentIns.FormCommentApi.getCommentList(params);
+
+    if ( res.errcode === 0 ) {
+      const { content } = res.data;
+      
+      if (!content) return ;
+
+      // 添加一些交互辅助字段
+      content.forEach((item:any, index:number) => {
+        item.collspaned = true; // 控制展开收起
+        item.isShowColspan = false; // 是否展示展开按钮
+        item.isShowReplay = false; // 是否展示回复弹窗
+        item.reComment = ''; // 回复的内容，默认给空
+
+        if (item.replys) { // 回复的评论，同理
+          item.replys.forEach((replyItem:any) => {
+            replyItem.collspaned = true; // 控制展开收起
+            replyItem.isShowColspan = false; // 是否展示展开按钮
+            replyItem.isShowReplay = false; // 是否展示回复弹窗
+            replyItem.reComment = ''; // 回复的内容，默认给空
+          });
+        }
+      })
+
+      this.commentList = content;
+
+      // 移动端根据评论判断是否显示评论列表
+      this.isShowCommentPanel = this.commentList.length <= 0;
+
+      // 计算是否需要
+      this.$nextTick(() => {
+        function setCollspan(item){
+          const selector:string = `#cc-${item.id}`;
+          const heightStandard:number = 61; // 判断是否需要折叠得标准高度
+          const height:number = (document.querySelector(selector) as any).getBoundingClientRect().height;
+          if (height > heightStandard) {
+            item.collspaned = true;
+            item.isShowColspan = true;
+          } else {
+            item.collspaned = false;
+            item.isShowColspan = false;
+          }
+        }
+        this.commentList.forEach((item:any) => {
+          setCollspan(item);
+
+          if (item.replys) {
+            item.replys.forEach((replayItem:any) => {
+              setCollspan(replayItem);
+            })
+          }
+        });
+      })
+    } else {
+      console.error(res.errmsg);
+    }
+  }
+
+
+  /**
+   * 获取评论列表数量
+   * */ 
+  async getCommListNum(){
+    const { formObj, bizObjectId, schemaCode } = this;
+    if (!formObj || !bizObjectId || !schemaCode) return;
+    const params:FormCommentIns.formCommentParams.CommentList = {
+      bizObjectId,
+      schemaCode
+    } 
+
+    const res:any = await FormCommentIns.FormCommentApi.getCommentListNum(params);
+    if ( res.errcode === 0 ) {
+      const { data } = res;
+      this.num = data;
+    } else {
+      console.error(res.errmsg);
+    }
+  }
+
+
+  handleChange(info:any, fileList:any) {
+    if (info.file.status !== 'uploading') {
+    }
+    if (info.file.status === 'done') { // 文件上传成功
+      const { response } = info.file;
+      if (response.errcode === 0) {
+        this.fileLists.push(response.data);
+      } 
+      // (this as any).$message.success(`${info.file.name} file uploaded successfully`);
+    } else if (info.file.status === 'error') {
+      // (this as any).$message.error(`${info.file.name} file upload failed.`);
+    }
+  }
+
+  /**
+   * 移动端upload file change
+   * */ 
+  onChange(info:any, files:any){
+    const { status, response } = info.value;
+    // status 1 准备上传 2 已上传 3上传失败 -1正在上传
+    if (status === 2) {
+      this.fileLists.push(response.data);
+    }
+  }
+
+  deleteFile(index:number){
+    this.fileLists.splice(index, 1);
+    this.alreadyFiles -= 1;
+  }
+
+  alreadyFiles:number = 0;
+  beforeUpload(file:any){
+    this.alreadyFiles += 1;
+    if (this.alreadyFiles > 8) {
+      (this as any).$message.error('最多可上传8个文件/图片');
+      return false;
+    } 
+    const { size } = file;
+    if (size > this.singleFileSize) {
+      (this as any).$message.error(`【${file.name}】大小超过5M`);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * @prams replayCommentId 被回复评论的id
+   * */ 
+  async send(item:any, type?:string){
+    if (type === 'comment') {
+      const { fileLists } = this;
+      if (fileLists.length > 8) {
+        (this as any).$message.error('最多可上传8个文件/图片');
+        return false;
+      }  
+    } 
+    
+    const { bizObjectId, schemaCode, fileLists, comment } = this;
+    let rid:string = '';
+    let con:any = this.filterHtml(comment);
+    let txt:any = comment;
+    if (item) {
+      rid = item.id;
+      con = this.filterHtml(item.reComment),
+      txt = item.reComment
+    } 
+
+    const params:FormCommentIns.formCommentParams.CreateComment = {
+      attachmentModelList: fileLists,
+      bizObjectId,
+      content: con,
+      replyCommentId: rid,
+      schemaCode,
+      text: txt
+    }
+
+    const res:any = await FormCommentIns.FormCommentApi.createComment(params);
+
+    if (res.errcode === 0) {
+      if (type === 'comment') {
+        this.comment = null;
+        this.fileLists = [];
+        this.alreadyFiles = 0;
+      } else {
+        item.reComment = null;;
+        item.isShowReplay = false;
+      }
+
+      this.getCommList();
+      this.getCommListNum();
+    } else {
+      console.error(res.errmsg);
+    }
+  }
+
+  onClickReply(item:any){
+    item.isShowReplay = true;
+    this.members = this.defaultMembers;
+  }
+
+  closeRelay(item){
+    item.isShowReplay = false;
+    this.reComment = '';
+  } 
+
+  replay(item:any){
+    this.send(item);
+  }
+
+  deleteComm(id: string){
+    const vm = this as any;
+    vm.$confirm({
+      title: '确定删除这条评论吗？',
+      onOk() {
+        vm.handleDeleteComm(id);
+      },
+    })
+  }
+
+  async handleDeleteComm(id:string){
+    const res:any = await FormCommentIns.FormCommentApi.deleteComment(id);
+
+    if (res.errcode === 0) {
+      (this as any).$message.success('删除评论成功!');
+      setTimeout(() => {
+        this.getCommList();
+        this.getCommListNum();
+      }, 500);
+    } else {
+      (this as any).$message.error('删除评论失败!');
+    }
+  }
+
+  @Watch('formObj')
+  onFormObjChange(v:any) {
+    if (v) {
+      if (Object.keys(v).length <= 0) return ;
+      this.getCommList();
+      this.getCommListNum();
+      this.getAtUsers();
+    }
+  }
+
+  @Watch('comment')
+  htmlChange(){
+    this.calculateWords();
+  }
+} 

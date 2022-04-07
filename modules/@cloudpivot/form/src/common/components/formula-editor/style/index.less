@@ -1,0 +1,15 @@
+@import '~codemirror/lib/codemirror.css';
+@import '~codemirror/addon/scroll/simplescrollbars.css';
+@import '~codemirror/addon/hint/show-hint.css';
+@import './formula-theme.less';
+
+@formulaEditorPrefix: shared-formula-editor;
+
+.@{formulaEditorPrefix} {
+  height: 100%;
+  width: 100%;
+  font-size: 13px;
+  &&--disabled * {
+    cursor: default;
+  }
+}

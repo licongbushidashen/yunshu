@@ -1,0 +1,82 @@
+// @import "../../../styles/common/common.less";
+
+/* begin 定义全局工作流行为样式 */
+@workflowActionClassName: gray, green, blue, red;
+@workflowActionColors: @light-color-3, #32B683, #2970FF, #F4454E;
+
+.workflowActionItem(@className, @Color) {
+    &.@{className} {
+        background-color: @Color;
+    }
+}
+
+.workflowActionLoop(@i) when (@i < (length(@workflowActionClassName) + 1)) {
+    .workflowActionItem(extract(@workflowActionClassName, @i), extract(@workflowActionColors, @i));
+    .workflowActionLoop(@i+1);
+}
+
+.workflow-action {
+    padding: 0 6px;
+    background: #32B683;
+    border-radius: 10px;
+    line-height: 19px;
+    display: inline-block;
+    vertical-align: middle;
+
+    span {
+        display: inline-block;
+        vertical-align: text-top;
+        color: #FFFFFF;
+        font-size: @font-size-10;
+        line-height: 19px;
+        transform: scale(0.8);
+    }
+
+    .workflowActionLoop(1);
+}
+
+.workflow-collapse {
+    .ant-collapse-header {
+        display: inline-block;
+        padding: @base4-padding-sm 0 !important;
+        // background-color: @white-background;
+        background-color: transparent; // 修改审批记录按钮背景颜色跟审批意见容器不同问题
+        line-height: @line-height-6;
+        .arrow {
+            float: right;
+            margin-left: 8px;
+            position: initial !important;
+            line-height: @line-height-6  !important;
+            color: @light-color-3;
+        }
+    }
+
+    .ant-collapse-content {
+        border: 0 !important;
+    }
+
+    .ant-collapse-content-box {
+        padding: 0;
+    }
+
+    .ant-collapse-item {
+        border: 0 !important;
+    }
+
+    .bold-collapse-panel {
+        .ant-collapse-header {
+            font-size: @font-size-18;
+            //font-weight: @font-weight-lg;
+            font-weight: @font-weight-md ;
+            padding: @base4-padding-md 0 !important;
+        }
+    }
+
+    //.ant-collapse-header .ant-collapse-arrow {
+    //    left: initial !important;
+    //    right: -16px;
+    //}
+
+}
+
+/*end 定义全局工作流行为样式 */

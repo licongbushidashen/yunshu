@@ -1,0 +1,1162 @@
+<template>
+  <div class="div-height">
+    <div class="input-modal" @click="modalShow">
+      <span class="txt">{{ inputValue }}</span>
+      <a-icon type="ellipsis" />
+    </div>
+    <a-modal
+      v-model="visible"
+      @ok="modalOk"
+      @cancel="modalHide"
+      okText="确定"
+      cancelText="取消"
+      wrapClassName="properFilterCondition"
+      width="810px"
+    >
+      <template slot="title">
+        <div>
+          <span>{{ title }}</span>
+          <!-- <span class="title-tips">满足条件的数据将执行新增数据动作</span> -->
+        </div>
+      </template>
+      <div class="centent">
+        <a-select show-search style="width: 292px" v-model="ruleConditionJoinType">
+          <a-select-option key="AND">满足所有条件的数据</a-select-option>
+          <a-select-option key="OR">满足任一条件的数据</a-select-option>
+        </a-select>
+        <!--主表条件-->
+        <div class="filters">
+          <a-row style="margin-top:15px">
+            <span class="filter-title">主表条件</span>
+            <span class="title-tips">{{ tips }}</span>
+          </a-row>
+          <a-row style="margin-top:10px">
+            <a-col :span="7" class="fieldlab">目标模型数据字段</a-col>
+            <a-col :span="3" class="fieldlab" style="margin-left:5px">对比函数</a-col>
+            <a-col :span="6" class="fieldlab" style="margin-left:-5px">值类型</a-col>
+            <a-col :span="7" class="fieldlab" style="margin-left:-5px">当前模型数据字段</a-col>
+            <a-col :span="1"></a-col>
+          </a-row>
+          <a-row v-for="(row,index) in filtersList.main" :key="index" style="margin-top:5px">
+            <a-col :span="7">
+              <data-item-select
+                :onlyPublished="true"
+                v-model="row.targetSchemaDataItem"
+                :list="targetFieldList.main"
+                :systemFilterCtl="{code: ['workflowInstanceId', 'ownerDeptQueryCode', 'sortKey', 'modifier']}"
+                :bizFilterCtl="{ type: [6, 7, 8, 10, 11]}"
+                :disabled="false"
+                @change="(val) => { targetDataItemChange(val, index,'main');}"
+              ></data-item-select>
+            </a-col>
+
+            <a-col :span="3">
+              <a-select
+                class="data-filter"
+                v-model="row.ruleConditionType"
+                placeholder="请选择"
+                @change="operatorChange(row.ruleConditionType,index,'main')"
+              >
+                <a-select-option
+                  v-for="(type,index) in row.conditionTypeList"
+                  :value="type.code"
+                  :key="index"
+                >{{ type.name }}</a-select-option>
+              </a-select>
+            </a-col>
+            <a-col :span="6">
+              <a-select
+                show-search
+                style="width: 180px"
+                v-model="row.ruleValueType"
+                @change="valueTypeChange('main',row.valueType,index)"
+              >
+                <template v-for="ruleValueTypeItem in row.ruleValueTypeList">
+                  <a-select-option
+                    :value="ruleValueTypeItem.id"
+                    :key="ruleValueTypeItem.id"
+                  >{{ ruleValueTypeItem.name }}</a-select-option>
+                </template>
+              </a-select>
+            </a-col>
+            <a-col :span="7">
+              <div v-if="row.ruleValueType =='DYNAMIC'">
+                <data-item-select
+                  :onlyPublished="true"
+                  style="margin-left:-5px"
+                  v-model="row.currentSchemaDataItem"
+                  :list="row.currentFieldList"
+                  :systemFilterCtl="{code: ['workflowInstanceId', 'ownerDeptQueryCode', 'sortKey']}"
+                  :bizFilterCtl="{ type: [6, 7, 8, 10, 11]}"
+                  :disabled="false"
+                  @change="(val) => { currentDataItemChange(val, index,'main');}"
+                ></data-item-select>
+              </div>
+              <template v-if="row.ruleValueType =='FIXED'">
+                <div v-if="row.propertyType== 3">
+                  <a-date-picker
+                    style="width: 220px"
+                    @change="dateChange($event,index,'main')"
+                    :format="DateFormat"
+                    :showTime="{ defaultValue: moment(row.value, 'HH:mm:ss',index,'main') }"
+                    :defaultValue="moment(row.value, 'YYYY-MM-DD HH:mm:ss',index,'main')"
+                    placeholder="请选择时间"
+                  />
+                </div>
+                <div v-else-if="row.propertyType== 12">
+                  <!-- <a-time-picker
+                    style="width: 220px"
+                    @change="timeChange($event,index,'main')"
+                    format="HH:mm:ss"
+                    :defaultValue="moment(row.value, 'HH:mm:ss',index,'main', 1)"
+                    placeholder="请选择时间"
+                  /> -->
+                  <a-input
+                    type="text"
+                    style="width: 220px;margin-left: -5px"
+                    v-model="row.value"
+                    placeholder="请输入"
+                  ></a-input>
+                </div>
+
+                <div v-else-if="row.propertyType === 2">
+                  <a-input
+                    type="number"
+                    style="width: 220px;margin-left: -5px"
+                    v-model="row.value"
+                    placeholder="请输入"
+                  ></a-input>
+                </div>
+                <div v-else-if="row.propertyType==4">
+                  <a-select show-search style="width: 220px;margin-left: -5px" v-model="row.value">
+                    <a-select-option key="1" :value="true">true</a-select-option>
+                    <a-select-option key="2" :value="false">false</a-select-option>
+                  </a-select>
+                </div>
+                <div v-else-if="row.propertyType==5">
+                  <staff-selector v-model="row.value" :options="staffSelectorOpts"></staff-selector>
+                </div>
+                <div v-else>
+                  <a-input
+                    type="text"
+                    style="width: 220px;margin-left: -5px"
+                    v-model="row.value"
+                    placeholder="请输入"
+                  ></a-input>
+                </div>
+              </template>
+            </a-col>
+            <a-col :span="1" style="text-align:center;padding-top: 4px">
+              <span class="delete" @click="delRows(index,'main')">
+                <i class="icon aufontAll h-icon-all-delete-o"></i>
+              </span>
+            </a-col>
+          </a-row>
+
+          <div class="add">
+            <span>
+              <span>
+                <i class="icon aufontAll h-icon-all-plus-o"></i>
+              </span>
+              <span @click="addRows('main')">新增查询条件</span>
+            </span>
+          </div>
+        </div>
+        <!--子表条件-->
+        <div class="filters" v-if="trigerObject.trigerType===1 || trigerObject.trigerType===3">
+          <a-row style="margin-top:15px">
+            <span class="filter-title">子表条件</span>
+            <span class="title-tips">查找符合条件的子表数据</span>
+          </a-row>
+          <a-row style="margin-top:10px">
+            <a-col :span="7" class="fieldlab">目标模型数据字段</a-col>
+            <a-col :span="3" class="fieldlab" style="margin-left:5px">对比函数</a-col>
+            <a-col :span="6" class="fieldlab" style="margin-left:-5px">值类型</a-col>
+            <a-col :span="7" class="fieldlab" style="margin-left:-5px">当前模型数据字段</a-col>
+            <a-col :span="1"></a-col>
+          </a-row>
+          <a-row v-for="(row,index) in filtersList.child" :key="index" style="margin-top:5px">
+            <a-col :span="7">
+              <data-item-select
+                :onlyPublished="true"
+                v-model="row.targetSchemaDataItem"
+                :list="targetFieldList.child"
+                :systemFilterCtl="{code: ['workflowInstanceId', 'ownerDeptQueryCode', 'sortKey', 'modifier']}"
+                :disabled="false"
+                @change="(val) => { targetDataItemChange(val, index,'child');}"
+              ></data-item-select>
+            </a-col>
+
+            <a-col :span="3">
+              <a-select
+                class="data-filter"
+                v-model="row.ruleConditionType"
+                placeholder="请选择"
+                @change="operatorChange(row.ruleConditionType,index,'child')"
+              >
+                <a-select-option
+                  v-for="(type,index) in row.conditionTypeList"
+                  :value="type.code"
+                  :key="index"
+                >{{ type.name }}</a-select-option>
+              </a-select>
+            </a-col>
+            <a-col :span="6">
+              <a-select
+                show-search
+                style="width: 180px"
+                v-model="row.ruleValueType"
+                @change="valueTypeChange('child',row.valueType,index)"
+              >
+                <template v-for="item in row.ruleValueTypeList">
+                  <a-select-option :value="item.id" :key="item.id">{{ item.name }}</a-select-option>
+                </template>
+              </a-select>
+            </a-col>
+            <a-col :span="7">
+              <div v-if="row.ruleValueType =='DYNAMIC'">
+                <data-item-select
+                  :onlyPublished="true"
+                  style="margin-left:-5px"
+                  v-model="row.currentSchemaDataItem"
+                  :list="row.currentFieldList"
+                  :systemFilterCtl="{code: ['workflowInstanceId', 'ownerDeptQueryCode', 'sortKey']}"
+                  :bizFilterCtl="{ type: [10, 8, 6, 7, 11]}"
+                  :disabled="false"
+                  @change="(val) => { currentDataItemChange(val, index,'main');}"
+                ></data-item-select>
+              </div>
+              <template v-if="row.ruleValueType =='FIXED'">
+                <div v-if="row.propertyType== 3">
+                  <a-date-picker
+                    style="width: 220px"
+                    @change="dateChange($event,index,'child')"
+                    format="YYYY-MM-DD HH:mm:ss"
+                    :showTime="{ defaultValue: moment(row.value, 'HH:mm:ss',index,'child') }"
+                    :defaultValue="moment(row.value, 'YYYY-MM-DD HH:mm:ss',index,'child')"
+                    placeholder="请选择时间"
+                  />
+                </div>
+                <div v-else-if="row.propertyType === 12">
+                  <!-- <a-time-picker
+                    style="width: 220px"
+                    @change="timeChange($event,index,'child')"
+                    format="HH:mm:ss"
+                    :defaultValue="moment(row.value, 'HH:mm:ss',index,'child', 1)"
+                    placeholder="请选择时间"
+                  /> -->
+                  <a-input
+                    type="text"
+                    style="width: 220px; margin-left: -5px"
+                    v-model="row.value"
+                    placeholder="请输入"
+                  ></a-input>
+                </div>
+                <div v-else-if="row.propertyType === 2">
+                  <a-input
+                    type="number"
+                    style="width: 220px;margin-left: -5px"
+                    v-model="row.value"
+                    placeholder="请输入"
+                  ></a-input>
+                </div>
+                <div v-else-if="row.propertyType==4">
+                  <a-select show-search style="width: 220px" v-model="row.value">
+                    <a-select-option key="1" value="true">true</a-select-option>
+                    <a-select-option key="2" value="false">false</a-select-option>
+                  </a-select>
+                </div>
+                <div v-else-if="row.propertyType==5">
+                  <staff-selector v-model="row.value" :options="staffSelectorOpts"></staff-selector>
+                </div>
+                <div v-else>
+                  <a-input type="text" style="width: 220px" v-model="row.value" placeholder="请输入"></a-input>
+                </div>
+              </template>
+            </a-col>
+            <a-col :span="1" style="text-align:center">
+              <span class="delete" @click="delRows(index,'child')">
+                <i class="icon aufontAll h-icon-all-delete-o"></i>
+              </span>
+            </a-col>
+          </a-row>
+
+          <div class="add">
+            <span>
+              <span>
+                <i class="icon aufontAll h-icon-all-plus-o"></i>
+              </span>
+              <span @click="addRows('child')">新增查询条件</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </a-modal>
+  </div>
+</template>
+
+<script lang='ts'>
+import {
+  Component,
+  Vue,
+  Mixins,
+  Inject,
+  Prop,
+  Watch,
+} from "vue-property-decorator";
+import appsApi from "@/apis/apps";
+import DataItemSelect from "../../data-rule/data-item-select.vue";
+import StaffSelector from "@cloudpivot/form/src/common/components/form-staff-selector/pc/staff-selector.vue";
+import { PropertyComponent } from "@h3/designer-core/property-panel";
+import * as forms from "h3-forms";
+import moment from "moment";
+import { dateFormatter } from "@cloudpivot/form/src/renderer/utils/date-formatter";
+import { DataItemType } from "@cloudpivot/form/schema";
+
+import {
+  BizRuleDataCondition,
+  Eexpr,
+  Icondition,
+  SystemDataItemCode,
+} from "../typings/rule-data-condition-type";
+
+const BizRule = new BizRuleDataCondition();
+
+interface ITableCondition {
+  /**目标模型数据项 */
+  targetSchemaDataItem: string;
+  /**对比函数 */
+  ruleConditionType: string;
+  /**值  TODO 类型？ */
+  value: any;
+  /**当前模型数据项 */
+  currentSchemaDataItem: string;
+  /**组件自定义属性 */
+  [propName: string]: any;
+}
+
+// 传给后台的数据格式
+interface IFilterCondition {
+  /**条件组合类型 */
+  ruleConditionJoinType: string;
+  /**主表条件 */
+  mainTableConditions: Array<ITableCondition>;
+  /**子表条件 */
+  childTableConditions: Array<ITableCondition>;
+}
+
+@Component({
+  name: "PropertyFilterCondition",
+  components: {
+    StaffSelector,
+    DataItemSelect,
+  },
+})
+export default class PropertyFilterCondition extends Mixins(PropertyComponent) {
+  @Inject()
+  getController!: () => forms.FormGroup;
+
+  get controller() {
+    return this.getController();
+  }
+  @Prop()
+  dataItems!: any;
+  visible: boolean = false;
+  ruleConditionJoinType: string = "AND";
+  schemaCode: string = "";
+  childSchemaCode: string = "";
+  showChildTable: boolean = false;
+  inputValue: string = "未设置";
+  title: string = "过滤条件";
+  tips: string = "满足以下条件的数据将不执行新增数据动作";
+
+  // 提交给后台的数据
+  curValue: IFilterCondition = {
+    ruleConditionJoinType: this.ruleConditionJoinType,
+    mainTableConditions: [],
+    childTableConditions: [],
+  };
+  // 数据条件对象，包含主表和子表
+  filtersList: { main: ITableCondition[]; child: ITableCondition[] } = {
+    main: [],
+    child: [],
+  };
+
+  // 目标模型数据字段数据源
+  targetDataItems: any = [];
+  currentDataItems: any = [];
+
+  targetFieldList: { main: any[]; child: any[] } = { main: [], child: [] };
+
+  // 当前模型数据字段数据源
+  currentFieldList: { main: any[]; child: any[] } = { main: [], child: [] };
+
+  // 选人控件初始化参数
+  staffSelectorOpts: any = {
+    selectOrg: true,
+    selectUser: false,
+    mulpitle: true,
+    showModel: true,
+    showSelect: true,
+    placeholder: "请选择",
+  };
+
+  // 触发类型
+  trigerObject: any = {
+    trigerType: -1,
+    trigerObj: "",
+    targetObj: "",
+  };
+
+  @Watch("value", {
+    immediate: true,
+  })
+  watchValue(val) {
+    this.emitChange(val);
+    if (
+      this.value.mainTableConditions &&
+      this.value.mainTableConditions.length
+    ) {
+      this.inputValue = "已设置";
+    } else {
+      this.inputValue = "未设置";
+    }
+  }
+
+  moment(val: string, f: string, index: number, type: string, isTime = 0) {
+    if (!val) {
+      let d = new Date();
+      if (isTime) {
+        this.filtersList[type][index].value = moment(d).format("HH:mm:ss");
+      } else {
+        this.filtersList[type][index].value = dateFormatter(
+          d,
+          "YYYY-MM-DD HH:mm:ss"
+        );
+      }
+      return moment(d, f);
+    }
+    return moment(val, f);
+  }
+
+  async initModal() {
+    this.filtersList.main = [];
+    this.filtersList.child = [];
+    this.ruleConditionJoinType = "AND";
+    // 根据不同节点设置弹出窗标题
+    const nodeType: string = this.controller.value.dataTriggerType;
+    if (nodeType === "UPDATE") {
+      this.title = "查找数据范围";
+      this.tips = "满足以下条件的数据将执行更新数据动作";
+    } else if (nodeType === "DELETE") {
+      this.title = "删除数据范围";
+      this.tips = "满足以下条件的数据将执行删除数据动作";
+    } else {
+      this.title = "过滤条件";
+      this.tips = "满足以下条件的数据将不执行新增数据动作";
+    }
+
+    // 获取触发对象
+    const trigerObj = this.controller.children.triggerObjectCode;
+    // 获取目标对象
+    const targetObj = this.controller.children.targetObjectCode;
+    let schemaCode = "";
+    if (trigerObj && targetObj && trigerObj.value && targetObj.value) {
+      targetObj.value.includes(".")
+        ? (schemaCode = targetObj.value.split(".")[0])
+        : (schemaCode = targetObj.value);
+
+      this.trigerObject.trigerObj = trigerObj.value;
+      this.trigerObject.targetObj = targetObj.value;
+      const trigerBool = trigerObj.value.includes(".");
+      const targetBool = targetObj.value.includes(".");
+
+      // 主表触发主表
+      if (!trigerBool && !targetBool) this.trigerObject.trigerType = 0;
+      // 主表触发子表
+      if (!trigerBool && targetBool) this.trigerObject.trigerType = 1;
+      // 子表触发主表
+      if (trigerBool && !targetBool) this.trigerObject.trigerType = 2;
+      // 子表触发子表
+      if (trigerBool && targetBool) this.trigerObject.trigerType = 3;
+    }
+
+    // 编辑时候
+    schemaCode && (await this.getDataItems(schemaCode));
+    if (this.controller.value && this.controller.value.filterCondition) {
+      const value = this.controller.value.filterCondition;
+      if (Array.isArray(value.mainTableConditions)) {
+        value.mainTableConditions.length === 0
+          ? (this.filtersList.main = [])
+          : (this.filtersList.main = BizRule.deepCopy(
+              value.mainTableConditions
+            ));
+        if (this.filtersList.main.length > 0) {
+          this.filtersList.main.forEach((res, index) => {
+            this.targetDataItemChange(
+              res.targetSchemaDataItem,
+              index,
+              "main",
+              true
+            );
+          });
+        }
+      }
+      if (Array.isArray(value.childTableConditions)) {
+        value.childTableConditions.length === 0
+          ? (this.filtersList.child = [])
+          : (this.filtersList.child = BizRule.deepCopy(
+              value.childTableConditions
+            ));
+        if (this.filtersList.child.length > 0) {
+          this.filtersList.child.forEach((res, index) => {
+            this.targetDataItemChange(
+              res.targetSchemaDataItem,
+              index,
+              "child",
+              true
+            );
+          });
+        }
+      }
+      if (value.ruleConditionJoinType) {
+        this.ruleConditionJoinType = value.ruleConditionJoinType;
+      }
+
+      this.dataItemIsExist();
+    }
+    // this.filtersList.main.length === 0 && this.addRows('main');
+  }
+
+  // 当数据项被删除后要删除
+  dataItemIsExist() {
+    if (this.filtersList.main.length > 0) {
+      this.removeNotExistItem("main");
+    }
+    if (this.filtersList.child.length > 0) {
+      this.removeNotExistItem("child");
+    }
+  }
+
+  removeNotExistItem(type: string) {
+    this.filtersList[type].map((item: any, index: number) => {
+      // 判断目标模型
+      let targetdataItem: any = undefined;
+      const targetSheets = this.targetDataItems.filter(
+        (val) => val.propertyType === DataItemType.Sheet
+      );
+
+      targetSheets.map((sheet: any) => {
+        this.targetDataItems.push(...sheet.subSchema.properties);
+      });
+      targetdataItem = this.targetDataItems.filter(
+        (val) => val.code === item.targetSchemaDataItem
+      );
+      if (targetdataItem && targetdataItem.length === 0) {
+        this.filtersList[type][index] = undefined;
+      } else {
+        // 判断是否为子表字段
+        let dataItem: any = undefined;
+        if (!item.currentSchemaDataItem.includes(".")) {
+          dataItem = this.dataItems.filter(
+            (val: any) => val.code === item.currentSchemaDataItem
+          );
+        } else {
+          const sheets = this.dataItems.filter(
+            (data: any) => data.propertyType === DataItemType.Sheet
+          );
+          const sheetDataItems: any = [];
+          sheets.map((sheet: any) => {
+            sheetDataItems.push(...sheet.subSchema.properties);
+          });
+          const code = item.currentSchemaDataItem.split(".")[1] || "";
+          if (code) {
+            dataItem = sheetDataItems.filter((val: any) =>
+              val.code.includes(code)
+            );
+          }
+        }
+        if (dataItem && dataItem.length === 0) {
+          const data = item.currentFieldList.find(
+            (val: any) => val.code === item.currentSchemaDataItem
+          );
+          const dataIndex = item.currentFieldList.indexOf(data);
+          dataIndex > -1 &&
+            this.filtersList[type][index].currentFieldList.splice(dataIndex, 1);
+          this.filtersList[type][index].currentSchemaDataItem = "";
+        }
+      }
+    });
+    this.filtersList[type] = this.filtersList[type].filter((f: any) => f);
+    this.filtersList.main.length === 0 && this.addRows("main");
+  }
+
+  dateChange(date: any, i: number, type: string) {
+    this.filtersList[type][i].value = dateFormatter(
+      date._d,
+      "YYYY-MM-DD HH:mm:ss"
+    );
+  }
+
+  timeChange(date: any, i: number, type: string) {
+    this.filtersList[type][i].value = date.format("HH:mm:ss");
+  }
+
+  // 获取绑定数据项
+  async getDataItems(schemaCode: string) {
+    const res = await appsApi.getDataItemList({ schemaCode: schemaCode });
+    if (res && res.errcode === 0) {
+      this.targetDataItems = res.data.filter(
+        (val) => val.propertyType !== DataItemType.Attachment
+      );
+      if (this.trigerObject.trigerType === 0) {
+        this.targetFieldList.main = res.data.filter(
+          (val) =>
+            val.propertyType !== DataItemType.Attachment &&
+            val.propertyType !== DataItemType.RelevanceFormEx
+        );
+        this.currentFieldList.main = this.dataItems.filter(
+          (val) =>
+            val.propertyType !== DataItemType.Attachment &&
+            val.propertyType !== DataItemType.RelevanceFormEx
+        );
+      } else if (this.trigerObject.trigerType === 1) {
+        const vals = this.trigerObject.targetObj.split(".");
+        this.targetFieldList.main = res.data.filter(
+          (d: any) => d.code !== vals[1]
+        );
+        this.currentFieldList.main = this.dataItems.filter(
+          (val) =>
+            val.propertyType !== DataItemType.Attachment &&
+            val.propertyType !== DataItemType.RelevanceFormEx
+        );
+        this.currentFieldList.child = this.dataItems.filter(
+          (val) =>
+            val.propertyType !== DataItemType.Attachment &&
+            val.propertyType !== DataItemType.RelevanceFormEx
+        );
+        const sheetDataItem = res.data.find((d: any) => d.code === vals[1]);
+        if (
+          sheetDataItem &&
+          sheetDataItem.subSchema &&
+          sheetDataItem.subSchema.properties
+        ) {
+          this.targetFieldList.child = sheetDataItem.subSchema.properties.filter(
+            (val) =>
+              val.propertyType !== DataItemType.Attachment &&
+              val.propertyType !== DataItemType.Address &&
+              val.propertyType !== DataItemType.RelevanceFormEx
+          );
+        }
+      } else if (this.trigerObject.trigerType === 2) {
+        this.targetFieldList.main = res.data.filter(
+          (val) =>
+            val.propertyType !== DataItemType.Attachment &&
+            val.propertyType !== DataItemType.RelevanceFormEx
+        );
+        const vals = this.trigerObject.trigerObj.split(".");
+        this.currentFieldList.main = this.dataItems.filter(
+          (d: any) =>
+            d.code !== vals[1] &&
+            d.propertyType !== DataItemType.Attachment &&
+            d.propertyType !== DataItemType.RelevanceFormEx
+        );
+        const childData = this.dataItems.find((d: any) => d.code === vals[1]);
+        if (
+          childData &&
+          childData.subSchema &&
+          childData.subSchema.properties
+        ) {
+          childData.subSchema.properties.map((c: any) => {
+            !c.code.includes(".") ? (c.code = `${vals[1]}.${c.code}`) : c.code;
+            if (!c.code.includes("sortKey")) this.currentFieldList.main.push(c);
+          });
+        }
+      } else if (this.trigerObject.trigerType === 3) {
+        // 子表触发子表
+        const vals = this.trigerObject.targetObj.split(".");
+
+        // 扩展当前模型数据字段【包含子表字段】
+        const triggerSheetCodes = this.trigerObject.trigerObj.split(".");
+        const triggerSheet = this.dataItems.find(
+          (val) => val.code === triggerSheetCodes[1]
+        );
+        let currentDataItem = [...this.dataItems];
+        if (
+          triggerSheet &&
+          triggerSheet.subSchema &&
+          triggerSheet.subSchema.properties
+        ) {
+          const triggerSheetDataItem = triggerSheet.subSchema.properties.map(
+            (val) => {
+              !val.code.includes(".") &&
+                (val.code = `${triggerSheetCodes[1]}.${val.code}`);
+              return val;
+            }
+          );
+          currentDataItem = [
+            ...currentDataItem,
+            ...triggerSheetDataItem,
+          ].filter(
+            (res: any) =>
+              res.code !==
+              `${triggerSheetCodes[1]}.${SystemDataItemCode.SortKey}`
+          );
+        }
+
+        this.targetFieldList.main = res.data.filter(
+          (val) =>
+            val.propertyType !== DataItemType.Attachment &&
+            val.propertyType !== DataItemType.RelevanceFormEx
+        );
+        this.currentFieldList.main = currentDataItem.filter(
+          (d: any) =>
+            d.code !== vals[1] &&
+            d.propertyType !== DataItemType.Attachment &&
+            d.propertyType !== DataItemType.RelevanceFormEx
+        );
+        this.currentFieldList.child = currentDataItem.filter(
+          (val) =>
+            val.propertyType !== DataItemType.Attachment &&
+            val.propertyType !== DataItemType.RelevanceFormEx
+        );
+        const sheetDataItem = res.data.find((d: any) => d.code === vals[1]);
+        if (
+          sheetDataItem &&
+          sheetDataItem.subSchema &&
+          sheetDataItem.subSchema.properties
+        ) {
+          this.targetFieldList.child = sheetDataItem.subSchema.properties.filter(
+            (val) =>
+              val.propertyType !== DataItemType.Attachment &&
+              val.propertyType !== DataItemType.Address &&
+              val.propertyType !== DataItemType.RelevanceFormEx
+          );
+        }
+      }
+    } else {
+      this.$message.error(res.errmsg as string);
+    }
+  }
+
+  // 添加行
+  addRows(type: string): void {
+    // newRow Data
+    const newRow: ITableCondition = {
+      targetSchemaDataItem: "",
+      ruleValueTypeList: [], // 值类型 列表
+      currentFieldList: [], // 当前模型数据项
+      ruleValueType: "", // 值类型 值
+      ruleConditionType: "",
+      value: "",
+      code: "",
+      currentSchemaDataItem: "",
+      visibleCtrl: -1,
+      propertyType: "",
+    };
+    this.filtersList[type].push(...[newRow]);
+  }
+  // 删除行
+  delRows(index, type) {
+    this.filtersList[type].splice(index, 1);
+  }
+  modalShow() {
+    this.visible = true;
+
+    this.initModal();
+  }
+  // 关闭
+  modalHide() {
+    this.visible = false;
+    this.resetList();
+  }
+  // 重置列表
+  resetList() {
+    this.filtersList.main = [];
+    this.filtersList.child = [];
+    this.targetFieldList.main = [];
+    this.targetFieldList.child = [];
+    this.currentFieldList.main = [];
+    this.currentFieldList.child = [];
+  }
+  // 确定
+  modalOk() {
+    if (!this.submitVerify(this.filtersList.main)) {
+      this.$message.error("主表条件不成立");
+      return;
+    } else if (!this.submitVerify(this.filtersList.child)) {
+      this.$message.error("子表条件不成立");
+      return;
+    } else if (
+      this.filtersList.child.length > 0 &&
+      this.filtersList.main.length === 0
+    ) {
+      this.$message.error("主表条件必填");
+      return;
+    }
+    this.filtersList.main.forEach(item => {
+      // 记录目标名称
+      if(item.targetSchemaDataItem){
+        let targetSchemaDataItem = this.targetFieldList.main.find(el => el.code === item.targetSchemaDataItem)
+        item.targetSchemaDataItemName = targetSchemaDataItem.name
+      }
+      // 记录选中字段的名称
+      if(item.currentSchemaDataItem){
+        let currentSchemaDataItem = item.currentFieldList.find(el => el.code === item.currentSchemaDataItem)
+        item.currentSchemaDataItemName = currentSchemaDataItem.name
+      }
+
+    });
+
+    let value = {
+      ruleConditionJoinType: this.ruleConditionJoinType,
+      mainTableConditions: BizRule.deepCopy(this.filtersList.main),
+      childTableConditions: BizRule.deepCopy(this.filtersList.child),
+    };
+    Object.getOwnPropertyNames(value.mainTableConditions).length === 0
+      ? (value.mainTableConditions = [])
+      : value.mainTableConditions;
+    Object.getOwnPropertyNames(value.childTableConditions).length === 0
+      ? (value.childTableConditions = [])
+      : value.childTableConditions;
+    this.emitChange(value);
+    this.modalHide();
+  }
+  submitVerify(list: any) {
+    if (list.length > 0) {
+      for (let item of list) {
+        if (item.ruleValueType === "") return false;
+        else {
+          switch (item.ruleValueType) {
+            case "DYNAMIC":
+              if (item.currentSchemaDataItem) {
+                item.error = true;
+              } else {
+                item.error = false;
+                return false;
+              }
+              break;
+            case "FIXED":
+              if (item.value.toString !== "" || item.value === 0) {
+                item.error = true;
+              } else {
+                item.error = false;
+                return false;
+              }
+              break;
+            case "EMPTY":
+              item.value = "";
+              item.currentSchemaDataItem = "";
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  // 目标数据项改变
+  targetDataItemChange(val: any, index: number, type: string, isInit = false) {
+    const targetItem: any = this.targetFieldList[type].find(
+      (item: any) => item.code === val
+    );
+    if (!targetItem) {
+      return;
+    }
+    this.setValueCtrl(targetItem, index, type, isInit); // 设置对比函数
+    this.setRuleValueTypeList(targetItem, index, type, isInit); // 设置 值类型
+    this.setCurrentFieldList(targetItem, index, type); // 设置符合当前目标模型数据项的 当前模型数据项
+  }
+  // 设置符合目标模式数据项的 值类型
+  setRuleValueTypeList(targetItem, index, type, isInit) {
+    if (!isInit) {
+      this.filtersList[type][index].ruleValueType = "DYNAMIC";
+    }
+    if (
+      targetItem.code === SystemDataItemCode.Id ||
+      [
+        SystemDataItemCode.CreatedDeptId,
+        SystemDataItemCode.Creater,
+        SystemDataItemCode.Owner,
+        SystemDataItemCode.OwnerDeptId,
+        SystemDataItemCode.ParentId,
+      ].includes(targetItem.code)
+    ) {
+      this.filtersList[type][
+        index
+      ].ruleValueTypeList = this.ruleValueTypeList.filter(
+        (val) => val.id === "DYNAMIC"
+      );
+      return;
+    } else if (
+      [
+        SystemDataItemCode.SequenceStatus,
+        SystemDataItemCode.Name,
+        SystemDataItemCode.CreatedTime,
+        SystemDataItemCode.ModifiedTime,
+        SystemDataItemCode.SequenceNo,
+      ].includes(targetItem.code)
+    ) {
+      this.filtersList[type][
+        index
+      ].ruleValueTypeList = this.ruleValueTypeList.filter(
+        (val) => val.id === "DYNAMIC" || val.id === "FIXED"
+      );
+      return;
+    }
+    switch (targetItem.propertyType) {
+      case DataItemType.ShortText:
+      case DataItemType.Radio:
+      case DataItemType.Checkbox:
+      case DataItemType.Dropdown:
+      case DataItemType.DropdownMulti:
+      case DataItemType.Date:
+      case DataItemType.Time:
+      case DataItemType.LongText:
+      case DataItemType.Number:
+      case DataItemType.Time:
+        this.filtersList[type][
+          index
+        ].ruleValueTypeList = this.ruleValueTypeList.filter(
+          (val) =>
+            val.id === "DYNAMIC" || val.id === "FIXED" || val.id === "EMPTY"
+        );
+        break;
+      case DataItemType.StaffSingle:
+      case DataItemType.StaffMulti:
+      case DataItemType.StaffDeptMix:
+      case DataItemType.DeptMulti:
+      case DataItemType.DeptSingle:
+      case DataItemType.RelevanceForm:
+        this.filtersList[type][
+          index
+        ].ruleValueTypeList = this.ruleValueTypeList.filter(
+          (val) => val.id === "DYNAMIC" || val.id === "EMPTY"
+        );
+        break;
+      case DataItemType.Logic:
+        this.filtersList[type][
+          index
+        ].ruleValueTypeList = this.ruleValueTypeList.filter(
+          (val) => val.id === "DYNAMIC" || val.id === "FIXED"
+        );
+        break;
+    }
+  }
+
+  DateFormat:string = 'YYYY-MM-DD HH:mm:ss'
+  // 设置符合目标模型数据类型的 当前模式下数据项
+  setCurrentFieldList(targetDataItem, index, type) {
+    if (type === "child") {
+      if (targetDataItem.code === SystemDataItemCode.Id) {
+        this.filtersList[type][
+          index
+        ].currentFieldList = this.currentFieldList.main.filter((val) => {
+          return (
+            (val.propertyType === DataItemType.ShortText ||
+              val.code === DataItemType.RelevanceForm) &&
+            val.code !== SystemDataItemCode.SequenceStatus &&
+            val.code !== SystemDataItemCode.Id &&
+            val.code !== SystemDataItemCode.SequenceNo &&
+            val.code !== SystemDataItemCode.Name
+          );
+        });
+        return;
+      }
+    }
+    switch (targetDataItem.propertyType) {
+      case DataItemType.ShortText:
+      case DataItemType.Radio:
+      case DataItemType.Dropdown:
+      case DataItemType.Checkbox:
+      case DataItemType.DropdownMulti:
+        this.filtersList[type][
+          index
+          ].currentFieldList = this.currentFieldList.main.filter((val) => {
+          return ([DataItemType.ShortText, DataItemType.Radio, DataItemType.Dropdown ].includes(targetDataItem.propertyType) ? [DataItemType.ShortText, DataItemType.Radio, DataItemType.Dropdown ].includes(val.propertyType) : [DataItemType.Checkbox, DataItemType.DropdownMulti ].includes(val.propertyType)) && val.code !== SystemDataItemCode.Modifier;
+        });
+        break
+      case DataItemType.LongText:
+      case DataItemType.Number:
+      case DataItemType.Date:
+      case DataItemType.Time:
+      case DataItemType.Logic:
+      case DataItemType.StaffDeptMix:
+        this.filtersList[type][
+          index
+        ].currentFieldList = this.currentFieldList.main.filter((val) => {
+          return val.propertyType === targetDataItem.propertyType && val.code !== SystemDataItemCode.Modifier ;
+        });
+
+        if(targetDataItem.propertyType === DataItemType.Date){
+          let format = 'YYYY-MM-DD HH:mm:ss'
+          try {
+            format = JSON.parse(targetDataItem.options).format
+          } catch (error) {
+          }
+          this.DateFormat = format
+        }
+        break;
+      case DataItemType.StaffSingle:
+      case DataItemType.StaffMulti:
+      case DataItemType.DeptMulti:
+      case DataItemType.DeptSingle:
+        this.filtersList[type][
+          index
+          ].currentFieldList = this.currentFieldList.main.filter((val) => {
+          return (val.propertyType === targetDataItem.propertyType || val.propertyType === DataItemType.StaffDeptMix) && val.code !== SystemDataItemCode.Modifier ;
+        });
+        break;
+      // 关联表单需要映射 相同的数据模型
+      case DataItemType.RelevanceForm:
+        // 判断选中的关联表单是否关联的当前模型
+        const arry = this.currentFieldList[type].filter(
+          (val) => val.schemaCode === targetDataItem.relativeCode
+        );
+        if (arry.length === 0) {
+          // 主表触发主表
+          this.filtersList[type][
+            index
+          ].currentFieldList = this.currentFieldList[type].filter(
+            (val) => targetDataItem.relativeCode === val.relativeCode
+          );
+        } else {
+          if (this.trigerObject.trigerType === 0) {
+            this.filtersList[type][
+              index
+            ].currentFieldList = this.currentFieldList[type].filter(
+              (val) =>
+                (val.propertyType === targetDataItem.propertyType &&
+                  targetDataItem.relativeCode === val.relativeCode) ||
+                val.code.includes(SystemDataItemCode.Id)
+            );
+          } else {
+            // 子表触发主表
+            this.filtersList[type][
+              index
+            ].currentFieldList = this.currentFieldList.main.filter(
+              (val) =>
+                (targetDataItem.relativeCode === val.relativeCode &&
+                  val.propertyType === targetDataItem.propertyType) ||
+                val.code === SystemDataItemCode.Id ||
+                val.code.includes(SystemDataItemCode.ParentId)
+            );
+          }
+        }
+        break;
+    }
+  }
+
+  // 当前数据项改变
+  currentDataItemChange(val: any, index: number, type: string) {
+    console.log(val);
+  }
+
+  // 操作符改变
+  operatorChange(val: any, index, type: string) {
+    const isVisible = BizRule.codeOf(val);
+    if (isVisible !== undefined) {
+      if (BizRule.codeOf(val) !== undefined) {
+        isVisible.id === Eexpr.EP || isVisible.id === Eexpr.NEP
+          ? (this.filtersList[type][index].visible = false)
+          : (this.filtersList[type][index].visible = true);
+      }
+    }
+  }
+
+  // 根据选择的数据项触发对应的值控件
+  setValueCtrl(
+    item: any,
+    index: number,
+    type: string,
+    isInit = false,
+    isVauetypeChage = false
+  ) {
+    let currentRowData = this.filtersList[type][index];
+    currentRowData.conditionTypeList = [];
+    currentRowData.conditionTypeList = BizRule.filterConditionOf(
+      item.propertyType,
+      item.code,
+      "filterCondition"
+    );
+    // 切换数据项后重置conditionType
+    if (!isInit) {
+      currentRowData.conditionType = currentRowData.conditionTypeList[0].code;
+    }
+    currentRowData.propertyType = item.propertyType;
+    currentRowData.code = item.code;
+    if (!isInit) {
+      currentRowData.value = "";
+      currentRowData.currentSchemaDataItem = "";
+    }
+
+    // 切换数据项后重置ruleConditionType
+    if (!isInit && !isVauetypeChage) {
+      currentRowData.ruleConditionType =
+        currentRowData.conditionTypeList[0].code;
+    }
+    // 根据Item值生成对应的控件
+    currentRowData.type = BizRule.showControls(item);
+  }
+
+  valueTypeChange(type: string, value: string, index: number) {
+    if (value === "EMPTY") {
+      const optert = BizRule.valueOf(Eexpr.EQ) || null;
+      if (optert) {
+        this.filtersList[type][index].conditionTypeList = [];
+        this.filtersList[type][index].conditionTypeList.push(optert);
+        this.filtersList[type][index].conditionType = optert.code || "";
+        this.filtersList[type][index].ruleConditionType = optert.code || "";
+      }
+    } else {
+      const targetItem: any = this.targetFieldList[type].find(
+        (item: any) =>
+          item.code === this.filtersList[type][index].targetSchemaDataItem
+      );
+      this.setValueCtrl(targetItem, index, type, false, true); // 设置对比函数
+    }
+  }
+
+  ruleValueTypeList = [
+    { id: "DYNAMIC", name: "动态值" },
+    { id: "FIXED", name: "固定值" },
+    { id: "EMPTY", name: "为空" },
+  ];
+}
+</script>
+
+<style lang='less'>
+.properFilterCondition {
+  .add {
+    margin-top: 8px;
+    color: @primary-color;
+    cursor: pointer;
+    text-align: center;
+    margin-right: 24px;
+    span {
+      margin-right: 8px;
+    }
+  }
+  .data-filter {
+    width: 85px;
+    margin-left: 5px;
+  }
+  .data-select {
+    width: 220px !important;
+  }
+  .filter-title {
+    color: #000;
+    opacity: 0.85;
+    font-weight: 600;
+  }
+  .title-tips {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
+    padding-left: 5px;
+  }
+  .fieldlab {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.64);
+    font-weight: 500;
+  }
+}
+</style>

@@ -1,0 +1,91 @@
+// @import '~@cloudpivot/common/src/pc/styles/themes/default.less';
+.menu-content {
+
+  .ant-menu.ant-menu-dark .ant-menu-item-selected,
+  .ant-menu-submenu-open .ant-menu-item .ant-menu-item-selected {
+    background-color: @white-background;
+
+    a {
+      color: @light-color-1;
+    }
+  }
+
+  .ant-menu-inline-collapsed {
+    width: 52px;
+
+    .ant-menu-item {
+      padding: 0 @base10-padding-md  !important;
+    }
+  }
+
+  .ant-menu-inline-collapsed>.ant-menu-submenu>.ant-menu-submenu-title {
+    padding: 0 @base10-padding-md  !important;
+  }
+
+  &>ul>li>a>.aufontAll,
+  .ant-menu-submenu>.ant-menu-submenu-title span .aufontAll,
+  .ant-menu-dark .ant-menu-inline.ant-menu-sub .ant-menu-item .aufontAll {
+    font-size: 18px;
+    margin-right: @base4-padding-md;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  &>ul>li>a>.specStyles,
+  .ant-menu-submenu>.ant-menu-submenu-title span .specStyles,
+  .ant-menu-dark .ant-menu-inline.ant-menu-sub .ant-menu-item .specStyles {
+    max-width: none !important;
+  }
+
+  &>ul>li>a>span,
+  .ant-menu-submenu>.ant-menu-submenu-title span span,
+  .ant-menu-dark .ant-menu-inline.ant-menu-sub .ant-menu-item span {
+    display: inline-block;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    max-width: calc(100% - 34px) !important;
+  }
+
+  // 已有全局样式，无需再重写一次，作者zhuqiu 注释  解决左侧 列表拖拽后需要显示目录全名称  问题单号 44092  （max-width: 84px !important;不能写死）
+
+  // .menu-content .ant-menu-dark .ant-menu-inline.ant-menu-sub .ant-menu-item span {
+  //   display: inline-block;
+  //   max-width: 84px !important;
+  //   overflow: hidden;
+  //   text-overflow: ellipsis;
+  //   white-space: nowrap;
+  //   -webkit-line-clamp: 2;
+  //   -webkit-box-orient: vertical;
+  // }
+
+  // .ant-menu-dark .ant-menu-inline.ant-menu-sub .ant-menu-item span {
+  //   display: inline-block;
+  //   max-width: 84px !important;
+  //   overflow: hidden;
+  //   text-overflow: ellipsis;
+  //   white-space: nowrap;
+  //   -webkit-line-clamp: 2;
+  //   -webkit-box-orient: vertical;
+  // }
+
+  .ant-menu-dark .ant-menu-submenu-title .ant-menu-submenu-arrow,
+  .ant-menu-dark .ant-menu-sub .ant-menu-submenu-title .ant-menu-submenu-arrow {
+    margin-top: 3px;
+  }
+
+  .ant-menu-dark.ant-menu-inline .ant-menu-submenu-title:hover {
+    & .ant-menu-submenu-arrow {
+      opacity: 1;
+
+      &::before,
+      &::after {
+        background: white;
+
+      }
+    }
+  }
+}

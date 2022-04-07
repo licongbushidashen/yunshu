@@ -1,0 +1,11 @@
+.impowerBox .qrcode {width: 210px;}
+.impowerBox .title {display: none;}
+.impowerBox .info {width: 210px;}
+.impowerBox .wrp_code {margin-top: 0!important;}
+.status_icon {display: none  !important}
+.impowerBox .status {
+  margin-top: 0;
+}
+.impowerBox .icon38_msg.succ {
+  display: none;
+}

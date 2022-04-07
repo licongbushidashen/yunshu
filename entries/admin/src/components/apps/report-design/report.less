@@ -1,0 +1,77 @@
+.report-design {
+  top: 0 !important;
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+
+  &__header {
+    min-height: 64px;
+    background: #052535;
+    color: #fff;
+    padding-left: 24px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+
+    .h-icon-all-arrow-left-o {
+      cursor: pointer;
+    }
+
+    span {
+      margin-left: 25px;
+    }
+
+    a {
+      color: #fff;
+      // & > i{
+      //     margin-left: 25px;
+      // }
+    }
+
+    &-right {
+      position: absolute;
+      right: 1em;
+
+      &>a,
+      &>span {
+        font-size: 14px;
+      }
+
+      &>a {
+        color: #17BC94;
+
+        &>i {
+          color: #17BC94;
+        }
+      }
+
+      &>a>i,
+      &>span>i {
+        margin-right: 10px;
+      }
+
+      &>span {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      &>span>i {
+        color: white !important;
+      }
+
+      /deep/.ant-divider,
+      .ant-divider-vertical {
+        margin: 0 16px;
+      }
+    }
+  }
+
+  &__body {
+    flex-grow: 1;
+    overflow: auto;
+  }
+}
+
+/deep/.h3-report-header {
+  box-shadow: none;
+}

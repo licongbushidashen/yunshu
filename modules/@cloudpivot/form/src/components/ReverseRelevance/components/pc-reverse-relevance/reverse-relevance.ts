@@ -1,0 +1,23 @@
+import { Component, Vue, Watch, Prop } from "vue-property-decorator";
+
+import ReverseRelevanceList from "./reverse-relevance-list.vue";
+
+import ReverseRelevanceLink from "./reverse-relevance-link.vue";
+
+import { ReverseRelevanceControl } from "@cloudpivot/form/src/common/controls/reverse-relevance-control";
+
+import common from "@cloudpivot/common/pc";
+
+@Component({
+  name: "reverse-relevance",
+  components: {
+    ReverseRelevanceList,
+    ReverseRelevanceLink,
+    H3Panel: common.components.Panel,
+  },
+})
+export default class ReverseRelevance extends ReverseRelevanceControl {
+  get tips() {
+    return this.control.options.tips;
+  }
+}

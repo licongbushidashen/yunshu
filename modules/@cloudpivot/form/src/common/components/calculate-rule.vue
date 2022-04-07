@@ -1,0 +1,871 @@
+<template>
+  <a-modal
+    :title="$t('languages.Apps.FormDesignPage.Calculation')"
+    :visible="true"
+    width="612px"
+    :cancelText="$t('languages.Apps.Cancel')"
+    :okText="$t('languages.Apps.Ok')"
+    @cancel="closeModal"
+    @ok="backData"
+    :maskClosable="false"
+    :keyboard="false"
+  >
+    <div class="calculate-rule">
+      <div class="data-item clearfix">
+        <div class="title">
+          <span>{{ $t("languages.Apps.FormDesignPage.DataItem") }}:</span>
+        </div>
+        <div>
+          <a-select
+            class="select"
+            :placeholder="$t('languages.PlaceHolder.Select')"
+            @change="dataItemChange"
+          >
+            <a-select-option
+              v-for="(dataitem, i) in dataItems"
+              :key="i"
+              :value="dataitem.code"
+              >{{ `${dataitem.name}[${dataitem.code}]` }}</a-select-option
+            >
+          </a-select>
+        </div>
+        <div>
+          <a-button @click="pushDataItem">{{
+            $t("languages.Apps.FormDesignPage.Insert")
+          }}</a-button>
+        </div>
+      </div>
+      <div class="btn-group">
+        <ul class="clearfix">
+          <li
+            v-for="(symbol, i) in symbolList"
+            :key="i"
+            @click="symbolBtnClick(symbol)"
+          >
+            <a-button>{{ symbol }}</a-button>
+          </li>
+        </ul>
+      </div>
+      <div class="btn-group">
+        <ul class="clearfix sum">
+          <li
+            v-for="(rule, i) in ruleList"
+            :key="i"
+            @click="ruleBtnClick(rule)"
+          >
+            <a-button>{{ rule }}</a-button>
+          </li>
+        </ul>
+      </div>
+      <div class="text-area">
+        <!-- <a-textarea
+          v-model="ruleString"
+          ref="ruletextarea"
+          @click="getCursorIndex"
+          @change="getCursorIndex"
+        ></a-textarea>-->
+        <div
+          ref="ruleHTMLRef"
+          :id="contentId"
+          class="ant-input"
+          contenteditable="true"
+        ></div>
+      </div>
+    </div>
+  </a-modal>
+</template>
+<script lang="ts">
+import { Component, Vue, Emit, Prop } from "vue-property-decorator";
+
+import * as dataitemStore from "@cloudpivot/form/src/stores/data-items.store-helper";
+
+import { textBeComeImg } from "@cloudpivot/form/utils/text-image";
+
+import { FormControlType } from "@cloudpivot/form/schema";
+
+interface IruleArr {
+  type: "string" | "img"; // ruleHTML中元素类型
+  val: string; // ruleHTML中元素内容
+  len: number; // ruleHTML中元素长度
+  data?: any; // IMG类型 完整数据
+  id?: string;
+}
+var ruleHTMLNode: any = "";
+@Component({
+  name: "CalculateRule",
+})
+export default class CalculateRule extends Vue {
+  @Prop({
+    type: Object,
+  })
+  modalData!: any;
+
+  @Prop({ type: Object })
+  dataItem?: any;
+
+  @Prop()
+  getFormControls;
+
+  /** 全部的 */
+  /**
+   * notUsed 未使用
+   */
+  get dataItemCodeList() {
+    const codeArr: any[] = [];
+    const length: number = this.items.length;
+    for (let i = 0; i < length; i += 1) {
+      codeArr.push(this.items[i].code);
+    }
+    return codeArr;
+  }
+  get items() {
+    // const initiallyArr = dataitemStore
+    //   .getDataItems(this)
+    //   .filter((res: any) => res.published);
+    // 取消只显示发布后的数据项
+    const initiallyArr = dataitemStore.getDataItems(this);
+    const dataArr = JSON.parse(JSON.stringify(initiallyArr));
+    const targetArr: any[] = [];
+    const length: number = dataArr.length | 0;
+    for (let i = 0; i < length; i += 1) {
+      targetArr.push(dataArr[i]);
+      if (dataArr[i].type === 8 && dataArr[i].properties) {
+        const parentCode: string = dataArr[i].code;
+        const subDataItem = dataArr[i].properties as any;
+        const subLength: number = subDataItem.length | 0;
+        for (let j = 0; j < subLength; j += 1) {
+          const subItem = subDataItem[j];
+          if (subItem.code !== "sortKey") {
+            subDataItem[j].code = `${parentCode}.${subDataItem[j].code}`;
+            targetArr.push(subDataItem[j]);
+          }
+          // subDataItem[j].code = `${parentCode}.${subDataItem[j].code}`;
+          // targetArr.push(subDataItem[j]);
+        }
+      }
+    }
+    return targetArr.filter((res: any) => res.type === 2);
+  }
+  /**
+   * @Author: Fan
+   * @Date: 2020-05-29 17:53:21
+   * @description: 计算规则 所属的数据项是否在 子表中
+   * @return: boolean
+   * @LastEditors: Fan
+   */
+  get isInSheet() {
+    return !!this.dataItem.parentCode;
+  }
+  ruleList: Array<string> = [
+    "SUM",
+    "AVG",
+    "MAX",
+    "MIN",
+    "COUNT",
+    "ROUND",
+    "INTUP",
+    "INTDOWN",
+  ];
+  symbolList: Array<string> = ["+", "-", "*", "/", "(", ")"];
+  ruleString: string = "";
+  textArea: any = null;
+  cursorIndex: any = null;
+  dataItems: Array<any> = [];
+  selectDataItem: any = "";
+  ruleHTML: any = "";
+  ruleArr: IruleArr[] = [];
+  created() {
+    //this.dataItems = this.items as any;
+    //不使用缓存中数据，使用当前表单中最新数据
+    let allControls = this.getFormControls();
+    let code = this.dataItem.code;
+    //let { parentCode = '' } = this.dataItem;
+    let arr = [];
+    let allCtrlKeys = Object.keys(allControls);
+    for (let key of allCtrlKeys) {
+      let item = allControls[key];
+      if (item.type === FormControlType.Number) {
+        if (this.dataItem.parentCode) {
+          this.dataItems.push({
+            name: item.options.name,
+            code: item.key,
+          });
+        } else {
+          if (item.key !== code) {
+            this.dataItems.push({
+              name: item.options.name,
+              code: item.key,
+            });
+          }
+        }
+      } else if (item.type === FormControlType.Sheet) {
+        for (let cl of item.columns) {
+          if (this.dataItem.parentCode) {
+            if (cl.type === FormControlType.Number && cl.key !== code) {
+              this.dataItems.push({
+                name: cl.options.name,
+                code: `${cl.parentKey}.${cl.key}`,
+              });
+            }
+          } else {
+            if (cl.type === FormControlType.Number) {
+              this.dataItems.push({
+                name: cl.options.name,
+                code: `${cl.parentKey}.${cl.key}`,
+              });
+            }
+          }
+        }
+      } else if (item.type === FormControlType.Tabs) {
+        var loop = [item];
+        while (loop.length) {
+          let loopItem = loop.shift();
+          for (let lt of loopItem.panels) {
+            let pnCtrlKeys = Object.keys(lt.controls);
+            for (let pnCtrlKey of pnCtrlKeys) {
+              let pnCtrl = lt.controls[pnCtrlKey];
+              if (
+                pnCtrl.type === FormControlType.Number &&
+                pnCtrl.key !== code
+              ) {
+                this.dataItems.push({
+                  name: pnCtrl.options.name,
+                  code: `${pnCtrl.key}`,
+                });
+              } else if (pnCtrl.type === FormControlType.Sheet) {
+                for (let cl of pnCtrl.columns) {
+                  if (cl.type === FormControlType.Number && cl.key !== code) {
+                    this.dataItems.push({
+                      name: cl.options.name,
+                      code: `${cl.parentKey}.${cl.key}`,
+                    });
+                  }
+                }
+              } else if (pnCtrl.type === FormControlType.Tabs) {
+                loop.push(pnCtrl);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  /**
+   * @Author: Fan
+   * @Description: 解析字符串,插入ruleNode中
+   * @param {type} string
+   * @Date: 2019-12-20 14:41:53
+   */
+  parseStringToNode(str) {
+    let tempType = "";
+    let tempStr = "";
+    for (let s of str.split("")) {
+      if (s === "{") {
+        if (tempType === "text" && !!tempStr) {
+          ruleHTMLNode.insertAdjacentText("beforeend", tempStr);
+        }
+        tempType = "img";
+        tempStr = "";
+      } else if (s === "}") {
+        if (tempType === "img") {
+          let d = this.dataItems.filter((item) => item.code === tempStr);
+          if (d.length) {
+            let dataItem = d[0];
+            let imgID = Math.ceil(Math.random() * 1000) + dataItem.code;
+            let imgSrc = textBeComeImg(dataItem.name);
+            let imgNode = `<img src="${imgSrc}" id="${imgID}" data-val='{${dataItem.code}}'>`;
+            ruleHTMLNode.insertAdjacentHTML("beforeend", imgNode);
+            tempType = "";
+            tempStr = "";
+          } else {
+            ruleHTMLNode.insertAdjacentText("beforeend", "{" + tempStr + "}");
+            tempType = "";
+            tempStr = "";
+          }
+        } else {
+          tempType = "text";
+          tempStr += "}";
+        }
+      } else {
+        if (!tempType) {
+          tempType = "text";
+        }
+        tempStr += s;
+      }
+    }
+    if (tempStr) {
+      ruleHTMLNode.insertAdjacentText("beforeend", tempStr);
+    }
+  }
+  mounted() {
+    this.$nextTick(() => {
+      document.addEventListener("selectionchange", this.selectHandler);
+      ruleHTMLNode = document.getElementById(this.contentId);
+      const data = this.modalData.data;
+      if (data && data.value) {
+        console.log("created => ", data.value);
+        this.parseStringToNode(data.value);
+      }
+    });
+  }
+  /**
+   * 数据项切换
+   */
+  dataItemChange(val: any) {
+    let item = this.dataItems.filter((v: any) => v.code === val)[0];
+    this.selectDataItem = item;
+  }
+  /**
+   * 将数据推送到工公式
+   */
+  // pushDataItem() {
+  //   if (this.selectDataItem) {
+  //     let cursorIndex: number = 0;
+  //     const strStart: string = this.ruleString.slice(0, this.cursorIndex);
+  //     const strEnd: string = this.ruleString.slice(this.cursorIndex);
+  //     this.ruleString = `${strStart}{${this.selectDataItem}}${strEnd}`;
+  //     cursorIndex = strStart.length + this.selectDataItem.length + 2;
+  //     setTimeout(() => {
+  //       this.setCursorPosition(this.textArea.$el, cursorIndex);
+  //       this.getCursorIndex();
+  //     }, 10);
+  //   }
+  // }
+  pushDataItem() {
+    if (this.selectDataItem) {
+      let imgID = Math.ceil(Math.random() * 1000) + this.selectDataItem.code;
+      let imgSrc = textBeComeImg(this.selectDataItem.name);
+      if (!!this.savedRange.commonAncestorContainer) {
+        // let start = this.savedRange.startOffset
+        // let end = this.savedRange.endOffset
+        let imgNode = document.createElement("img");
+        imgNode.src = imgSrc;
+        imgNode.id = imgID;
+        imgNode.dataset.val = `{${this.selectDataItem.code}}`;
+        this.savedRange.insertNode(imgNode);
+        let endOffset = this.savedRange.endOffset;
+        this.savedRange.setStart(ruleHTMLNode, endOffset);
+        ruleHTMLNode.focus();
+      } else {
+        ruleHTMLNode.focus();
+        setTimeout(() => {
+          let imgNode = `<img src="${imgSrc}" id="${imgID}" data-val='{${this.selectDataItem.code}}'>`;
+          ruleHTMLNode.insertAdjacentHTML("beforeend", imgNode);
+          this.savedRange.setStart(ruleHTMLNode, this.savedRange.endOffset + 1);
+          ruleHTMLNode.focus();
+        });
+      }
+    }
+  }
+  // symbolBtnClick(symbol: string) {
+  //   let cursorIndex: number = 0;
+  //   if (this.cursorIndex && this.cursorIndex !== null) {
+  //     const strStart: string = this.ruleString.slice(0, this.cursorIndex);
+  //     const strEnd: string = this.ruleString.slice(this.cursorIndex);
+  //     this.ruleString = `${strStart}${symbol}${strEnd}`;
+  //     cursorIndex = strStart.length + symbol.length;
+  //   } else {
+  //     this.ruleString = `${this.ruleString}${symbol}`;
+  //     cursorIndex = this.ruleString.length;
+  //   }
+  //   setTimeout(() => {
+  //     this.setCursorPosition(this.textArea.$el, cursorIndex);
+  //     this.getCursorIndex();
+  //   }, 10);
+  // }
+
+  symbolBtnClick(symbol: string) {
+    if (!!this.savedRange.commonAncestorContainer) {
+      let textNode = document.createTextNode(symbol);
+      this.savedRange.insertNode(textNode);
+      let endOffset = this.savedRange.endOffset;
+      this.savedRange.setStart(ruleHTMLNode, endOffset);
+      this.savedRange.collapsed(true);
+      ruleHTMLNode.focus();
+    } else {
+      ruleHTMLNode.focus();
+      setTimeout(() => {
+        ruleHTMLNode.insertAdjacentText("beforeend", symbol);
+        this.savedRange.setStart(ruleHTMLNode, this.savedRange.endOffset + 1);
+        ruleHTMLNode.focus();
+      });
+    }
+  }
+  /**
+   * 设置光标位置
+   */
+  setCursorPosition(ctrl: any, pos: any) {
+    if (ctrl.setSelectionRange) {
+      ctrl.focus();
+      ctrl.setSelectionRange(pos, pos);
+    } else if (ctrl.createTextRange) {
+      const range = ctrl.createTextRange();
+      range.collapse(true);
+      range.moveEnd("character", pos);
+      range.moveStart("character", pos);
+      range.select();
+    }
+  }
+  /**
+   * 添加计算按钮
+   */
+  // ruleBtnClick(rule: string) {
+  //   const ruleStr = rule.toLowerCase();
+  //   let cursorIndex: number = 0;
+  //   if (this.cursorIndex && this.cursorIndex !== null) {
+  //     const strStart: string = this.ruleString.slice(0, this.cursorIndex);
+  //     const strEnd: string = this.ruleString.slice(this.cursorIndex);
+  //     this.ruleString = `${strStart}${ruleStr}()${strEnd}`;
+  //     cursorIndex = strStart.length + ruleStr.length + 2;
+  //   } else {
+  //     this.ruleString = `${this.ruleString}${ruleStr}()`;
+  //     cursorIndex = this.ruleString.length;
+  //   }
+  //   setTimeout(() => {
+  //     this.setCursorPosition(this.textArea.$el, cursorIndex - 1);
+  //     this.getCursorIndex();
+  //   }, 10);
+  // }
+  ruleBtnClick(rule: string) {
+    if (!!this.savedRange.commonAncestorContainer) {
+      let textNode = document.createTextNode(`${rule.toLowerCase()}()`);
+      let endOffset = this.savedRange.endOffset;
+      this.savedRange.insertNode(textNode);
+      setTimeout(() => {
+        let afterEndOffset = this.savedRange.endOffset;
+        this.savedRange.setStart(ruleHTMLNode, afterEndOffset);
+        this.savedRange.collapse(true);
+        ruleHTMLNode.focus();
+      });
+    } else {
+      ruleHTMLNode.focus();
+      setTimeout(() => {
+        ruleHTMLNode.insertAdjacentText("beforeend", `${rule.toLowerCase()}()`);
+        this.savedRange.setStart(ruleHTMLNode, this.savedRange.endOffset + 1);
+        ruleHTMLNode.focus();
+      });
+    }
+  }
+  /**
+   * 获取鼠标光标下标
+   */
+  getCursorIndex() {
+    this.cursorIndex = this.textArea.$el.selectionStart;
+    console.log(this.textArea.$el.selectionStart);
+  }
+  backData() {
+    let ruleString = this.formatterRuleHTML();
+    const { done, msg } = this.testRuleString(ruleString);
+    if (!done && ruleString) {
+      console.error("formatterRuleHTML =>", ruleString);
+      this.$message.error("计算规则不合法" + "[" + msg + "]");
+      return;
+    }
+    console.log("backData", done, msg);
+    const backData = {
+      value: ruleString,
+    };
+    this.$emit("backData", backData);
+  }
+  /**
+   * @Author: Fan
+   * @Description: 将 ruleHTMLNode数据 格式话成字符串
+   * @URL:http://redmine.h3bpm.com/issues/31177
+   * @Date: 2019-12-20 13:48:11
+   */
+  formatterRuleHTML() {
+    let str = "";
+    for (let n of ruleHTMLNode.childNodes) {
+      if (n.nodeName === "IMG") {
+        str += `${n.dataset.val}`;
+      } else if (n.nodeName === "#text" && !!n.textContent) {
+        str += `${n.textContent}`;
+      }
+    }
+    return str;
+  }
+  closeModal() {
+    this.$emit("closeModal");
+  }
+  /**
+   * 计算规则的校验
+   */
+  testRuleString(str: string) {
+    console.log("计算规则的校验", str);
+    // 聚合函数
+    const obj: any = {
+      sum: 1,
+      avg: 1,
+      max: 1,
+      min: 1,
+      count: 1,
+      round: 1,
+      intup: 1,
+      intdown: 1,
+    };
+
+    // 剔除空白符
+    str = str.replace(/\s/g, "");
+
+    // 错误情况，空字符串
+    if (!str) {
+      return {
+        done: false,
+        msg: "请填写非空字符串",
+      };
+    }
+
+    if (~str.indexOf("round")) {
+      let execReg = /\{[^\}]+\}/g;
+      let execRes;
+      while ((execRes = execReg.exec(str)) != null) {
+        if (!this.isInSheet && execRes[0].indexOf(".") > -1) {
+          return {
+            done: false,
+            msg: "计算表达式不符合格式要求",
+          };
+        }
+      }
+
+      if (!/^round\([^,]+,(\d+)\)$/.test(str)) {
+        return {
+          done: false,
+          msg: "计算表达式不符合格式要求",
+        };
+      }
+
+      str = str.replace(/round\(([^,]+),\d+\)/g, "$1");
+    }
+    if (~str.indexOf("intup")) {
+      let execReg = /\{[^\}]+\}/g;
+      let execRes;
+      while ((execRes = execReg.exec(str)) != null) {
+        if (!this.isInSheet && execRes[0].indexOf(".") > -1) {
+          return {
+            done: false,
+            msg: "计算表达式不符合格式要求",
+          };
+        }
+      }
+      str = str.replace(/intup\((.+)\)/g, "$1"); //判断函数表达式是否合法，相当于判断第一个参数的运算规则是否合法
+    }
+    if (~str.indexOf("intdown")) {
+      let execReg = /\{[^\}]+\}/g;
+      let execRes;
+      while ((execRes = execReg.exec(str)) != null) {
+        if (!this.isInSheet && execRes[0].indexOf(".") > -1) {
+          return {
+            done: false,
+            msg: "计算表达式不符合格式要求",
+          };
+        }
+      }
+      str = str.replace(/intdown\((.+)\)/g, "$1"); //同上
+    }
+
+    // 错误情况，运算符连续
+    if (/[\+\-\*\/]{2,}/.test(str)) {
+      return {
+        done: false,
+        msg: "运算符不可以连续",
+      };
+    }
+    // 不能以计算符号结尾 或开始
+    if (/[\+\-\*\/]$/.test(str) || /^[\+\-\*\/]/.test(str)) {
+      return {
+        done: false,
+        msg: "不能以计算符号开始或结尾",
+      };
+    }
+
+    // 错误情况，数据项连续 {}{}
+    if (/\}\{/.test(str)) {
+      return {
+        done: false,
+        msg: "数据项不可以连续",
+      };
+    }
+
+    // 空括号
+    if (/\(\)/.test(str)) {
+      return {
+        done: false,
+        msg: "括号中内容不能为空",
+      };
+    }
+    // 输入的字符中 不能含有'，'否则 h3-form中的 语句解析会报错
+    if (/，/.test(str)) {
+      return {
+        done: false,
+        msg: "输入的字符中 不能含有中文逗号（，）",
+      };
+    }
+
+    // 错误情况，括号不配对
+    const stack: any[] = [];
+    for (let i = 0, item; i < str.length; i += 1) {
+      item = str.charAt(i);
+      if ("(" === item) {
+        stack.push("(");
+      } else if (")" === item) {
+        if (stack.length > 0) {
+          stack.pop();
+        } else {
+          return {
+            done: false,
+            msg: "括号不配对",
+          };
+        }
+      }
+    }
+    if (0 !== stack.length) {
+      return {
+        done: false,
+        msg: "括号不配对",
+      };
+    }
+
+    // 错误情况，(后面是运算符
+    if (/\([\+\-\*\/]/.test(str)) {
+      return {
+        done: false,
+        msg: "'('后面不能以运算符开始",
+      };
+    }
+
+    // 错误情况，)前面是运算符
+    if (/[\+\-\*\/]\)/.test(str)) {
+      return {
+        done: false,
+        msg: "')'前面不能以运算符结束",
+      };
+    }
+    //花括号为空
+    if (/\{\}/.test(str)) {
+      return {
+        done: false,
+        msg: "花括号中内容不能为空",
+      };
+    }
+    //错误情况，花括号不配对
+    const bstack: any[] = [];
+    for (let i = 0, bitem; i < str.length; i++) {
+      bitem = str.charAt(i);
+      if ("{" === bitem) {
+        bstack.push("{");
+      } else if ("}" === bitem) {
+        if (bstack.length > 0) {
+          bstack.pop();
+        } else {
+          return {
+            done: false,
+            msg: "花括号不匹配",
+          };
+        }
+      }
+    }
+    if (0 !== bstack.length) {
+      return {
+        done: false,
+        msg: "花括号中内容不配对",
+      };
+    }
+    // 错误情况，变量没有来自“待选公式变量”
+    var tmpStr = str
+      .replace(/\{.*?\}/g, "")
+      .replace(/[\{\}\(\)\+\-\*\/]{1,}/g, "`");
+    var array = tmpStr.split("`");
+    for (var i = 0, item; i < array.length; i++) {
+      item = array[i];
+      if (/[A-Z]/i.test(item) && "undefined" === typeof obj[item]) {
+        return {
+          done: false,
+          msg: "变量没有来自“待选公式变量”",
+        };
+      }
+    }
+    //提取code,检查code 是否存在（已发布）
+    const codeStack: any[] = [];
+    const arr: any = str.match(/\{(.+?)\}/g);
+    if (!arr) {
+      return {
+        done: false,
+        msg: "请选择数据项",
+      };
+    }
+    const arrCode = this.dataItemCodeList;
+    for (var j = 0, len = arr.length; j < len; j++) {
+      const strTwo: string = arr[j].replace(/^\{|\}$/g, "");
+      if (arrCode.indexOf(strTwo) === -1) {
+        return {
+          done: false,
+          msg: "所选编码不存在",
+        };
+      }
+      codeStack.push(strTwo);
+    }
+    //TODO 数组codeStack 处理，调用接口
+    // 校验输入的内容格式是否正确
+    var sss = str.replace(
+      /(avg)|(max)|(min)|(sum)|(count)|(round)|(intup)|(intdown)/g,
+      "C"
+    ); // 将方法标记为 C 子表数据可以用于 所有公式
+
+    // 在主表中的数据项 选中的子表数据项只能用在方法中. 如果是子表中的数据项,则选择其他子表数据项可以公式和方法中
+    if (this.isInSheet) {
+      sss = sss.replace(/\{(.+?)\}/g, "N");
+    } else {
+      sss = sss.replace(/\{(\w+)\}/g, "N");
+      sss = sss.replace(/\{(.+?)\}/g, "S");
+    }
+    //不匹配负数
+    sss = sss.replace(/(0.[0-9]+|[1-9][0-9]*.[0-9]+|[1-9][0-9]*|0)/g, "N"); // 将输入的 数值常量转换成 N
+    // if (/C\(S(,(N|S))*\)/.test(sss) || /C\((N|S)(,S)*\)/.test(sss)) {
+    //   return {
+    //     done: false,
+    //     msg: '子表数据项只能用于SUM和COUNT方法中!'
+    //   };
+    // }
+    // 将 C(N)或C(S)转换成 N, 因为 方法最后可以视为一个数值
+    while (/C\((N|S)(,(N|S))*\)/.test(sss)) {
+      sss = sss.replace(/C\((N|S)(,(N|S))*\)/g, "N"); // 将 不包含子表数据项的公式替换成N
+    }
+    if (/S/.test(sss)) {
+      return {
+        done: false,
+        msg: "子表数据项只能用于方法中!",
+      };
+    }
+    var stack_arr: string[] = [];
+
+    for (let _i = 0, l = sss.length; _i < l; _i++) {
+      let c: string = sss[_i];
+      if (c === "(") {
+        stack_arr.push("(");
+      } else if (c === "N") {
+        if (stack_arr.length === 0) {
+          stack_arr.push("N");
+        } else {
+          let _len = stack_arr.length;
+          let _pre = stack_arr[_len - 1]; // 这个时候 需要判断最后一位是不是符号
+          if (
+            ~["+", "-", "*", "/"].indexOf(_pre) &&
+            stack_arr[_len - 2] === "N"
+          ) {
+            stack_arr.splice(_len - 2, 2, "N");
+          } else {
+            stack_arr.push("N");
+          }
+        }
+      } else if (~["+", "-", "*", "/"].indexOf(c)) {
+        stack_arr.push(c);
+      } else if (c === ")") {
+        let _len = stack_arr.length;
+        let _pre = stack_arr[_len - 1];
+        if (_pre === "N" && stack_arr[_len - 2] === "(") {
+          stack_arr.splice(_len - 2, 2, "N");
+        }
+        while (stack_arr.length > 1) {
+          let _l = stack_arr.length - 1;
+          let _p = stack_arr[_l - 1];
+          if (~["+", "-", "*", "/"].indexOf(_p) && stack_arr[_l - 2] === "N") {
+            stack_arr.splice(_l - 2, 3, "N");
+          } else {
+            break;
+          }
+        }
+      } else {
+        stack_arr.push(c);
+      }
+    }
+    if (stack_arr.length === 1 && stack_arr[0] === "N") {
+      return {
+        done: true,
+        msg: "计算表达式符合格式要求",
+      };
+    } else {
+      return {
+        done: false,
+        msg: "计算表达式不符合格式要求",
+      };
+    }
+    return {
+      done: true,
+      msg: "计算表达式符合格式要求",
+    };
+  }
+
+  contentId = `content${this.getGuid()}`;
+  savedRange: any = {};
+  getGuid() {
+    // 生成随机ID
+    return `r${new Date().getTime()}d${Math.ceil(Math.random() * 1000)}`;
+  }
+  selectHandler() {
+    // 监听选定文本的变动
+    let sel = window.getSelection();
+
+    let range: any = sel.rangeCount > 0 ? sel.getRangeAt(0) : null;
+    if (
+      !!range &&
+      range.commonAncestorContainer &&
+      range.commonAncestorContainer.ownerDocument.activeElement.id ===
+        this.contentId
+    ) {
+      this.savedRange = range;
+      !ruleHTMLNode && (ruleHTMLNode = range.commonAncestorContainer);
+    }
+  }
+}
+</script>
+<style lang="less" scoped>
+.calculate-rule {
+  .data-item {
+    margin-bottom: 16px;
+    & > div {
+      float: left;
+      .select {
+        width: 308px;
+        margin: 0 8px;
+      }
+    }
+    /deep/.title {
+      span {
+        line-height: 32px !important;
+      }
+    }
+  }
+  .btn-group {
+    ul {
+      &.sum {
+        li {
+          button {
+            padding: 0 10px;
+            width: auto;
+          }
+        }
+      }
+      li {
+        float: left;
+        margin: 0 16px 16px 0;
+        /deep/ button {
+          padding: 0;
+          width: 32px;
+          text-align: center;
+          span {
+            line-height: 32px;
+          }
+        }
+      }
+    }
+  }
+  .text-area {
+    & textarea,
+    & > div.ant-input {
+      width: 100%;
+      height: 142px;
+      border-radius: 4px;
+    }
+  }
+}
+</style>
