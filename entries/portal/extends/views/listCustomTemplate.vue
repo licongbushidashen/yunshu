@@ -1424,10 +1424,15 @@ export default class listCustomTemplate extends Vue {
       width: 140
     };
     let columns = [];
+    for (let i = 0; i < this.columns.length; i++) {
+      if (this.columns[i].id != "createdTime") {
+        columns.push(this.columns[i]);
+      }
+    }
     if (this.$route.name == "work") {
-      columns = [...this.columns, dt];
+      columns = [...columns, dt];
     } else {
-      columns = this.columns;
+      columns = columns;
     }
     let tableConfig = this.tableConfig;
 

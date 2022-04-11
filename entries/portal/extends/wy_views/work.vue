@@ -36,7 +36,7 @@
         >
         <a-select
           show-search
-          style="width:160px;    padding-top: 5px;    margin-right: 20px;"
+          style="width:140px;    padding-top: 5px;    margin-right: 20px;"
           v-model="sheetDataItem"
           allowClear
         >
@@ -52,7 +52,7 @@
         >
         <a-select
           show-search
-          style="width:160px;    padding-top: 5px;    margin-right: 20px;"
+          style="width:140px;    padding-top: 5px;    margin-right: 20px;"
           v-model="sheetDataItem1"
           allowClear
         >
@@ -70,7 +70,7 @@
         <a-select
           v-if="Tindex == 1 || Tindex == 2 || Tindex == 3"
           show-search
-          style="width:160px;    padding-top: 5px;    margin-right: 20px;"
+          style="width:140px;    padding-top: 5px;    margin-right: 20px;"
           v-model="sheetDataItem2"
           allowClear
         >
@@ -88,7 +88,7 @@
         <a-select
           v-if="Tindex == 0 || Tindex == 4"
           show-search
-          style="width:160px;    padding-top: 5px;    margin-right: 20px;"
+          style="width:140px;    padding-top: 5px;    margin-right: 20px;"
           v-model="sheetDataItem3"
           allowClear
         >
@@ -106,7 +106,7 @@
         <a-select
           v-if="Tindex == 2"
           show-search
-          style="width:160px;    padding-top: 5px;    margin-right: 20px;"
+          style="width:140px;    padding-top: 5px;    margin-right: 20px;"
           v-model="sheetDataItem4"
           allowClear
         >
@@ -321,7 +321,6 @@ export default {
         LY: this.sheetDataItem4
       };
       this.$refs.lists.reload();
-      console.log(this.$refs.lists, "tet");
     },
     change(item, index) {
       this.sheetDataItem = "";
@@ -386,6 +385,9 @@ export default {
 };
 </script>
 <style lang="less" scoped>
+/deep/.application-box .table-box {
+  height: calc(100%) !important;
+}
 .content-top {
   display: none;
 }

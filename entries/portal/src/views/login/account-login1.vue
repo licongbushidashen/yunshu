@@ -12,7 +12,7 @@ import axios from "axios";
 import OAuthApi from "@/apis/oauth";
 import qs from "qs";
 import env from "@/config/env";
-import wyml from "../../../static/config";
+
 import common from "@cloudpivot/common";
 import { Modal, Input, Button, Tooltip } from "@h3/antd-vue";
 
@@ -82,17 +82,19 @@ export default class LoginAccount extends Vue {
   backhome() {
     axios
       .post(
-        `/maxkey/maxkey/authz/cas/logout/913bf547-fda9-4c4d-afb6-ec58ab4e3bf4?globalSessionId=${localStorage.getItem(
-          "globalSessionId"
-        )}`
+        `/maxkey/maxkey/authz/cas/logout/${
+          window.wyml.wyml.ID
+        }?globalSessionId=${localStorage.getItem("globalSessionId")}`
       )
       .then(res => {
         localStorage.removeItem("token");
         localStorage.removeItem("refresh_token");
         localStorage.removeItem("expireTime");
         sessionStorage.removeItem("user");
-        window.location.href = `/maxkey/maxkey/oauth/v20/authorize?response_type=code&client_id=${
-          wyml.wyml.ID
+        window.location.href = `${
+          window.wyml.wyml.url
+        }/oauth/v20/authorize?response_type=code&client_id=${
+          window.wyml.wyml.ID
         }&scope=all&redirect_uri=${window.location.href.split("?")[0]}`;
       });
     // window.location.href = `https://onekey-test.zhejianglab.com/maxkey/oauth/v20/authorize?response_type=code&client_id=913bf547-fda9-4c4d-afb6-ec58ab4e3bf4&scope=all&redirect_uri=${
@@ -104,8 +106,8 @@ export default class LoginAccount extends Vue {
     axios
       .post(
         `/maxkey/maxkey/oauth/v20/token?client_id=${
-          wyml.wyml.ID
-        }client_secret=${wyml.wyml.secret}&code=${localStorage.getItem(
+          window.wyml.wyml.ID
+        }&client_secret=${window.wyml.wyml.secret}&code=${localStorage.getItem(
           "zj_code"
         )}&grant_type=authorization_code&redirect_uri=${
           window.location.href.split("?")[0]

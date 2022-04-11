@@ -213,7 +213,7 @@ import env from "@/config/env";
 import site from "@/config/site";
 
 import axios from "axios";
-import wyml from "../../static/config";
+
 const icon = require("@/assets/icons/appicon.svg");
 
 const WorkflowCenterModule = namespace("WorkflowCenter/WorkflowCenter");
@@ -421,7 +421,6 @@ export default class CommonHeader extends Vue {
 
   // 退出登录
   logout() {
-    debugger;
     const logoutIP = env.oauthHost;
     const redirectIP = env.redirectHost;
     const token: string = localStorage.getItem("token") || "";
@@ -438,17 +437,19 @@ export default class CommonHeader extends Vue {
       this.$router.replace({ name: "login" });
       axios
         .post(
-          `/maxkey/maxkey/authz/cas/logout/913bf547-fda9-4c4d-afb6-ec58ab4e3bf4?globalSessionId=${localStorage.getItem(
-            "globalSessionId"
-          )}`
+          `/maxkey/maxkey/authz/cas/logout/${
+            window.wyml.wyml.ID
+          }?globalSessionId=${localStorage.getItem("globalSessionId")}`
         )
         .then(res => {
           localStorage.removeItem("token");
           localStorage.removeItem("refresh_token");
           localStorage.removeItem("expireTime");
           sessionStorage.removeItem("user");
-          window.location.href = `/maxkey/maxkey/oauth/v20/authorize?response_type=code&client_id=${
-            wyml.wyml.ID
+          window.location.href = `${
+            window.wyml.wyml.url
+          }/oauth/v20/authorize?response_type=code&client_id=${
+            window.wyml.wyml.ID
           }&scope=all&redirect_uri=${window.location.href.split("?")[0]}`;
         });
     });
@@ -505,11 +506,11 @@ export default class CommonHeader extends Vue {
       this.$store.state.wyld = false;
 
       if (info.roleName) {
-        let admin = info.roleName.find(e => e == wyml.glyId);
+        let admin = info.roleName.find(e => e == window.wyml.glyId);
         if (admin) {
           this.$store.state.wyadmin = true;
         } else {
-          let ld = info.roleName.find(e => e == wyml.ldroleId);
+          let ld = info.roleName.find(e => e == window.wyml.ldroleId);
           if (ld) {
             this.$store.state.wyld = true;
           }

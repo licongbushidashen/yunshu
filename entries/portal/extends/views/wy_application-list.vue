@@ -65,7 +65,8 @@
             </div> -->
           </div>
           <!-- 其他操作按钮:新增/删除/... -->
-          <div id="list-actions" ref="actions" v-if="$store.state.wyadmin">
+          <!-- <div id="list-actions" ref="actions" v-if="$store.state.wyadmin"> -->
+          <div id="list-actions" ref="actions">
             <template v-for="(ac, index) in queryActions">
               <template v-if="ac.actionCode !== 'batch_print'">
                 <template
@@ -666,7 +667,7 @@
 </style>
 <style lang="less" scoped>
 .application-box .table-box {
-  height: calc(100% - 32px);
+  height: calc(100% - 50px) !important;
 }
 // @import "./style/index.less";
 @media screen and (max-width: 1366px) {

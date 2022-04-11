@@ -17,7 +17,7 @@
           <div></div>
           <div>
             <a-select
-              style="width: 240px !important"
+              style="width: 130px !important"
               v-model="rwly"
               v-if="Tindex == 2"
               @change="test"

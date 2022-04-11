@@ -7,7 +7,7 @@ import App from "./App.vue";
 import store from "./store";
 import i18n from "./config/i18n";
 import axios from "axios";
-debugger;
+
 // // 引入自定义指令
 // import directives from './directives';
 
@@ -95,7 +95,6 @@ export async function startup(environment: any) {
   Vue.prototype.router = router;
 
   router.beforeEach((to: any, from: any, next: any) => {
-    debugger;
     // localStorage.setItem(
     //   "token",
     //   "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiYXBpIl0sImNvcnBJZCI6bnVsbCwidXNlcl9pZCI6IjhhZTQ5Y2M0N2YzOTE3MWMwMTdmOTMwMDZlMzczMzNkIiwidXNlcl9uYW1lIjoiMDAwODE0Iiwic2NvcGUiOlsicmVhZCJdLCJtb2JpbGUiOmZhbHNlLCJpc0FkbWluIjp0cnVlLCJleHAiOjE2NDc1MzMzOTgsImlzQXBwQWRtaW4iOmZhbHNlLCJhdXRob3JpdGllcyI6WyJVU0VSIiwiQVVUSF9TWVNURU1fTUFOQUdFIl0sImp0aSI6ImZlYmY2MWMyLWVjYjctNDNkMy05NWZmLTkyNzMyY2U1YTI2ZCIsImNsaWVudF9pZCI6ImFwaSJ9.O1ngHbPcMLZNmWnQJ_DsUlO9aZk1wDxkx3qo_DCSPFhTzM4cpDNiAzjns36AKUhQIwVraX3VK3a0wtUHNSL8qwXxW5OuDbzK5jNAQjipcVK47NgmJbtPhMzsP_4rxYlLIOOCVvzbjVJ-oQeRVkWq8iyuJkcHpL7Uhhn6Lf6x7fxRDo8a0mqZFrRTBJ9JfhFoVm5f04Eq2ux3BEOiaD7tu0Wgw9RiB01BPaAedroQRXBRDwc0Fl_4SMZRFbA0jPu1eg1pkOZZghSWL-iU0X8Sl-x3mx3sS93TGGkMa8LYPQSjuY64m1skveiN3thAm8w5G6bNu_n3JUZ3r64pFgcfIw"
@@ -128,7 +127,7 @@ export async function startup(environment: any) {
       });
     }
     if (!token) {
-      // oauth();
+      oauth();
     }
     if (env.enableProxy) {
       next();
@@ -150,9 +149,11 @@ export async function startup(environment: any) {
     const globalSessionId = getQueryVariable("globalSessionId");
     // const code = "c1875736-8981-49bd-9f99-6b95a8e269d6";
     if (!code) {
-      window.location.href = `https://onekey-test.zhejianglab.com/maxkey/oauth/v20/authorize?response_type=code&client_id=913bf547-fda9-4c4d-afb6-ec58ab4e3bf4&scope=all&redirect_uri=${
-        window.location.href
-      }`;
+      window.location.href = `${
+        window.wyml.wyml.url
+      }/oauth/v20/authorize?response_type=code&client_id=${
+        window.wyml.wyml.ID
+      }&scope=all&redirect_uri=${window.location.href.split("?")[0]}`;
     } else {
       localStorage.setItem("zj_code", code);
       localStorage.setItem("globalSessionId", globalSessionId);

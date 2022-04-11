@@ -35,7 +35,7 @@
         >
         <a-select
           show-search
-          style="width:160px;    padding-top: 5px;    margin-right: 20px;"
+          style="width:140px;    padding-top: 5px;    margin-right: 20px;"
           v-model="sheetDataItem"
           allowClear
         >
@@ -51,7 +51,7 @@
         >
         <a-select
           show-search
-          style="width:160px;    padding-top: 5px;    margin-right: 20px;"
+          style="width:140px;    padding-top: 5px;    margin-right: 20px;"
           v-model="sheetDataItem1"
           allowClear
         >
@@ -69,7 +69,7 @@
         <a-select
           v-if="Tindex == 1 || Tindex == 2 || Tindex == 3"
           show-search
-          style="width:160px;    padding-top: 5px;    margin-right: 20px;"
+          style="width:140px;    padding-top: 5px;    margin-right: 20px;"
           v-model="sheetDataItem2"
           allowClear
         >
@@ -87,7 +87,7 @@
         <a-select
           v-if="Tindex == 0 || Tindex == 4"
           show-search
-          style="width:160px;    padding-top: 5px;    margin-right: 20px;"
+          style="width:140px;    padding-top: 5px;    margin-right: 20px;"
           v-model="sheetDataItem3"
           allowClear
         >
@@ -105,7 +105,7 @@
         <a-select
           v-if="Tindex == 2"
           show-search
-          style="width:160px;    padding-top: 5px;    margin-right: 20px;"
+          style="width:140px;    padding-top: 5px;    margin-right: 20px;"
           v-model="sheetDataItem4"
           allowClear
         >
@@ -116,13 +116,14 @@
           </template>
         </a-select>
         <label
-          v-if="!$store.state.dept.name"
+          v-if="Tindex == 0 || Tindex == 4"
           for=""
           style="    line-height: 39px;    margin-right: 10px;color: #000000d9;"
           >承办部门</label
         >
+        <!-- v-if="!$store.state.dept.name" -->
         <staff-selector
-          v-if="!$store.state.dept.name"
+          v-if="Tindex == 0 || Tindex == 4"
           style="width:200px;position: relative;    top: 4px;    margin-right: 20px;"
           v-model="depts"
           :options="taffSelectorOpts"
@@ -301,9 +302,9 @@ export default {
     },
     seach() {
       let dept = [];
-      if (this.$store.state.dept.name) {
-        this.depts = [this.$store.state.dept];
-      }
+      // if (this.$store.state.dept.name) {
+      //   this.depts = [this.$store.state.dept];
+      // }
       for (let i = 0; i < this.depts.length; i++) {
         dept.push({
           name: this.depts[i].name,
@@ -339,9 +340,9 @@ export default {
         workflowName: ""
       };
       let dept = [];
-      if (this.$store.state.dept.name) {
-        this.depts = [this.$store.state.dept];
-      }
+      // if (this.$store.state.dept.name) {
+      //   this.depts = [this.$store.state.dept];
+      // }
       for (let i = 0; i < this.depts.length; i++) {
         dept.push({
           name: this.depts[i].name,
@@ -402,9 +403,9 @@ export default {
       }
     }
     let dept = [];
-    if (this.$store.state.dept.name) {
-      this.depts = [this.$store.state.dept];
-    }
+    // if (this.$store.state.dept.name) {
+    //   this.depts = [this.$store.state.dept];
+    // }
     for (let i = 0; i < this.depts.length; i++) {
       dept.push({
         name: this.depts[i].name,

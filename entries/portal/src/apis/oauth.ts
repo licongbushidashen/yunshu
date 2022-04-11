@@ -15,8 +15,8 @@ const refreshTokenUrl = `${env.oauthHost}/login/Authentication/get_refresh_token
 
 const oAuthLoginUrl = `${env.oauthHost}/oauth/authorize`;
 const oAuthTokenUrl = `${env.oauthHost}/oauth/token`;
-// const userInfoUrl = `${env.apiHost}/api/organization/user/info_login`;
-const userInfoUrl = `/api/organization/user/info_login`;
+const userInfoUrl = `${env.apiHost}/api/organization/user/info_login`;
+// const userInfoUrl = `/api/organization/user/info_login`;
 const oauthLogin: string = `${env.oauthHost}/login/mobile/ajax`;
 const formUrl = `${env.apiHost}/api/runtime/form/get_message_form_url`;
 const configUrl = `${env.apiHost}/public/system/config`;

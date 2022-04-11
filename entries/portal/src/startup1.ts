@@ -94,11 +94,10 @@ export async function startup(environment: any) {
   Vue.prototype.router = router;
 
   router.beforeEach((to: any, from: any, next: any) => {
-    // // debugger;
-    localStorage.setItem(
-      "token",
-      "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiYXBpIl0sImNvcnBJZCI6bnVsbCwidXNlcl9pZCI6IjhhZTQ5Y2M0N2YzOTE3MWMwMTdmOTJmZWUyMDMyZGNkIiwidXNlcl9uYW1lIjoiMDAwMzUxIiwic2NvcGUiOlsicmVhZCJdLCJtb2JpbGUiOmZhbHNlLCJpc0FkbWluIjp0cnVlLCJleHAiOjE2NDkzNDkxNTQsImlzQXBwQWRtaW4iOmZhbHNlLCJhdXRob3JpdGllcyI6WyJVU0VSIiwiQVVUSF9TWVNURU1fTUFOQUdFIl0sImp0aSI6Ijg4ZWJiMDlkLTdhNzItNDViOS1iYzg4LTMwOGEyZDZjNGYyZSIsImNsaWVudF9pZCI6ImFwaSJ9.QdrpA26TT4XCHU80oRvVImWJ62K8jcMfhIxYe349NFfSmgZwNTFzmTaa8gRcJCEy5iqXJfIe-fe9E2pxJr5_cQY0wdsoLy-WtytIAuA5e9r6AqXFf_LBmtWfbY-o-2G9hLXrpKDPWs1-OXZ6I4J0ENVf5P6-uhirY_YSnESdflns-uDg8-1Fd_MIADNXEFK_9Q2JrHhfTjoZJ-TjnC-_Ru3smlp9wWlWtAVy5youolDc1-PuXokNc0qR-QHqf0pFDNw9HqNLrjWpJOxFjMfWsFcnC9OITEjJ-rCMKHCecMOPrhnnJDYP_H7KL042MBvctA71NBNcp8pXzL7ipmhk8Q"
-    );
+    // localStorage.setItem(
+    //   "token",
+    //   "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiYXBpIl0sImNvcnBJZCI6bnVsbCwidXNlcl9pZCI6IjhhZTQ5Y2M0N2YzOTE3MWMwMTdmOTMwMDZlMzczMzNkIiwidXNlcl9uYW1lIjoiMDAwODE0Iiwic2NvcGUiOlsicmVhZCJdLCJtb2JpbGUiOmZhbHNlLCJpc0FkbWluIjp0cnVlLCJleHAiOjE2NDk2NjgyNzIsImlzQXBwQWRtaW4iOmZhbHNlLCJhdXRob3JpdGllcyI6WyJVU0VSIiwiQVVUSF9TWVNURU1fTUFOQUdFIl0sImp0aSI6IjRhMmJiMThhLTViMTMtNDU1OC1iNmMyLThkMTVlMTNiYWM1MiIsImNsaWVudF9pZCI6ImFwaSJ9.QdMLeBzITesARwFbrlVH10vUKOLOTyjwRpvCLhsSeNagdtexUdcxPNAfeqDpys3LvTC4LacAWqVQtgyck6Y4cFliOwzSYjxvYuAvEOP2c2r2hAV9HipHMiS6lEcHH4tSaccFc0NTXxTPEY7uPINbVaIdgwZLmVoN2t_16X9eftm2-6v_SxSITxqt-6OsSSKvP-tZoE_YyKLBLjSAFeT_W70EQ34uCsCV0DBWzL3XZMg8zu_imtKa_sPJC7bZYRX67jxmM5rJ49lImaXA47SJE3ZwcKWy1wb8OQ3hXZG8Q4cxoM6pPLZIm3tesYIPYHisb1xhgXbAddHNKrCmbby1Cw"
+    // );
     let title = "奥哲云枢";
     if (to.meta && to.meta.title) {
       title = to.meta.title;
@@ -127,7 +126,7 @@ export async function startup(environment: any) {
       });
     }
     if (!token) {
-      // oauth();
+      oauth();
     }
     if (env.enableProxy) {
       next();
@@ -148,10 +147,13 @@ export async function startup(environment: any) {
     const code = getQueryVariable("code");
     const globalSessionId = getQueryVariable("globalSessionId");
     // const code = "c1875736-8981-49bd-9f99-6b95a8e269d6";
+
     if (!code) {
-      window.location.href = `https://onekey-test.zhejianglab.com/maxkey/oauth/v20/authorize?response_type=code&client_id=913bf547-fda9-4c4d-afb6-ec58ab4e3bf4&scope=all&redirect_uri=${
-        window.location.href
-      }`;
+      window.location.href = `${
+        window.wyml.wyml.url
+      }/oauth/v20/authorize?response_type=code&client_id=${
+        window.wyml.wyml.ID
+      }&scope=all&redirect_uri=${window.location.href.split("?")[0]}`;
     } else {
       localStorage.setItem("zj_code", code);
       localStorage.setItem("globalSessionId", globalSessionId);
