@@ -204,6 +204,9 @@ export default class PCImagePreview extends Vue {
       img.onload = function(){
         resolve(that.imageToBase64(img))
       }
+      img.onerror = function(){
+        resolve(that.imageToBase64(img))
+      }
     })
   }
 

@@ -1,51 +1,8 @@
 <template>
-  <div style="    height: 100%;     overflow-y: auto;">
-    <div class="wy_tabs">
-      <ul>
-        <li
-          v-for="(item, index) in dcdb"
-          :key="index"
-          @click="change(item, index)"
-          style="position: relative;"
-        >
-          <span :class="Tindex == index ? 'active' : ''">{{ item.label }}</span>
-          <span
-            v-if="item.num"
-            style=" background: rgb(186, 5, 5);
-                    border-radius: 50%;
-                    width: 22px;
-                    height: 22px;
-                    line-height: 22px;
-                    display: inline-block;
-                    position: absolute;
-                    top: 11px;
-                    right: 25px;
-                    font-size: 12px;
-                    text-align: center;
-                    color: rgb(255, 255, 255);"
-            >{{ item.num }}</span
-          >
-        </li>
-      </ul>
-    </div>
+  <div style="      height: calc(100% - 130px);">
     <div class="wy_select">
-      <a-form
-        layout="inline"
-        style="display:flex"
-        v-if="Tindex == 1 || Tindex == 2 || Tindex == 3"
-      >
-        <!-- <label
-          style="    line-height: 43px;    margin-right: 10px;color:#000000d9"
-          >单据号</label
-        >
-        <a-form-item :colon="false" ref="queryForm1">
-          <a-input
-            placeholder="单据号"
-            v-model="queryData.sequenceNo"
-            class="workflow-name-input"
-          ></a-input>
-        </a-form-item> -->
-        <!-- <label
+      <a-form layout="inline" style="display:flex">
+        <label
           style="    line-height: 43px;    margin-right: 10px;color:#000000d9"
           >任务名称</label
         >
@@ -55,38 +12,25 @@
             v-model="queryData.workflowName"
             class="workflow-name-input"
           ></a-input>
-        </a-form-item> -->
-        <!-- <label
+        </a-form-item>
+        <label
           style="    line-height: 43px;    margin-right: 10px;color:#000000d9"
-          >当前节点</label
+          >重点任务来源</label
         >
-        <a-form-item :colon="false" ref="queryForm1">
-          <a-input
-            placeholder="审批节点"
-            v-model="queryData.activityName"
-            class="workflow-name-input"
-          ></a-input>
-        </a-form-item> -->
-        <!-- <label
-          style="    line-height: 43px;    margin-right: 10px;color:#000000d9"
-          >处理人</label
+        <a-select
+          show-search
+          style="width:180px;    padding-top: 5px;    margin-right: 20px;"
+          v-model="queryData.workflowCode"
+          allowClear
         >
-        <StaffSelector
-          style="width: 200px;    display: inline-block;    margin-right: 16px;    margin-bottom: 0;    height: 40px;    position: relative;    top: 5px;"
-          class="workflow-name-input"
-          v-model="queryData.participantName"
-          :options="setMulti2()"
-          :onlyForm="true"
-          :visiblePart="true"
-        >
-        </StaffSelector> -->
-        <!-- <span class="wy_search" @click="seach"> </span> -->
+          <template v-for="item in targetDataItems">
+            <a-select-option :value="item.status" :key="item.status">{{
+              item.name
+            }}</a-select-option>
+          </template>
+        </a-select>
+        <span class="wy_search" @click="seach"> </span>
       </a-form>
-      <!-- <div class="wy_change">
-        <button class="wy_button">新增</button>
-        <button class="wy_button nts">导入</button>
-        <button class="wy_button nts">导出</button>
-      </div> -->
       <div class="wy_table" style="margin-top:20px;"></div>
       <List
         v-if="childrenList"
@@ -130,29 +74,37 @@ export default {
       Tindex: 0,
       sheetDataItem: "",
       targetDataItems: [
+        // {
+        //   name: "上级批示",
+        //   status: "LDPS"
+        // },
+        // {
+        //   name: "实验室主任批示",
+        //   status: "default_1646214214918"
+        // },
+        // {
+        //   name: "日常督办事项",
+        //   status: "RCLC"
+        // },
         {
-          name: "进行中",
-          status: "PROCESSING"
+          name: "实验室年度重点工作",
+          status: "default_1646217559189"
         },
         {
-          name: "已完成",
-          status: "COMPLETED"
-        },
-        {
-          name: "已作废",
-          status: "CANCELED"
-        },
-        {
-          name: "草稿",
-          status: "DRAFT"
+          name: "省年度重点工作",
+          status: "default_1646218936192"
         }
+        // {
+        //   name: "任务办理反馈单",
+        //   status: "RWBL"
+        // }
       ],
       queryData: {
         activityName: "",
         sequenceNo: "",
         workflowName: "",
         participantName: "",
-        workflowCode: "default_1646217559189"
+        workflowCode: ""
       },
       dcdb: [
         {
@@ -161,23 +113,23 @@ export default {
           id: "default_1646217559189",
           num: 0
         },
-        {
-          label: "实验室主任批示",
-          //   id: "ZRPSD"
-          id: "default_1646214214918",
-          num: 0
-        },
-        {
-          label: "日常督办事项",
-          //   id: "DBX"
-          id: "RCLC",
-          num: 0
-        },
-        {
-          label: "上级批示",
-          id: "LDPS",
-          num: 0
-        },
+        // {
+        //   label: "实验室主任批示",
+        //   //   id: "ZRPSD"
+        //   id: "default_1646214214918",
+        //   num: 0
+        // },
+        // {
+        //   label: "日常督办事项",
+        //   //   id: "DBX"
+        //   id: "RCLC",
+        //   num: 0
+        // },
+        // {
+        //   label: "上级批示",
+        //   id: "LDPS",
+        //   num: 0
+        // },
         {
           label: "省年度重点工作",
           //   id: "SRW"
@@ -217,8 +169,9 @@ export default {
         sequenceNo: "",
         workflowName: "",
         participantName: "",
-        workflowCode: this.dcdb[index].id
+        workflowCode: ""
       };
+      //  workflowCode: this.dcdb[index].id
       this.Tindex = index;
       this.$route.params.schemaCode = item.id;
       this.$nextTick(() => {
@@ -264,7 +217,7 @@ export default {
     //   }
     // },
     onparchange() {
-      this.numall();
+      // this.numall();
       // this.getUnfinishedWorkflowItems("default_1646218936192");
       // this.getUnfinishedWorkflowItems("LDPS");
       // this.getUnfinishedWorkflowItems("default_1646214214918");
@@ -273,7 +226,8 @@ export default {
     }
   },
   created() {
-    this.numall();
+    // debugger;
+    // this.numall();
     // this.getUnfinishedWorkflowItems("default_1646218936192");
     // this.getUnfinishedWorkflowItems("LDPS");
     // this.getUnfinishedWorkflowItems("default_1646214214918");
@@ -319,7 +273,8 @@ export default {
   margin-left: 60px;
   margin-right: 60px;
   margin-top: 10px;
-  height: calc(100% - 180px);
+  // height: calc(100% - 180px);
+  height: calc(100% - 40px);
 }
 .wy_tabs {
   border-top: 1px solid #e0e0e0;

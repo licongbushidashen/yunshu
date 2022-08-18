@@ -7,9 +7,9 @@
  *其他自定义配置参数避免以上的命名冲突
  */
 var wyml={
-    wymls:{
-        ID:'913bf547-fda9-4c4d-afb6-ec58ab4e3bf4',
-        secret:'S7NoMjUwMjIwMjIxNTM5NDg3NjgeiZ',
+    wyml:{
+        ID:'ba59c997-fa3a-40fe-b9cf-208d9dbeabc6',
+        secret:'KTWvMjUwMjIwMjIxNTMzMTYyMDE1NF',
         url:'https://onekey.zhejianglab.com/maxkey',
     },
     // 领导组
@@ -34,3 +34,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
         window.wyml = wyml;
     }
 }
+    // localStorage.setItem(
+    //   "token",
+    //   "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiYXBpIl0sImNvcnBJZCI6bnVsbCwidXNlcl9pZCI6IjhhZTQ5Y2MxODAxM2IwODkwMTgwMTNiNDQ1ZmYwMDAxIiwidXNlcl9uYW1lIjoiMDAwODE0Iiwic2NvcGUiOlsicmVhZCJdLCJtb2JpbGUiOmZhbHNlLCJpc0FkbWluIjp0cnVlLCJleHAiOjE2NTU3MTU0OTcsImlzQXBwQWRtaW4iOmZhbHNlLCJhdXRob3JpdGllcyI6WyJVU0VSIiwiQVVUSF9TWVNURU1fTUFOQUdFIl0sImp0aSI6ImI1NzYwNjgyLWViOWEtNDgyMy05ZWU5LWMzZGUzNmMzNWM5NSIsImNsaWVudF9pZCI6ImFwaSJ9.iygx2ep7SvEx716D4f9CrkKrhXZUsoinFQVZwvbp6vZT0e7V-Ovg387NfchqMZ-8zgt1sXJjNuDnNtvzUmi69rSDdBjYhHiCwYOYbgKAD0BxmRopWbff6xaZipB7N0HZpNn3O-HLBQpfvS6sSrtNEXnoS3qjQuPArpEqKfnThLrX_Mj_v8TkuEiP1NaP8OwVmT3wjMvVol-1TacjNKIkInMsHWmNFoALH5PW8sKtxcoYvZ3PolxHileeRqGsMUBtqNBskDyykXI7wRK4DodsLBGtdByyBrUrPfaOshM_Or-ugKnKdS9RPjlm8Uyokhm1YxhAqsyTRXi18-ZNBLHt2w"
+    //               );

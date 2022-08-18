@@ -447,13 +447,24 @@ export default class TabTable extends mixins(WorkItemMixin) {
   openDetail(obj: any) {
     let url: string = ''
     if (this.tabType === 'instance') {
-      url = `/form/detail?workflowInstanceId=${obj.id}&return=${
+     if(( location.pathname + location.search)=='/wyviews/task'){
+        url = `/form/detail?workflowInstanceId=${obj.id}&return=/workflow-center/my-workflow`
+     }else{
+     url = `/form/detail?workflowInstanceId=${obj.id}&return=${
         location.pathname + location.search
       }`
+     }
     } else if (this.tabType === 'task') {
+          if(( location.pathname + location.search)=='/wyviews/task'){
+            url = `/form/detail?workitemId=${obj.id}&workflowInstanceId=${
+        obj.instanceId
+      }&return=/workflow-center/my-workflow`
+     }else{
       url = `/form/detail?workitemId=${obj.id}&workflowInstanceId=${
         obj.instanceId
       }&return=${location.pathname + location.search}`
+     }
+ 
     }
     if (this.isDingTalk) {
       this.$router

@@ -404,7 +404,7 @@ export default class PcFormDetail extends pcForm.runtime.FormDetail {
         operater ? (name = JSON.parse(operater).name) : name;
         window.sessionStorage.setItem("uploadName", name);
         const title = this.formObj.instanceName || this.formObj.bizSheet.name;
-        document.title = `${site.title}-${title}`;
+        document.title = `${title}`;
       }
 
       this.$nextTick(() => {
@@ -675,7 +675,10 @@ export default class PcFormDetail extends pcForm.runtime.FormDetail {
   }
 
   goWfForm(workitemId: string, workflowInstanceId: string, reload?: boolean) {
-    const url = this.$route.query.return as string;
+    let url = this.$route.query.return as string;
+    if (url.indexOf("/wyviews") != -1) {
+      url = "/workflow-center/my-unread-workitem";
+    }
     const params = {
       name: "form-detail",
       query: {

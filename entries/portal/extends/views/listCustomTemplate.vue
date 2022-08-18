@@ -56,6 +56,9 @@
       .table22_3 {
         flex: 1;
       }
+      .table22_4 {
+        width: 140px;
+      }
     }
   }
 }
@@ -709,7 +712,7 @@
               v-else-if="sortKey(col.properties.id)"
               @click="changeSort(row.cols, col.properties)"
             >
-              <label>{{
+              <label v-if="col.properties.vcTitle != '办理截止日期'">{{
                 col.properties.name_i18n
                   ? col.properties.name_i18n[$i18n.locale]
                     ? zhToen[col.properties.name_i18n[$i18n.locale]]
@@ -721,6 +724,7 @@
                     : col.value
                   : col.value
               }}</label>
+              <label v-else>反馈日期</label>
               <div class="head-value-up_down">
                 <a-icon
                   type="caret-up"
@@ -740,7 +744,7 @@
                 />
               </div>
             </div>
-            <label v-else>
+            <label v-else-if="col.properties.vcTitle != '办理截止日期'">
               {{
                 col.properties.name_i18n
                   ? col.properties.name_i18n[$i18n.locale]
@@ -754,6 +758,7 @@
                   : col.value
               }}</label
             >
+            <label v-else>反馈日期</label>
           </div>
         </div>
       </div>
@@ -894,13 +899,13 @@
                 style="    border: 1px solid #abd1b8;    color: #35a85c !important;"
                 >查看详情</span
               > -->
-            <span
+            <!-- <span
               class="dets"
               v-if="col.SFXUFK == '是' && col.properties.id === 'cz'"
               @click="openmel(rowIdx)"
               style="    border: 1px solid #abd1b8;    color: #35a85c !important;width:70px"
               >完成情况
-            </span>
+            </span> -->
 
             <!-- </div> -->
           </div>
@@ -941,7 +946,7 @@
     </div>
     <a-modal
       class="jdwc"
-      title="季度完成情况"
+      title="完成情况"
       :visible="visible"
       @cancel="visible = false"
       width="800px"
@@ -1292,25 +1297,27 @@ export default class listCustomTemplate extends Vue {
           wcjdatas.push(res.head[i]);
         }
       }
-      console.log(wcjdatas, 1111);
-      for (let i = 0; i < res.list.length; i++) {
-        let data = res.list[i];
-        let arr = wcjdatas.map(e => {
-          if (e.id != "id") {
-            if (isNaN(data[e.id]) && !isNaN(Date.parse(data[e.id]))) {
-              if (data[e.id].indexOf("%") == "-1") {
-                let tiem = this.format(data[e.id], "yyyy-MM-dd ");
-                return tiem;
+      if (res.list != null) {
+        for (let i = 0; i < res.list.length; i++) {
+          let data = res.list[i];
+          let arr = wcjdatas.map(e => {
+            if (e.id != "id") {
+              if (isNaN(data[e.id]) && !isNaN(Date.parse(data[e.id]))) {
+                if (data[e.id].indexOf("%") == "-1") {
+                  let tiem = this.format(data[e.id], "yyyy-MM-dd ");
+                  return tiem;
+                } else {
+                  return data[e.id] || "--";
+                }
               } else {
                 return data[e.id] || "--";
               }
-            } else {
-              return data[e.id] || "--";
             }
-          }
-        });
-        wcjdata.push(arr);
+          });
+          wcjdata.push(arr);
+        }
       }
+
       this.wcjdata = wcjdata;
 
       this.wcjdatas = wcjdatas;
@@ -1425,12 +1432,22 @@ export default class listCustomTemplate extends Vue {
     };
     let columns = [];
     for (let i = 0; i < this.columns.length; i++) {
-      if (this.columns[i].id != "createdTime") {
+      debugger;
+      if (this.columns[i].id != "createdTime" && this.columns[i].id != "XHS") {
         columns.push(this.columns[i]);
       }
     }
     if (this.$route.name == "work") {
-      columns = [...columns, dt];
+      if (
+        this.$route.params.schemaCode == "ZRBLD" ||
+        this.$route.params.schemaCode == "FKD" ||
+        this.$route.params.schemaCode == "SJPSD"
+      ) {
+        columns = columns;
+      } else {
+        columns = columns;
+        // columns = [...columns, dt];
+      }
     } else {
       columns = columns;
     }
@@ -1469,19 +1486,19 @@ export default class listCustomTemplate extends Vue {
           columns[i].width = "auto";
           break;
         case "RW":
-          columns[i].width = "15%";
+          columns[i].width = "22%";
           break;
         case "ZRFJ":
-          columns[i].width = "15%";
+          columns[i].width = "22%";
           break;
         case "RWNR":
-          columns[i].width = "15%";
+          columns[i].width = "22%";
           break;
         case "CYJC":
           columns[i].width = "15%";
           break;
         case "cz":
-          columns[i].width = "6%";
+          columns[i].width = "100px";
           break;
         case "__ordinalNo":
           columns[i].width = "40px";
@@ -1508,7 +1525,7 @@ export default class listCustomTemplate extends Vue {
           checked: false,
           additionalClasses: ["table-row", "table-head-row"],
           cols: columns.map(col => ({
-            value: col.vcTitle,
+            value: col.vcTitle == "办理截止日期" ? "反馈日期" : col.vcTitle,
             // NOTE: thead-col 的属性会复制到 tbody-col 上
             properties: this.setOnlyFlag(col),
             additionalClasses: [
@@ -1747,6 +1764,10 @@ export default class listCustomTemplate extends Vue {
                 properties.width = "200px";
                 break;
               case "LY":
+                properties.width = "120px";
+                break;
+
+              case "CBDW_1":
                 properties.width = "200px";
                 break;
               case "JGCD":
@@ -1774,6 +1795,21 @@ export default class listCustomTemplate extends Vue {
               case "JZRQ":
                 properties.width = "145px";
                 style = { "padding-left": "15px" };
+                break;
+              case "JGFK":
+                properties.width = "140px";
+                break;
+              case "BLJZRQ":
+                properties.width = "140px";
+                break;
+              case "XBDW":
+                properties.width = "140px";
+                break;
+              case "BLFJ":
+                properties.width = "220px";
+                break;
+              case "CBDW":
+                properties.width = "120px";
                 break;
               case "RWLY":
                 properties.width = "22%";
@@ -1812,7 +1848,7 @@ export default class listCustomTemplate extends Vue {
                 properties.width = "22%";
                 break;
               case "cz":
-                properties.width = "6%";
+                properties.width = "100px";
                 break;
               case "__ordinalNo":
                 properties.width = "48px";
@@ -1883,7 +1919,6 @@ export default class listCustomTemplate extends Vue {
     let obj: object;
     let res = this.originalTableData[rows];
     workItemId = await this.existWorkItem(res.workflowInstanceId, res.id);
-    console.log(workItemId, 555555555555555);
     this.nodes = await this.getWorkFlowNodes(res.workflowInstanceId);
     if (this.nodes.length > 0) {
       obj = {

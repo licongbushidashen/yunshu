@@ -1,40 +1,34 @@
-import {
-  ControllerConduct,
-  ControlAttributeType,
-} from "@cloudpivot/form/typings";
-import {
-  formatterValueToSetStatus,
-  formatterRequiredFormula,
-} from "@cloudpivot/form/utils";
-import baseAttribute from "@cloudpivot/form/src/common/component-base-attribute";
+import { ControllerConduct, ControlAttributeType } from "@cloudpivot/form/typings"
+import { formatterValueToSetStatus, formatterRequiredFormula } from "@cloudpivot/form/utils"
+import baseAttribute from "@cloudpivot/form/src/common/component-base-attribute"
 export default {
   groups: {
     base: {
       label: "基础信息",
-      keys: ["name", "labelVisible", "visible", "style", "tips", "widgetType"],
+      keys: ["name", "labelVisible", "visible", "style", "tips", "widgetType"]
     },
     controller: {
       label: "控制属性",
-      keys: [],
-    },
+      keys: []
+    }
   },
   properties: {
     name: {
-      ...baseAttribute.name,
+      ...baseAttribute.name
     },
     dataItemName: {
-      ...baseAttribute.dataItemName,
+      ...baseAttribute.dataItemName
     },
     style: {
-      ...baseAttribute.style,
+      ...baseAttribute.style
     },
     widgetType: {
       ...baseAttribute.widgetType,
-      value: "单据号",
+      value: "单据号"
     },
     dataItemType: {
       ...baseAttribute.dataItemType,
-      value: "短文本",
+      value: "短文本"
     },
     // 流水号编码
     prefix: {
@@ -42,10 +36,10 @@ export default {
         regexps: {
           maxLength: {
             len: 200,
-            message: "长度不能超过200字节",
-          },
-        },
-      },
+            message: "长度不能超过200字节"
+          }
+        }
+      }
     },
     // 最大长度
     maxLength: {
@@ -54,34 +48,34 @@ export default {
         list: [
           {
             value: "4",
-            label: "4",
+            label: "4"
           },
           {
             value: "5",
-            label: "5",
+            label: "5"
           },
           {
             value: "6",
-            label: "6",
+            label: "6"
           },
           {
             value: "7",
-            label: "7",
+            label: "7"
           },
           {
             value: "8",
-            label: "8",
+            label: "8"
           },
           {
             value: "9",
-            label: "9",
+            label: "9"
           },
           {
             value: "10",
-            label: "10",
-          },
-        ],
-      },
+            label: "10"
+          }
+        ]
+      }
     },
     // 重置策略时间
     resetDate: {
@@ -90,47 +84,47 @@ export default {
         list: [
           {
             value: "none",
-            label: "不重置",
+            label: "不重置"
           },
           {
             value: "DAY",
-            label: "每天",
+            label: "每天"
           },
           {
             value: "MONTH",
-            label: "每月",
+            label: "每月"
           },
           {
             value: "YEAR",
-            label: "每年",
-          },
-        ],
-      },
+            label: "每年"
+          }
+        ]
+      }
     },
     // 连接符
     delimiter: {
       inputMethod: ControlAttributeType.Dropdown,
       options: {
-        allowClear: true,
+        allowClear: false,
         list: [
           {
             value: "mark1",
-            label: "-",
+            label: "-"
           },
           {
             value: "mark2",
-            label: "#",
+            label: "#"
           },
           {
             value: "mark3",
-            label: "_",
-          },
+            label: "_"
+          }
         ],
         callback: (key: boolean, attr: any, attrs: any, vm: any) => {
-          let val = attr.value || "";
-          vm.updateAttribute(key, "delimiter", val);
-        },
-      },
-    },
-  },
-} as ControllerConduct;
+          let val = attr.value || ""
+          vm.updateAttribute(key, "delimiter", val)
+        }
+      }
+    }
+  }
+} as ControllerConduct

@@ -1,8 +1,6 @@
-
-import { DataItemType } from "@cloudpivot/form/schema";
+import { DataItemType } from "@cloudpivot/form/schema"
 
 export interface DataItem {
-
   id?: string
 
   code: string
@@ -34,23 +32,18 @@ export interface DataItem {
   appFunctionCode?: string
 
   appPackageCode?: string
-
 }
-
 
 /**
  * 数据项操作符
  */
 export interface DataItemOperator {
-
   label: string
 
   value: string
-
 }
 
 export enum DateItemOperatorType {
-
   /**
    * 等于
    */
@@ -129,8 +122,7 @@ export enum DateItemOperatorType {
   /**
    * 不位于
    */
-  NotIn = 16,
-
+  NotIn = 16
 }
 
 /**
@@ -138,29 +130,31 @@ export enum DateItemOperatorType {
  */
 export const logicDataItemOperators = [
   {
-    label: '等于',
+    label: "等于",
     value: DateItemOperatorType.Equal
   }
-];
+]
 
 export const sequenceStatusOperators = [
   {
-    label: '为空',
+    label: "为空",
     value: DateItemOperatorType.IsNull
-  }, {
-    label: '不为空',
+  },
+  {
+    label: "不为空",
     value: DateItemOperatorType.IsNotNull
   },
   {
-    label: '等于',
+    label: "等于",
+    labelOld: "==",
     value: DateItemOperatorType.Equal
   },
   {
-    label: '不等于',
+    label: "不等于",
+    labelOld: "!=",
     value: DateItemOperatorType.NotEqual
   }
-];
-
+]
 
 /**
  * 数值型数据项操作符集合
@@ -168,19 +162,26 @@ export const sequenceStatusOperators = [
 export const numberDataItemOperators = [
   ...sequenceStatusOperators,
   {
-    label: '大于',
+    label: "大于",
+    labelOld: ">",
     value: DateItemOperatorType.GreaterThan
-  }, {
-    label: '小于',
+  },
+  {
+    label: "小于",
+    labelOld: "<",
     value: DateItemOperatorType.LessThan
-  }, {
-    label: '大于等于',
+  },
+  {
+    label: "大于等于",
+    labelOld: ">=",
     value: DateItemOperatorType.GreaterThanOrEqual
-  }, {
-    label: '小于等于',
+  },
+  {
+    label: "小于等于",
+    labelOld: "<=",
     value: DateItemOperatorType.LessThanOrEqual
-  }];
-
+  }
+]
 
 /**
  * 文本型数据项操作符集合
@@ -188,12 +189,13 @@ export const numberDataItemOperators = [
 export const textDataItemOperators = [
   ...sequenceStatusOperators,
   {
-    label: '包含',
+    label: "包含",
     value: DateItemOperatorType.Contains
-  }, {
-    label: '不包含',
-    value: DateItemOperatorType.NotContains
   },
+  {
+    label: "不包含",
+    value: DateItemOperatorType.NotContains
+  }
   //  {
   //   label: '位于',
   //   value: DateItemOperatorType.In
@@ -201,108 +203,125 @@ export const textDataItemOperators = [
   //   label: '不位于',
   //   value: DateItemOperatorType.NotIn
   // }
-];
-
+]
 
 /**
  * 选人数据项操作符集合
  */
 export const staffDataItemOperators = [
   {
-    label: '为空',
+    label: "为空",
     value: DateItemOperatorType.IsNull
-  }, {
-    label: '不为空',
+  },
+  {
+    label: "不为空",
     value: DateItemOperatorType.IsNotNull
   },
   {
-    label: '包含',
+    label: "包含",
     value: DateItemOperatorType.Contains
-  }, {
-    label: '不包含',
+  },
+  {
+    label: "不包含",
     value: DateItemOperatorType.NotContains
-  }, {
-    label: '位于',
+  },
+  {
+    label: "位于",
     value: DateItemOperatorType.In
-  }, {
-    label: '不位于',
+  },
+  {
+    label: "不位于",
     value: DateItemOperatorType.NotIn
-  }, {
-    label: '属于',
+  },
+  {
+    label: "属于",
     value: DateItemOperatorType.Of
-  }, {
-    label: '不属于',
+  },
+  {
+    label: "不属于",
     value: DateItemOperatorType.NotOf
   },
   {
-    label: '拥有',
+    label: "拥有",
     value: DateItemOperatorType.Have
-  }, {
-    label: '不拥有',
+  },
+  {
+    label: "不拥有",
     value: DateItemOperatorType.NotHave
   }
-];
-
+]
 
 /**
  * 关联表单数据项操作符集合
  */
 export const relevanceFormDataItemOperators = [
   {
-    label: '为空',
+    label: "为空",
     value: DateItemOperatorType.IsNull
-  }, {
-    label: '不为空',
+  },
+  {
+    label: "不为空",
     value: DateItemOperatorType.IsNotNull
-  }];
+  }
+]
 
-
-  /**
+/**
  * 长文本型数据项操作符集合
  */
 export const textDataLongItemOperators = [
   ...sequenceStatusOperators,
   {
-    label: '包含',
+    label: "包含",
     value: DateItemOperatorType.Contains
-  }, {
-    label: '不包含',
+  },
+  {
+    label: "不包含",
     value: DateItemOperatorType.NotContains
   }
 ]
 
 export abstract class OperatorService {
-
   static findByLabel(type: DataItemType, label: string) {
-    let operator;
+    let operator
     if (type === DataItemType.Number || type === DataItemType.Date) {
-      operator = numberDataItemOperators.find((o: any) => o.label === label);
+      operator = numberDataItemOperators.find((o: any) => o.label === label || o.labelOld === label)
     } else if (type === DataItemType.Logic) {
-      operator = logicDataItemOperators.find((o: any) => o.label === label);
-    } else if (type === DataItemType.StaffSingle || type === DataItemType.StaffMulti || type === DataItemType.DeptSingle || type === DataItemType.DeptMulti || type === DataItemType.StaffDeptMix) {
-      operator = staffDataItemOperators.find((o: any) => o.label === label);
+      operator = logicDataItemOperators.find((o: any) => o.label === label)
+    } else if (
+      type === DataItemType.StaffSingle ||
+      type === DataItemType.StaffMulti ||
+      type === DataItemType.DeptSingle ||
+      type === DataItemType.DeptMulti ||
+      type === DataItemType.StaffDeptMix
+    ) {
+      operator = staffDataItemOperators.find((o: any) => o.label === label)
     } else if (type === DataItemType.RelevanceForm || type === DataItemType.RelevanceFormEx) {
-      operator = relevanceFormDataItemOperators.find((o: any) => o.label === label);
+      operator = relevanceFormDataItemOperators.find((o: any) => o.label === label)
     } else {
-      operator = textDataItemOperators.find((o: any) => o.label === label);
+      operator = textDataItemOperators.find((o: any) => o.label === label)
     }
-    return operator;
+    return operator
   }
 
   static findByValue(type: DataItemType, value: DateItemOperatorType) {
-    let operator;
+    let operator
     if (type === DataItemType.Number || type === DataItemType.Date) {
-      operator = numberDataItemOperators.find((o: any) => o.value === value);
+      operator = numberDataItemOperators.find((o: any) => o.value === value)
     } else if (type === DataItemType.Logic) {
-      operator = logicDataItemOperators.find((o: any) => o.value === value);
-    } else if (type === DataItemType.StaffSingle || type === DataItemType.StaffMulti || type === DataItemType.DeptSingle || type === DataItemType.DeptMulti || type === DataItemType.StaffDeptMix) {
-      operator = staffDataItemOperators.find((o: any) => o.value === value);
+      operator = logicDataItemOperators.find((o: any) => o.value === value)
+    } else if (
+      type === DataItemType.StaffSingle ||
+      type === DataItemType.StaffMulti ||
+      type === DataItemType.DeptSingle ||
+      type === DataItemType.DeptMulti ||
+      type === DataItemType.StaffDeptMix
+    ) {
+      operator = staffDataItemOperators.find((o: any) => o.value === value)
     } else if (type === DataItemType.RelevanceForm || type === DataItemType.RelevanceFormEx) {
-      operator = relevanceFormDataItemOperators.find((o: any) => o.value === value);
+      operator = relevanceFormDataItemOperators.find((o: any) => o.value === value)
     } else {
-      operator = textDataItemOperators.find((o: any) => o.value === value);
+      operator = textDataItemOperators.find((o: any) => o.value === value)
     }
-    return operator;
+    return operator
   }
-
 }

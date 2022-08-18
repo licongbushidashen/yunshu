@@ -370,8 +370,8 @@ export default class RelevantSelectionMap2 extends Vue {
 
       if (bizTargetArr.length) {
         debugger
-        bizSourceArr = this.currentFieldList.main.filter(x => {
-          return [0,12,13,14,15].includes(x.type) ? ([0,12,14].includes(x.type) ? [0,12,14].includes(bizTargetArr[0].type) : [13,15].includes(bizTargetArr[0].type)) : x
+         bizSourceArr = this.currentFieldList.main.filter(x => {
+          return [12,13,14,15].includes(x.type) ? ([12,14].includes(x.type) ? [12,14].includes(bizTargetArr[0].type) : [13,15].includes(bizTargetArr[0].type)) : x
         });
         this.mappingList.push({
           currentDataItem: undefined,

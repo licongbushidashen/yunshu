@@ -498,7 +498,7 @@ export default class AppList2 extends Vue {
     const records: string = window.localStorage.getItem(this.recordKey) as string;
     this.adaptWidth = !!records;
 
-    document.title = `奥哲云枢-${this.applicationPageTitle}` || "奥哲云枢";
+    document.title = `之江实验室-${this.applicationPageTitle}` || "之江实验室";
 
     this.$message.config({
       maxCount: 1,
@@ -2707,7 +2707,7 @@ export default class AppList2 extends Vue {
 
   @Watch("applicationPageTitle")
   onApplicationPageTitleChange(v: any) {
-    document.title = `奥哲云枢-${v}`;
+    document.title = `之江实验室-${v}`;
   }
 
   @Watch("$route")

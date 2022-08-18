@@ -50,7 +50,10 @@ export default class AppGroupItem extends Vue {
           reportCode: this.code
         }
       }).catch((err: any) => {err});
-    } else if (this.pcUrl) {
+    }else if(this.type === 'Folder'){
+      this.$emit('changeParent')
+    }
+    else if (this.pcUrl) {
       this.pageGo();
     } else {
       this.$message.error('页面地址未设置，请联系管理员！');

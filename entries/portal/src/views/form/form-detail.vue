@@ -1,4 +1,3 @@
-
 <template>
   <div class="form-detail">
     <!-- <form-detail-header v-if="!isNew && !isDraft" :formObj="formObj" :nodes="nodes" @nodesSwitch="nodesSwitch">
@@ -11,21 +10,53 @@
       ></form-actions>
     </form-detail-header> -->
 
-    <form-detail-header-open-in-list :formObj="formObj" @action="onAction" :nodes="nodes" @nodesSwitch="nodesSwitch">
+    <form-detail-header-open-in-list
+      :formObj="formObj"
+      @action="onAction"
+      :nodes="nodes"
+      @nodesSwitch="nodesSwitch"
+    >
       <template slot="h4">
-
         <template v-if="isWorkflowForm">
-          <h4 v-if="isNew">{{$t('languages.common.formTitle.createWorkflow')}}{{formObj.workflowName ? '-' + formObj.workflowName : ''}}</h4>
-          <h4 v-else-if="isDraft">{{$t('languages.common.formTitle.editWorkflow')}}{{formObj.workflowName ? '-' + formObj.workflowName : ''}}</h4>
-          <h4 v-else>{{$t('languages.common.formTitle.viewWorkflow')}}{{formObj.workflowName ? '-' + formObj.workflowName : ''}}</h4>
+          <h4 v-if="isNew">
+            {{ $t("languages.common.formTitle.createWorkflow")
+            }}{{ formObj.workflowName ? "-" + formObj.workflowName : "" }}
+          </h4>
+          <h4 v-else-if="isDraft">
+            {{ $t("languages.common.formTitle.editWorkflow")
+            }}{{ formObj.workflowName ? "-" + formObj.workflowName : "" }}
+          </h4>
+          <h4 v-else>
+            {{ $t("languages.common.formTitle.viewWorkflow")
+            }}{{ formObj.workflowName ? "-" + formObj.workflowName : "" }}
+          </h4>
         </template>
         <template v-else>
-          <h4 v-if="isNew">{{$t('languages.common.formTitle.createForm')}}{{formObj.bizSheet && formObj.bizSheet.name ? '-' + formObj.bizSheet.name : ''}}</h4>
-          <h4 v-else-if="isDraft">{{$t('languages.common.formTitle.editForm')}}{{formObj.bizSheet && formObj.bizSheet.name ? '-' + formObj.bizSheet.name : ''}}</h4>
-          <h4 v-else>{{$t('languages.common.formTitle.viewForm')}}{{formObj.bizSheet && formObj.bizSheet.name ? '-' + formObj.bizSheet.name : ''}}</h4>
+          <h4 v-if="isNew">
+            {{ $t("languages.common.formTitle.createForm")
+            }}{{
+              formObj.bizSheet && formObj.bizSheet.name
+                ? "-" + formObj.bizSheet.name
+                : ""
+            }}
+          </h4>
+          <h4 v-else-if="isDraft">
+            {{ $t("languages.common.formTitle.editForm")
+            }}{{
+              formObj.bizSheet && formObj.bizSheet.name
+                ? "-" + formObj.bizSheet.name
+                : ""
+            }}
+          </h4>
+          <h4 v-else>
+            {{ $t("languages.common.formTitle.viewForm")
+            }}{{
+              formObj.bizSheet && formObj.bizSheet.name
+                ? "-" + formObj.bizSheet.name
+                : ""
+            }}
+          </h4>
         </template>
-
-
       </template>
       <!-- <form-actions
         :actions="actions"
@@ -49,7 +80,7 @@
           />
           <!--渲染控件-->
           <pc-form-renderer
-            :class="{'has-form-border': borderMode}"
+            :class="{ 'has-form-border': borderMode }"
             ref="formRenderer"
             :controls="controls"
             :relevanceDataList="dataModalList"
@@ -88,8 +119,12 @@
 
           <template v-if="isSsubmited && isLoadComment">
             <div class="retract" @click="toggleComment">
-              <img v-if="isShowComment" src="../../assets/icons/shouqi.png" alt="">
-              <img v-else src="../../assets/icons/zhankai.png" alt="">
+              <img
+                v-if="isShowComment"
+                src="../../assets/icons/shouqi.png"
+                alt=""
+              />
+              <img v-else src="../../assets/icons/zhankai.png" alt="" />
             </div>
           </template>
         </div>
@@ -111,7 +146,8 @@
       type="info"
       banner
       closable
-      class="alert-info" />
+      class="alert-info"
+    />
 
     <a-alert
       v-if="showAlertWarn"
@@ -143,11 +179,17 @@
       ></TempPrintHtml>
     </template>
 
-
-    <form-detail-footer  :formObj="formObj" :nodes="nodes" @nodesSwitch="nodesSwitch">
+    <form-detail-footer
+      :formObj="formObj"
+      :nodes="nodes"
+      @nodesSwitch="nodesSwitch"
+    >
       <template slot="isSaveData" v-if="isNew || isDraft">
-        <a-checkbox :checked="isSaveAndCreate" @change="e => isSaveAndCreate = e.target.checked">
-        继续创建时，保留本次提交内容
+        <a-checkbox
+          :checked="isSaveAndCreate"
+          @change="e => (isSaveAndCreate = e.target.checked)"
+        >
+          继续创建时，保留本次提交内容
         </a-checkbox>
       </template>
       <template slot="upAndCreate" v-if="isNew || isDraft">
@@ -217,7 +259,7 @@
 <style lang="less" scoped>
 @import "../../styles/themes/default.less";
 // @import "../../components/apps/form/style";
-/deep/.ant-tabs{
+/deep/.ant-tabs {
   padding-left: 0.5em;
 }
 .form-detail {
@@ -236,7 +278,7 @@
   width: 330px;
   min-width: 330px;
   height: 100%;
-  background: #F4F6FC;
+  background: #f4f6fc;
   padding: 16px 0;
   box-sizing: border-box;
 }
@@ -247,17 +289,17 @@
   height: calc(100% - 64px);
   position: relative;
   min-width: 924px;
-  transition: all ease .5s;
+  transition: all ease 0.5s;
 }
 
 .retract {
   position: absolute;
   right: 0;
   top: 3px;
-  transition: all ease .1s;;
+  transition: all ease 0.1s;
   cursor: pointer;
   & > img {
-    opacity: .6;
+    opacity: 0.6;
     &:hover {
       opacity: 1;
     }
@@ -281,24 +323,25 @@
   overflow: auto;
   flex-grow: 1;
   padding: 20px 0 100px 0;
+  // background: #f0f0f0;
   & > div.form-d-box {
     max-width: 972px;
     margin: 0 auto;
     padding: 0 24px;
   }
-  .approval-record{
+  .approval-record {
     background: #fff;
   }
-  .approval-record-header{
+  .approval-record-header {
     /deep/.ant-collapse-header {
       width: 100%;
-      padding:10px !important;
+      padding: 10px !important;
       color: rgba(0, 0, 0, 0.65);
-      &:hover{
-        background: #EEF3FF;
+      &:hover {
+        background: #eef3ff;
       }
       .ant-collapse-arrow {
-        left: 88px!important;
+        left: 88px !important;
         color: rgba(0, 0, 0, 0.45);
         font-weight: normal;
       }
@@ -363,14 +406,14 @@
   width: 102px;
   min-width: 102px;
   max-width: 102px;
-  &.top{
+  &.top {
     padding-top: 7px;
   }
 }
 
-/deep/.h3-panel-body .ant-row-flex .field__label-div{
+/deep/.h3-panel-body .ant-row-flex .field__label-div {
   width: 100%;
-  flex:none;
+  flex: none;
 }
 
 /deep/.ant-row-flex {

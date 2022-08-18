@@ -400,7 +400,7 @@ export default class RegularModal extends Vue {
     const data = modalData.data;
     const type = modalData.type;
 
-    let items = dataitemStore.getDataItems(this)
+    let items = JSON.parse(JSON.stringify(dataitemStore.getDataItems(this)));
     // let items = dataitemStore.getDataItems(this).filter(x => x.used);
 
     if (this.dataItem.parentCode) {

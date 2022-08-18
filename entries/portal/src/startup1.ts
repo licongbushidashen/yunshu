@@ -9,6 +9,7 @@ import i18n from "./config/i18n";
 import axios from "axios";
 // // 引入自定义指令
 // import directives from './directives';
+import OAuthApi from "@/apis/oauth";
 
 import env from "@/config/env";
 
@@ -94,11 +95,7 @@ export async function startup(environment: any) {
   Vue.prototype.router = router;
 
   router.beforeEach((to: any, from: any, next: any) => {
-    // localStorage.setItem(
-    //   "token",
-    //   "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiYXBpIl0sImNvcnBJZCI6bnVsbCwidXNlcl9pZCI6IjhhZTQ5Y2M0N2YzOTE3MWMwMTdmOTMwMDZlMzczMzNkIiwidXNlcl9uYW1lIjoiMDAwODE0Iiwic2NvcGUiOlsicmVhZCJdLCJtb2JpbGUiOmZhbHNlLCJpc0FkbWluIjp0cnVlLCJleHAiOjE2NDk2NjgyNzIsImlzQXBwQWRtaW4iOmZhbHNlLCJhdXRob3JpdGllcyI6WyJVU0VSIiwiQVVUSF9TWVNURU1fTUFOQUdFIl0sImp0aSI6IjRhMmJiMThhLTViMTMtNDU1OC1iNmMyLThkMTVlMTNiYWM1MiIsImNsaWVudF9pZCI6ImFwaSJ9.QdMLeBzITesARwFbrlVH10vUKOLOTyjwRpvCLhsSeNagdtexUdcxPNAfeqDpys3LvTC4LacAWqVQtgyck6Y4cFliOwzSYjxvYuAvEOP2c2r2hAV9HipHMiS6lEcHH4tSaccFc0NTXxTPEY7uPINbVaIdgwZLmVoN2t_16X9eftm2-6v_SxSITxqt-6OsSSKvP-tZoE_YyKLBLjSAFeT_W70EQ34uCsCV0DBWzL3XZMg8zu_imtKa_sPJC7bZYRX67jxmM5rJ49lImaXA47SJE3ZwcKWy1wb8OQ3hXZG8Q4cxoM6pPLZIm3tesYIPYHisb1xhgXbAddHNKrCmbby1Cw"
-    // );
-    let title = "奥哲云枢";
+    let title = "之江实验室";
     if (to.meta && to.meta.title) {
       title = to.meta.title;
     }
@@ -137,9 +134,71 @@ export async function startup(environment: any) {
         // window.location.href = '/login';
 
         next({ name: "login" });
+        return;
       }
-
-      next();
+      if (to.fullPath.indexOf("wyViewsUser") == -1 && to.fullPath.indexOf("wyviews") == -1) {
+        next();
+        return;
+      }
+      if (localStorage.getItem("wydpet") == "not") {
+        if (to.fullPath.indexOf("wyViewsUser") == -1) {
+          next({ name: "wyViewsUser" });
+          return;
+        } else {
+          next();
+          return;
+        }
+      } else if (localStorage.getItem("wydpet")) {
+        if (to.fullPath.indexOf("wyviews") == -1) {
+          next({ name: "wyviews" });
+          return;
+        } else {
+          next();
+          return;
+        }
+      }
+      if (!localStorage.getItem("wydpet")) {
+        if (!token) {
+          // oauth();
+          next();
+        } else {
+          axios
+            .get(`${env.oauthHost}/api/system/permission/get_apppackage?appCode=DB`, {})
+            // .get(`/api/system/permission/get_apppackage?appCode=DB`, {})
+            .then((res: any) => {
+              if (res.errcode === 0 && res.data) {
+                let data = res.data.permissionGroups;
+                console.log(store);
+                OAuthApi.getUserInfo().then(val => {
+                  let user = val.data;
+                  let wydept;
+                  for (let i = 0; i < data.length; i++) {
+                    if (i > 1) {
+                      break;
+                    } else {
+                      let yh = JSON.parse(data[i].departments);
+                      for (let j = 0; j < yh.length; j++) {
+                        if (yh[j].id == user.id) {
+                          wydept = yh[j].id;
+                        } else if (yh[j].id == user.departmentId) {
+                          wydept = yh[j].id;
+                        }
+                      }
+                      localStorage.setItem("wydpet", wydept ? wydept : "not");
+                    }
+                  }
+                  if (localStorage.getItem("wydpet") && localStorage.getItem("wydpet") != "not") {
+                    next({ name: "wyviews" });
+                  } else {
+                    next({ name: "wyViewsUser" });
+                  }
+                });
+              }
+            });
+        }
+      } else {
+        next();
+      }
     }
   });
 
@@ -149,11 +208,15 @@ export async function startup(environment: any) {
     // const code = "c1875736-8981-49bd-9f99-6b95a8e269d6";
 
     if (!code) {
-      window.location.href = `${
-        window.wyml.wyml.url
-      }/oauth/v20/authorize?response_type=code&client_id=${
-        window.wyml.wyml.ID
-      }&scope=all&redirect_uri=${window.location.href.split("?")[0]}`;
+      localStorage.setItem("copy_link_url_path", window.location.href);
+      if (window.location.href.indexOf("-test") > -1) {
+      } else {
+        window.location.href = `${
+          window.wyml.wyml.url
+        }/oauth/v20/authorize?response_type=code&client_id=${
+          window.wyml.wyml.ID
+        }&scope=all&redirect_uri=${window.location.href}`;
+      }
     } else {
       localStorage.setItem("zj_code", code);
       localStorage.setItem("globalSessionId", globalSessionId);

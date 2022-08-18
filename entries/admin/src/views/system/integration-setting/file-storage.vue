@@ -90,6 +90,8 @@ import systemApi from '@/apis/system/system-manager.api';
 import PasswordSpan from '@/components/global/password-span.vue';
 
 const UserModule = namespace('System/User');
+import OAuthApi from '@/apis/oauth';
+import common from '@cloudpivot/common';
 
 
 @Component({
@@ -256,7 +258,7 @@ export default class FileStorage extends Vue {
   }
 
   // 保持配置数据
-  save() {
+  async save() {
     const vm: any = this;
     if (vm.edit) {
       vm.edit = false;
@@ -265,7 +267,7 @@ export default class FileStorage extends Vue {
     }
 
     const params = this.setParams();
-
+    if (params.ftpConfigVO.ftpPassword) await this.encryptionParams(params)
     systemApi.createdOss(params).then((res: any) => {
       if (res.errcode === 0) {
         vm.$message.success('保存成功!', 2);
@@ -278,9 +280,10 @@ export default class FileStorage extends Vue {
   }
 
   // 连接测试
-  connect() {
+  async connect() {
     const vm: any = this;
     const params:any = vm.setParams();
+    if (params.ftpConfigVO.ftpPassword) await this.encryptionParams(params)
     // params.storageMode = vm.storageType;
     // vm.fileStorage.forEach((res:any) => {
     //   params[res.code] = res.value;
@@ -294,6 +297,21 @@ export default class FileStorage extends Vue {
         vm.$message.error(res.errmsg, 2);
       }
     });
+  }
+
+  async encryptionParams(params) {
+    // rsa加密
+    const result = await OAuthApi.getRsaKey();
+    const flag = typeof result === 'object' && result.hasOwnProperty('index') && result.hasOwnProperty('key');
+    if (!flag) {
+        return;
+    }
+    const { index, key } = result;
+    const passWord = common.utils.RsaEncrypt(params.ftpConfigVO.ftpPassword, key);
+    params.ftpConfigVO.ftpPassword = passWord
+    params['index'] = index
+    params.customized = true
+    // rsa加密结束
   }
 
   handleParam( type: string ): any{

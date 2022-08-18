@@ -2,9 +2,10 @@
   <div id="MyUnfinishedWorkItem" class="workitem-box" ref="workItem">
     <div
       class="content-top"
-      style="position: absolute;    top: -57px;    right: 0px;"
+      style="    position: absolute; top: -59px; right:0px;"
     >
       <h2>
+        <!-- style="position: absolute;    top: -57px;    right: 0px;" -->
         <!-- {{ $t("cloudpivot.flowCenter.pc.todoList") }} -->
         <!-- <span
           class="toggle-batch"
@@ -33,14 +34,22 @@
       </h2>
       <div class="content-right">
         <!-- 批量同意 -->
-        <a-button
+        <!-- <a-button
           v-if="mode == 'batch'"
           :disabled="!batchDisable"
-          @click="batchDialog('batchInfo')"
+          @click="batchDialog('batchInfo', 0)"
         >
           {{ $t("cloudpivot.flowCenter.pc.batchAgree") }}
-        </a-button>
+        </a-button> -->
 
+        <!-- 批量同意 -->
+        <a-button
+          v-if="mode == 'batch'"
+          @click="batchDialog('batchInfo', 1)"
+          style="margin-left:20px"
+        >
+          全部提交
+        </a-button>
         <!-- 批量转办 -->
         <a-button
           style="margin-left: 8px;"
@@ -88,7 +97,8 @@
             <i
               class="icon aufontAll h-icon-all-Batch-processing-2 batch-icon"
               :class="mode == 'batch' ? 'batch-mode' : 'single-mode'"
-            ></i>
+              >批量处理</i
+            >
           </a-tooltip>
           <span class="batch-tip-mask" v-if="mode == 'batch'"></span>
         </div>
@@ -163,9 +173,25 @@
           </template>
 
           <!-- 模板名称 -->
-
+          <!-- 流程类型 -->
+          <span slot="workflowNameTitle">
+            <!-- {{ $t("cloudpivot.flowCenter.pc.flowTemplate") }} -->
+            任务来源
+          </span>
+          <template slot="workflowName" slot-scope="{ text, record }">
+            <span
+              v-if="isChinese"
+              :class="record.isRead ? 'gray text-ellipsis' : 'text-ellipsis'"
+              >{{ text }}</span
+            >
+            <span
+              v-else
+              :class="record.isRead ? 'gray text-ellipsis' : 'text-ellipsis'"
+              >{{ record.name_i18n[$i18n.locale] }}</span
+            >
+          </template>
           <!-- 单据号 -->
-          <span slot="sequenceNoTitle">
+          <!-- <span slot="sequenceNoTitle">
             {{ $t("cloudpivot.flowCenter.pc.sequenceNo") }}
           </span>
           <template slot="sequenceNo" slot-scope="{ text, record }">
@@ -173,7 +199,7 @@
               :class="record.isRead ? 'gray text-ellipsis' : 'text-ellipsis'"
               >{{ text }}</span
             >
-          </template>
+          </template> -->
 
           <!-- 当前节点 -->
           <span slot="activityNameTitle">{{
@@ -559,6 +585,7 @@
 </template>
 
 <script lang="ts">
+import { FormDetailService } from "@cloudpivot/form/src/runtime/services/form-detail-service";
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 
 import { mixins } from "vue-class-component";
@@ -582,7 +609,9 @@ import BatchFailList from "@cloudpivot/flow-center/src/components/pc/components/
 import BatchSuccessInfo from "@cloudpivot/flow-center/src/components/pc/components/modals/batch-success-info.vue";
 import {
   workflowCenterApi,
-  workflowCenter as workflowCenterParams
+  workflowCenter as workflowCenterParams,
+  formApi,
+  workflowApi
 } from "@cloudpivot/api";
 
 import * as WorkflowCenterNS from "@cloudpivot/flow-center/src/components/pc/typings/workflow-center";
@@ -751,7 +780,7 @@ export default class MyUnfinishedWorkItem extends mixins(WorkItemMixin) {
   showBatchFailListModal: boolean = false;
   showBatchSuccessModal: boolean = false;
   failListData: any = {};
-
+  okling: number = 0;
   defaultTableColumns: any = [
     {
       dataIndex: "orderNumber",
@@ -766,7 +795,12 @@ export default class MyUnfinishedWorkItem extends mixins(WorkItemMixin) {
       hSlot: "instanceNameTitle",
       bSlot: "instanceName"
     },
-
+    {
+      dataIndex: "workflowName",
+      width: 220,
+      hSlot: "workflowNameTitle",
+      bSlot: "workflowName"
+    },
     {
       dataIndex: "sequenceNo",
       width: 200,
@@ -940,20 +974,101 @@ export default class MyUnfinishedWorkItem extends mixins(WorkItemMixin) {
     }
     this.reload();
   }
+  falg12: any = 0;
+  falg12List: any = [];
   //批量处理
-  batchDialog(type?) {
+  batchDialog(type?, val?) {
+    debugger;
+    this.falg12 = val;
+    this.showBatchInfoModal = false;
     if (type == "batchInfo") this.showBatchInfoModal = true;
     if (type == "failList") this.showBatchFailListModal = true;
     if (type == "batchSuccess") this.showBatchSuccessModal = true;
   }
   async batchHandle({ remark, resources }) {
-    this.$message.loading("批量处理中,请稍后...", 5);
+    this.$message.loading(`批量处理中,请稍后...`, 5);
     let taskIds = [] as any;
-    this.tableData.forEach(({ checked, id }) => {
-      if (checked) {
-        taskIds.push(id);
+    let ids = [] as any;
+    // 将要修改 workItemTimeoutStatus: "NORMAL"
+
+    if (!this.batchDisable) {
+      this.falg12List.forEach(
+        ({ checked, id, workItemTimeoutStatus, activityCode }, index) => {
+          if (workItemTimeoutStatus === "NORMAL") {
+            ids.push(this.falg12List[index]);
+            // if (activityCode !== "Activity2") {
+            //   taskIds.push(id);
+            // } else if (activityCode === "Activity2") {
+            //   ids.push(this.falg12List[index]);
+            // }
+          }
+        }
+      );
+    } else {
+      this.tableData.forEach(
+        ({ checked, id, workItemTimeoutStatus, activityCode }, index) => {
+          if (checked && workItemTimeoutStatus === "NORMAL") {
+            ids.push(this.tableData[index]);
+            // if (checked && activityCode !== "Activity2") {
+            //   taskIds.push(id);
+            // } else if (checked && activityCode === "Activity2") {
+            //   ids.push(this.tableData[index]);
+            // }
+          }
+        }
+      );
+    }
+    if (ids.length > 0) {
+      this.okling = 1;
+      this.$message.loading({
+        content: `已完成操作 ${this.okling}/${ids.length}`,
+        key: 200
+      });
+      if (this.falg12) {
+        for (let i = ids.length - 1; i >= 0; i--) {
+          this.okling = ids.length - i;
+          this.$message.loading({
+            content: `已完成操作 ${this.okling}/${ids.length}`,
+            key: 200
+          });
+          let obj = {
+            return: ids[i].workflowCode,
+            workflowInstanceId: ids[i].instanceId,
+            workitemId: ids[i].id,
+            isWorkFlow: true,
+            relevanceInfo: { workitemType: ids[i].workflowCode }
+          };
+          let loads = await formApi.load(obj);
+          this.submit(ids[i].deptId, loads.data, remark);
+        }
+      } else {
+        for (let i = 0; i < ids.length; i++) {
+          this.okling = i;
+          this.$message.loading({
+            content: `已完成操作 ${this.okling}/${ids.length}`,
+            key: 200
+          });
+          let obj = {
+            return: ids[i].workflowCode,
+            workflowInstanceId: ids[i].instanceId,
+            workitemId: ids[i].id,
+            isWorkFlow: true,
+            relevanceInfo: { workitemType: ids[i].workflowCode }
+          };
+          let loads = await formApi.load(obj);
+
+          this.submit(ids[i].deptId, loads.data, remark);
+        }
       }
-    });
+    }
+    debugger;
+
+    if (taskIds.length === 0) {
+      this.failListData = { successNum: ids.length };
+      this.batchDialog("batchSuccess");
+      this.$message.destroy();
+      return;
+    }
     const res = await workflowCenterApi.batchUnfinishWorkflow({
       approval: { content: remark, resources },
       taskIds
@@ -961,10 +1076,12 @@ export default class MyUnfinishedWorkItem extends mixins(WorkItemMixin) {
     if (!res) return;
     const { errcode, data } = res;
     this.showBatchInfoModal = false;
-    this.$message.destroy();
     if (errcode === 0 && data.failNum === 0) {
+      data.successNum += ids.length;
       this.failListData = data;
+      this.$message.destroy();
       this.batchDialog("batchSuccess");
+      // this.$message.success("提交成功", 3);
       //this.mode = 'standalone';
       //this.reload();
     } else if (errcode === 0) {
@@ -993,6 +1110,106 @@ export default class MyUnfinishedWorkItem extends mixins(WorkItemMixin) {
       this.isSelectAll = false;
     } else {
       this.isSelectAll = true;
+    }
+  }
+
+  /**
+   * 提交、同意、不同意
+   * @param deptId
+   * @param agree
+   */
+  async submit(deptId: string, dataParams?: any, remark?: any) {
+    // return;
+
+    console.log(dataParams);
+    let data: object = {};
+    data.agree = true;
+    data.actionCode =
+      dataParams.activityCode == "Activity2" ? "submit" : "agree";
+    // data.depatmentId = deptId;
+    data.workItemId = dataParams.workItemId;
+    data.workflowInstanceId = dataParams.workflowInstanceId;
+    data.workflowCode = dataParams.workflowCode;
+    data.bizObject = {
+      sheetCode: dataParams.bizSheet.code,
+      schemaCode: dataParams.bizObject.schemaCode,
+      id: dataParams.bizObject.id,
+      workflowInstanceId: dataParams.workflowInstanceId
+    };
+    if (dataParams.activityCode !== "Activity2") {
+      data.approval = {
+        activityCode: dataParams.activityCode,
+        activityName: dataParams.activityName,
+        workflowInstanceId: dataParams.workflowInstanceId,
+        workflowTokenId: dataParams.workflowTokenId,
+        workItemId: dataParams.workItemId,
+        content: remark,
+        commonSet: false,
+        deleted: false,
+        result: 1,
+        actionType: null,
+        bizObjectId: null,
+        bizPropertyCode: null,
+        commentTime: null,
+        createdBy: null,
+        createdTime: null,
+        creater: null,
+        id: null,
+        lastAttachment: null,
+        modifiedBy: null,
+        modifiedTime: null,
+        relUsers: null,
+        remarks: null,
+        resources: null,
+        schemaCode: null,
+        tokenId: null
+      };
+    }
+
+    // 流程模拟，发起流程时提交处理
+    if (this.$route.query.workflowMock && this.$route.query.startWorkflowCode) {
+      const startWorkflowCode = `${this.$route.query.startWorkflowCode}-mock`;
+      const _preMockData: any = window.sessionStorage.getItem(
+        startWorkflowCode
+      );
+      const mockData = JSON.parse(_preMockData);
+      data.simulative = true;
+      if (mockData && mockData.originator && mockData.originator.length) {
+        data.runMode = mockData.runMode;
+        let isAdmin = false;
+        if (window.sessionStorage.getItem("user")) {
+          // 当前用户为超管的话，在流程模拟时取预设人作为拥有者
+          const user: any = JSON.parse(window.sessionStorage.getItem(
+            "user"
+          ) as string);
+          isAdmin = user.permissions.includes("ADMIN");
+        }
+        if (data.bizObject.data["owner"] && !isAdmin) {
+          // 如果表单设置了拥有者，流程模拟时需将部门清空，后台默认取主部门
+          data.depatmentId = "";
+        } else {
+          // 如果表单未设置拥有者，流程模拟时取预设发起人作为拥有者
+          data.bizObject.data["owner"] = [
+            { id: mockData.originator[0].id, type: 3 }
+          ];
+        }
+      }
+    }
+    // 1流程表单 2非流程表单
+    data.formType = 1;
+    data = FormDetailService.mergeReplayToken(data); // 合并 校验码
+    let vm = this;
+    try {
+      data.bizObject.data = dataParams.bizObject.data;
+      console.log(data, "xxxx");
+      // data.bizObject.data.version = dataParams.workflowVersion;
+      const res: any = await formApi.submit(data, "/api/runtime/form");
+      if (res.errcode === 0) {
+      } else if (res.errcode === 302036) {
+        return this.popErr(res);
+      }
+      return res;
+    } finally {
     }
   }
   /**
@@ -1087,9 +1304,10 @@ export default class MyUnfinishedWorkItem extends mixins(WorkItemMixin) {
           : false,
       page: this.curPage - 1,
       size: this.pageSize,
+      appCode: "DB",
       workItemSource: this.listType === "all" ? undefined : 1
     };
-
+    this.getUnfinishedWorkflowItems1();
     // 数据处理函数
     this.dataHandler = (data: any) => {
       data.forEach((item: any, index: number) => {
@@ -1133,6 +1351,71 @@ export default class MyUnfinishedWorkItem extends mixins(WorkItemMixin) {
     // this.$store.dispatch("WorkflowCenterStore/getWorkCount");
   }
 
+  async getUnfinishedWorkflowItems1(type?: string) {
+    const params = {
+      ...this.searchParams,
+      wd: "", //以前接口需要的参数
+      // workflowName: '',
+      // workflowCode: '',
+      // originator: '',
+      // workflowTplName:'',
+      // appCode: this.appCode,
+      batchOperate:
+        this.mode === "batch"
+          ? this.listType === "all"
+            ? true
+            : false
+          : false,
+      page: this.curPage - 1,
+      size: 10000,
+      appCode: "DB",
+      workItemSource: this.listType === "all" ? undefined : 1
+    };
+
+    // 数据处理函数
+    this.dataHandler = (data: any) => {
+      data.forEach((item: any, index: number) => {
+        item.orderNumber = index + 1;
+        item.key = index;
+        item.hover = false;
+        item.checked = false;
+        item.isRead = item.state === WorkflowCenterNS.WorkItemStatus.INPROGESS;
+        item = this.setTime(item);
+        item.departmentName = WorkflowCenterHelper.departmentNameTranslator(
+          item.departmentName
+        );
+
+        // 设置高亮
+        item.originatorName = utils.searchHighLight(
+          this.wd,
+          item.originatorName
+        );
+        item.instanceName = utils.searchHighLight(
+          this.searchParams.workflowName,
+          item.instanceName
+        );
+
+        // 判断是否为委托任务
+        item.beTrust = item.workItemTrust ? item.workItemTrust.trust : false;
+        // 判断当前用户是否为委托人
+        item.currentTrustor = item.workItemTrust
+          ? item.workItemTrust.currentTrustor
+          : false;
+
+        // 国际化兼容
+        item = utils.compatible(item, "activityName");
+      });
+      return data;
+    };
+
+    this.isLoading = true;
+    const res = await workflowCenterApi.searchWorkitems(params);
+    // this.$emit("onparchange", "");
+    // this.commonHandler(res, type);
+    this.falg12List = res.data.content || [];
+    // this.$store.dispatch("WorkflowCenterStore/getWorkCount");
+  }
+
   @Watch("$i18n.locale")
   onLanguageChange() {
     this.tableData.forEach((item: any) => {
@@ -1157,6 +1440,13 @@ export default class MyUnfinishedWorkItem extends mixins(WorkItemMixin) {
 }
 </style>
 <style lang="less" scoped>
+.h-icon-all-Batch-processing-2 {
+  font-size: 14px !important;
+}
+.h-icon-all-Batch-processing-2::before {
+  content: "\E727";
+  margin-right: 4px;
+}
 /deep/.wy_select {
   height: calc(100% - 150px) !important;
 }

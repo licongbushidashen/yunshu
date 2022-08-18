@@ -478,7 +478,7 @@ export default class FormDetailFppter extends Vue {
     // border-right: 1px solid rgba(217, 217, 217, 1);
     flex-grow: 1;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
 
     a.aback {
       font-size: 18px;

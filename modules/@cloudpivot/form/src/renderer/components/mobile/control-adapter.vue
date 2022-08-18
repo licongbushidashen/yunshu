@@ -30,7 +30,7 @@
       <span>{{label}}</span>
       <div class="right" >
         <span @click="showActionSheet=true">
-          {{control.op === 'eq' ? '等于' : '不等于'}}
+         {{control.op === 'NotEq' ? '不等于' : '等于'}}
           <template v-if="showActionSheet">
             <i class="icon aufontAll h-icon-all-down-o"></i>
           </template>

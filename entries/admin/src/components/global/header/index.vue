@@ -8,10 +8,15 @@
       <span>{{ tipText }}</span>
     </div>
     <!-- 右侧静态模块 -->
-    <div v-if="!hiddenRight.includes(currentHeader)" class="header-right flex-justify-between">
+    <div
+      v-if="!hiddenRight.includes(currentHeader)"
+      class="header-right flex-justify-between"
+    >
       <!-- <span class="market-entrance" @click="onRouteToMarket" v-if="marketPortalSwitch">应用市场</span> -->
       <a-tooltip placement="topLeft">
-        <template slot="title">帮助中心</template>
+        <template slot="title"
+          >帮助中心</template
+        >
         <div>
           <a href="https://www.yuque.com/skwme4" target="_blank">
             <img src="@/assets/images/question-circle-o.svg" />
@@ -22,7 +27,10 @@
         <a-dropdown :trigger="['click']">
           <a class="ant-dropdown-link">
             <a-avatar
-              v-if="loginedUserInfo.imgUrl && loginedUserInfo.imgUrl.includes('http')"
+              v-if="
+                loginedUserInfo.imgUrl &&
+                  loginedUserInfo.imgUrl.includes('http')
+              "
               :src="loginedUserInfo.imgUrl"
             />
             <a-avatar
@@ -30,7 +38,10 @@
               :src="getDownloadUrl(loginedUserInfo.imgUrl)"
             />
             <!-- <a-avatar v-if="loginedUserInfo.imgUrl" :src="loginedUserInfo.imgUrl"></a-avatar> -->
-            <i v-else class="icon aufontAll h-icon-all-normal_smile default-avatar"></i>
+            <i
+              v-else
+              class="icon aufontAll h-icon-all-normal_smile default-avatar"
+            ></i>
             <span class="login-name">{{ loginedUserInfo.name }}</span>
             <i class="icon aufontAll h-icon-all-down-o" />
           </a>
@@ -43,7 +54,9 @@
             <a-menu-item>
               <a @click="toProtal">
                 <i class="icon aufontAll h-icon-all-warehouse-o"></i>
-                <span class="header-menu-content">{{ $t('languages.PortalManager') }}</span>
+                <span class="header-menu-content">{{
+                  $t("languages.PortalManager")
+                }}</span>
               </a>
             </a-menu-item>
             <!-- <a-menu-item>
@@ -56,14 +69,18 @@
             <a-menu-item v-if="loginedUserInfo.username === 'admin'">
               <a @click="changePwd">
                 <i class="icon aufontAll h-icon-all-form-o"></i>
-                <span class="header-menu-content">{{ $t('languages.ChangePwd') }}</span>
+                <span class="header-menu-content">{{
+                  $t("languages.ChangePwd")
+                }}</span>
               </a>
             </a-menu-item>
 
             <a-menu-item v-if="isShowToggleLanguage">
               <a @click="toggleLanguage" class="toggle-lang">
                 <i class="icon aufontAll h-icon-all-swap-o"></i>
-                <span class="header-menu-content">{{ $t('languages.Switch') }}</span>
+                <span class="header-menu-content">{{
+                  $t("languages.Switch")
+                }}</span>
                 <span :class="$i18n.locale === 'zh' ? 'active' : ''">中</span> /
                 <span :class="$i18n.locale === 'en' ? 'active' : ''">En</span>
               </a>
@@ -71,7 +88,9 @@
             <a-menu-item>
               <a @click="exit">
                 <i class="icon aufontAll h-icon-all-logout-o"></i>
-                <span class="header-menu-content">{{ $t('languages.Exit') }}</span>
+                <span class="header-menu-content">{{
+                  $t("languages.Exit")
+                }}</span>
               </a>
             </a-menu-item>
           </a-menu>
@@ -102,16 +121,26 @@
       <div class="i18n-tips_content">
         <header>
           <i class="icon aufontAll h-icon-all-exclamation-circle-o" />
-          <span>已切换到【{{ $i18n.locale === 'zh' ? '中文' : '英文' }}模式】</span>
+          <span
+            >已切换到【{{ $i18n.locale === "zh" ? "中文" : "英文" }}模式】</span
+          >
         </header>
         <article>
-          <aside>应用名称、应用下的分组名称、模型名称、模型设计区名称（包括表单控件名称、流程节点名称、流程名称、表单名称、列表展示字段、查询条件名称、操作按钮名称等）</aside>
-          <p>以上设置在编辑后将保存为{{ $i18n.locale === 'zh' ? '中文' : '英文' }}名称</p>
+          <aside>
+            应用名称、应用下的分组名称、模型名称、模型设计区名称（包括表单控件名称、流程节点名称、流程名称、表单名称、列表展示字段、查询条件名称、操作按钮名称等）
+          </aside>
+          <p>
+            以上设置在编辑后将保存为{{
+              $i18n.locale === "zh" ? "中文" : "英文"
+            }}名称
+          </p>
         </article>
       </div>
       <img class="i18n-tips_gif" src="@/assets/images/i18n-guide.gif" />
       <div class="i18n-tips_button">
-        <a-button type="primary" @click="handleClose">{{ $t('languages.Apps.DeleteOk') }}</a-button>
+        <a-button type="primary" @click="handleClose">{{
+          $t("languages.Apps.DeleteOk")
+        }}</a-button>
       </div>
     </a-modal>
 
@@ -120,6 +149,7 @@
 </template>
 
 <script lang="ts">
+import axios from "axios";
 import { Component, Vue, Watch } from "vue-property-decorator";
 import { State, namespace, Action } from "vuex-class";
 import * as OrgApi from "@/apis/organization";
@@ -171,17 +201,19 @@ export default class HeaderBar extends Vue {
 
   tipMsg: string = "";
 
-  hiddenRight:string[] = ['WorkflowMockHeader'];
+  hiddenRight: string[] = ["WorkflowMockHeader"];
 
-  marketPortalSwitch: boolean = true;  //应用市场入口配置开关
+  marketPortalSwitch: boolean = true; //应用市场入口配置开关
 
   get isShowToggleLanguage() {
     return this.$store.state.config.multiLanguageSwitch;
   }
 
-  get tipText(){
+  get tipText() {
     const licenseDate = this.licenseDate;
-    return licenseDate <= 0 ? `您的License已过有效期，请联系管理员续期` : `您的license有效期剩余${licenseDate}天， 请联系管理员续期！`
+    return licenseDate <= 0
+      ? `您的License已过有效期，请联系管理员续期`
+      : `您的license有效期剩余${licenseDate}天， 请联系管理员续期！`;
   }
 
   mounted() {
@@ -190,9 +222,12 @@ export default class HeaderBar extends Vue {
     this.watchLocalLangChange();
     //获取应用市场入口配置开关
     let windowConfig = (window as any).config;
-    console.log('windowConfig',windowConfig);
+    console.log("windowConfig", windowConfig);
     //应用市场开关默认为开启状态
-    if (windowConfig.marketPortalSwitch === false || windowConfig.marketPortalSwitch === 'false'){
+    if (
+      windowConfig.marketPortalSwitch === false ||
+      windowConfig.marketPortalSwitch === "false"
+    ) {
       this.marketPortalSwitch = false;
     }
   }
@@ -227,8 +262,7 @@ export default class HeaderBar extends Vue {
   }
 
   // 查看个人信息
-  userDetail() {
-  }
+  userDetail() {}
 
   // 跳转到门户
   toProtal() {
@@ -278,30 +312,76 @@ export default class HeaderBar extends Vue {
     OAuthApi.logout({
       redirect_uri: redirectUrl,
       T: this.token as string
-      })
-      .then((res: any) => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("expireTime");
-        sessionStorage.removeItem("user");
-        localStorage.removeItem('syncTaskId');
-         localStorage.removeItem('orgPartSync');
+    }).then((res: any) => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("expireTime");
+      sessionStorage.removeItem("user");
+      localStorage.removeItem("syncTaskId");
+      localStorage.removeItem("orgPartSync");
+      let oauthst = window.location.href;
+      if (oauthst.indexOf("-test") > -1) {
+        window.wyml = {
+          wyml: {
+            ID: "913bf547-fda9-4c4d-afb6-ec58ab4e3bf4",
+            secret: "S7NoMjUwMjIwMjIxNTM5NDg3NjgeiZ",
+            url: "https://onekey-test.zhejianglab.com/maxkey"
+          },
+          // 领导组
+          ldroleId: "督办领导组(勿删勿改)",
+          // 督查督办管理员
+          glyId: "督办管理员(勿删勿改)"
+        };
+      } else {
+        window.wyml = {
+          wyml: {
+            ID: "ba59c997-fa3a-40fe-b9cf-208d9dbeabc6",
+            secret: "KTWvMjUwMjIwMjIxNTMzMTYyMDE1NF",
+            url: "https://onekey.zhejianglab.com/maxkey"
+          },
+          // 领导组
+          ldroleId: "督办领导组(勿删勿改)",
+          // 督查督办管理员
+          glyId: "督办管理员(勿删勿改)"
+        };
+      }
+      if (window.location.href.indexOf("test") == -1) {
+        axios
+          .post(
+            `/maxkey/maxkey/authz/cas/logout/${
+              window.wyml.wyml.ID
+            }?globalSessionId=${localStorage.getItem("globalSessionId")}`
+          )
+          .then(res => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("wydpet");
+            localStorage.removeItem("refresh_token");
+            localStorage.removeItem("expireTime");
+            sessionStorage.removeItem("user");
+            window.location.href = `${
+              window.wyml.wyml.url
+            }/oauth/v20/authorize?response_type=code&client_id=${
+              window.wyml.wyml.ID
+            }&scope=all&redirect_uri=${window.location.href.split("?")[0]}`;
+          });
+      } else {
         window.location.href = redirectUrl;
-    })
+      }
+    });
   }
 
-   get apiHost(){
-    return (window as any).config.apiHost
+  get apiHost() {
+    return (window as any).config.apiHost;
   }
 
-  get token(){
-    return window.localStorage.getItem('token');
+  get token() {
+    return window.localStorage.getItem("token");
   }
 
-  getDownloadUrl(refId:string){
+  getDownloadUrl(refId: string) {
     let url = `${this.apiHost}/api/aliyun/download?refId=${refId}`;
-    if(this.token){
-      url += '&T=' + this.token;
+    if (this.token) {
+      url += "&T=" + this.token;
     }
     return url;
   }
@@ -365,10 +445,10 @@ export default class HeaderBar extends Vue {
   /**
    * 跳转至应用市场首页
    */
-  onRouteToMarket(){
+  onRouteToMarket() {
     let windowConfig = (window as any).config;
-    console.log('windowConfig',windowConfig);
-    if(!windowConfig.marketPortalHost){
+    console.log("windowConfig", windowConfig);
+    if (!windowConfig.marketPortalHost) {
       return;
     }
     console.log(windowConfig.marketPortalHost);
@@ -377,7 +457,7 @@ export default class HeaderBar extends Vue {
 }
 </script>
 
-<style lang="less" scoped >
+<style lang="less" scoped>
 .header-top {
   background: #052535;
   & > div {
@@ -392,12 +472,12 @@ export default class HeaderBar extends Vue {
     position: absolute;
     top: 0;
     right: 24px;
-    .market-entrance{
+    .market-entrance {
       color: #fff;
       cursor: pointer;
     }
-    .market-entrance:hover{
-      color: #17BC94;
+    .market-entrance:hover {
+      color: #17bc94;
     }
     & > div {
       margin-left: 24px;
@@ -420,10 +500,10 @@ export default class HeaderBar extends Vue {
         line-height: 32px;
         color: #7165ff;
       }
-      & .login-name{
-      color:#fff;
-      font-size: 14px;
-      margin-left: 12px;
+      & .login-name {
+        color: #fff;
+        font-size: 14px;
+        margin-left: 12px;
       }
     }
   }

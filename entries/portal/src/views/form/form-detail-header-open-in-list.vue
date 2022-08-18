@@ -1,18 +1,39 @@
 <template>
   <div class="header">
     <div>
-      <div class="header-left">
+      <div class="header-left" :style="isInIframe ? '' : 'width: 100%;'">
         <a v-if="isDingTalk" class="aback" @click="back">返回</a>
-        <!-- <img class="logo" :src="logo" @click="goHome" /> -->
-
-        <slot name="h4" />
+        <img v-if="!isInIframe" class="logo" :src="logo" @click="goHome" />
+        <ul class="wy_home_to" v-if="!isInIframe">
+          <li>
+            <a href="https://portal.zhejianglab.com/portal/index">首页</a>
+          </li>
+          <li>
+            <a href="https://portal.zhejianglab.com/portal/service">服务大厅</a>
+          </li>
+          <li>
+            <a href="https://portal.zhejianglab.com/portal/task">任务中心</a>
+          </li>
+          <li style="width:20px"><span class="wyicon"></span></li>
+          <li>
+            <span class="wydl"
+              ><a
+                href="https://portal.zhejianglab.com/oa/home"
+                style="font-size:13px"
+              >
+                欢迎登录</a
+              ></span
+            >
+          </li>
+        </ul>
+        <slot name="h4" v-if="isInIframe" />
         <!-- <h4>发起流程</h4> -->
 
         <a v-if="isDingTalk" class="open-blank" @click.prevent="openBlank"
           >在浏览器中打开</a
         >
 
-        <div class="header-dropdown" v-if="nodes.length > 0">
+        <div class="header-dropdown" v-if="nodes.length > 0 && isInIframe">
           <a-dropdown :trigger="['click']">
             <div>
               <span>{{ activeNodes }}</span>
@@ -54,7 +75,7 @@
           @mouseover="showBigQrcode = true"
           @mouseout="showBigQrcode = false"
           @click.stop="showBigQrcode = true"
-          v-if="!isEl && ['DINGTALK','WECHAT'].includes(relatedType)"
+          v-if="!isEl && ['DINGTALK', 'WECHAT'].includes(relatedType)"
           class="qrcode"
         >
           <!--<img  @click.stop="showBigQrcode = !showBigQrcode" src="~@/assets/images/qrcode-icon.png"/>-->
@@ -71,8 +92,10 @@
           </div>
         </div>
 
-        <div @click="copyURL">
-          <span><a-icon type="link" />{{ $t("cloudpivot.list.pc.CopyLink") }}</span>
+        <div @click="copyURL" v-if="isInIframe">
+          <span
+            ><a-icon type="link" />{{ $t("cloudpivot.list.pc.CopyLink") }}</span
+          >
         </div>
 
         <div @click.prevent="openBlank" v-if="isInIframe">
@@ -91,7 +114,6 @@
     <slot></slot>
   </div>
 </template>
-
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
@@ -114,8 +136,8 @@ import OAuthApi from "@/apis/oauth";
     ADropdown: Dropdown,
     AMenu: Menu,
     AMenuItem: Menu.Item,
-    AIcon: Icon,
-  },
+    AIcon: Icon
+  }
 })
 export default class FormDetailHeader extends Vue {
   @Getter("getAntLocale") locale!: string;
@@ -143,7 +165,6 @@ export default class FormDetailHeader extends Vue {
     return !!(window as any).externalLinkToken;
   }
 
-
   async getUserInfo() {
     const res = await OAuthApi.getUserInfo();
     if (res.errcode === 0) {
@@ -155,25 +176,26 @@ export default class FormDetailHeader extends Vue {
 
   // 跳转到首页
   goHome() {
-    const appCode = (window as any).Environment
-      ? (window as any).Environment.appCode
-      : null;
-    if (appCode) {
-      this.$router
-        .push({
-          name: "singleApp",
-          params: {
-            appCode,
-          },
-        })
-        .catch((err: any) => {
-          err;
-        });
-    } else {
-      this.$router.push({ name: "myUnfinishedWorkItem" }).catch((err: any) => {
-        err;
-      });
-    }
+    window.location.href = "https://portal.zhejianglab.com/oa/home";
+    // const appCode = (window as any).Environment
+    //   ? (window as any).Environment.appCode
+    //   : null;
+    // if (appCode) {
+    //   this.$router
+    //     .push({
+    //       name: "singleApp",
+    //       params: {
+    //         appCode
+    //       }
+    //     })
+    //     .catch((err: any) => {
+    //       err;
+    //     });
+    // } else {
+    //   this.$router.push({ name: "myUnfinishedWorkItem" }).catch((err: any) => {
+    //     err;
+    //   });
+    // }
   }
 
   isAdd = false;
@@ -184,7 +206,7 @@ export default class FormDetailHeader extends Vue {
       disabled: false,
       loading: false,
       text: "表单留痕",
-      visible: true,
+      visible: true
     });
   }
 
@@ -193,7 +215,7 @@ export default class FormDetailHeader extends Vue {
     if (url) {
       this.$router
         .push({
-          path: url,
+          path: url
         })
         .catch((err: any) => {
           err;
@@ -289,7 +311,6 @@ export default class FormDetailHeader extends Vue {
 
     const parent = window.parent;
     parent.open(url, "_blank");
-
   }
 
   // get url() {
@@ -310,7 +331,7 @@ export default class FormDetailHeader extends Vue {
   }
 
   get activeNodes() {
-    const theNode = this.nodes.find((res) => res.selected);
+    const theNode = this.nodes.find(res => res.selected);
     if (theNode) {
       return theNode.activityName;
     }
@@ -371,8 +392,15 @@ export default class FormDetailHeader extends Vue {
     // this.showTrack= (this.formObj.bizObject.loadedFromDb && this.formObj.formPermission.actionPermission.formTrack) ? true : false ;
   }
 
-  get showTrack(){
-    return (this.formObj && this.formObj.bizObject && this.formObj.formPermission && this.formObj.formPermission.actionPermission && this.formObj.bizObject.loadedFromDb && this.formObj.formPermission.actionPermission.formTrack) ? true : false ;
+  get showTrack() {
+    return this.formObj &&
+      this.formObj.bizObject &&
+      this.formObj.formPermission &&
+      this.formObj.formPermission.actionPermission &&
+      this.formObj.bizObject.loadedFromDb &&
+      this.formObj.formPermission.actionPermission.formTrack
+      ? true
+      : false;
   }
 
   mounted() {
@@ -388,7 +416,7 @@ export default class FormDetailHeader extends Vue {
 
   relatedType: string = "";
   @Watch("formObj", {
-    immediate: true,
+    immediate: true
   })
   onFormObjChange(formObj: any) {
     if (!formObj.bizSheet) return;
@@ -409,7 +437,7 @@ export default class FormDetailHeader extends Vue {
       corpId: user.corpId,
       agentId: user.agentId,
       mobileServerUrl: user.mobileServerUrl,
-      relatedType: user.relatedType,
+      relatedType: user.relatedType
     };
     // const { config } = this.$store.state;
 
@@ -423,7 +451,7 @@ export default class FormDetailHeader extends Vue {
 
     const { relatedType } = config;
 
-    this.relatedType = relatedType
+    this.relatedType = relatedType;
 
     this.isAdd = loadedFromDb;
 
@@ -433,13 +461,17 @@ export default class FormDetailHeader extends Vue {
       // 流程表单
       if (workflowInstanceId && workItemId) {
         // 新增
-        signinUrl = `${config.mobileServerUrl}/?workflowInstanceId=${workflowInstanceId}&workItemId=${workItemId}&corpId=${corpId}&agentId=${agentId}&mode=form`;
+        signinUrl = `${
+          config.mobileServerUrl
+        }/?workflowInstanceId=${workflowInstanceId}&workItemId=${workItemId}&corpId=${corpId}&agentId=${agentId}&mode=form`;
         if (this.nodes.length > 0) {
           signinUrl += "&isWorkFlow=true";
         }
       } else {
         // 业务表单
-        signinUrl = `${config.mobileServerUrl}/?corpId=${corpId}&agentId=${agentId}&schemaCode=${schemaCode}&sheetCode=${sheetCode}&id=${id}&mode=form`;
+        signinUrl = `${
+          config.mobileServerUrl
+        }/?corpId=${corpId}&agentId=${agentId}&schemaCode=${schemaCode}&sheetCode=${sheetCode}&id=${id}&mode=form`;
       }
 
       // signinUrl =`${config.mobileServerUrl}/?workflowInstanceId=${workflowInstanceId}&workItemId=${workItemId}&id=${id}&schemaCode=${schemaCode}&sheetCode=${sheetCode}&corpId=${corpId}&agentId=${agentId}`;
@@ -449,10 +481,14 @@ export default class FormDetailHeader extends Vue {
 
       if (workflowCode) {
         // 发起流程
-        signinUrl = `${config.mobileServerUrl}/?workflowCode=${workflowCode}&corpId=${corpId}&agentId=${agentId}&mode=form`;
+        signinUrl = `${
+          config.mobileServerUrl
+        }/?workflowCode=${workflowCode}&corpId=${corpId}&agentId=${agentId}&mode=form`;
       } else {
         // 新增业务表单
-        signinUrl = `${config.mobileServerUrl}/?corpId=${corpId}&agentId=${agentId}&schemaCode=${schemaCode}&sheetCode=${sheetCode}&mode=form`;
+        signinUrl = `${
+          config.mobileServerUrl
+        }/?corpId=${corpId}&agentId=${agentId}&schemaCode=${schemaCode}&sheetCode=${sheetCode}&mode=form`;
       }
       // signinUrl =`${config.mobileServerUrl}/?workflowInstanceId=${workflowInstanceId}&workItemId=${workItemId}&schemaCode=${schemaCode}&sheetCode=${sheetCode}&corpId=${corpId}&agentId=${agentId}`;
     }
@@ -481,7 +517,6 @@ export default class FormDetailHeader extends Vue {
   }
 }
 </script>
-
 
 <style lang="less" scoped>
 @import "~@/styles/themes/default.less";
@@ -566,7 +601,8 @@ export default class FormDetailHeader extends Vue {
   }
   img.logo {
     cursor: pointer;
-    max-height: 30px !important;
+    max-height: 35px !important;
+    margin-left: 24%;
   }
 
   & > div:first-child {
@@ -600,6 +636,49 @@ export default class FormDetailHeader extends Vue {
   &.a-menu-item-active {
     background: rgba(240, 247, 255, 1);
     font-weight: 600;
+  }
+}
+.wy_home_to {
+  margin: 0 auto;
+  width: 50%;
+  min-height: 64px;
+  position: relative;
+  left: 0;
+  float: right;
+  margin-right: 0px;
+  li {
+    display: inline;
+    padding-top: 20px;
+    width: 15%;
+    float: left;
+    text-align: center;
+    .wyicon {
+      background: url("./wyicon.png");
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      position: relative;
+      top: 1px;
+    }
+    .wydl {
+      position: relative;
+    }
+    .wydl::before {
+      content: "";
+      display: inline-block;
+      height: 42px;
+      width: 1px;
+      position: absolute;
+      top: -10px;
+      left: -20px;
+      background: #e1e1e1;
+    }
+    a {
+      color: rgb(34, 34, 34);
+      text-align: center;
+      font-size: 15px;
+      font-family: 微软雅黑;
+    }
   }
 }
 </style>

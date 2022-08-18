@@ -649,24 +649,31 @@ export abstract class FormDetail extends Vue {
     if (user) {
       user = JSON.parse(user)
     }
-    if (isNew || (this.inEdit && !isWorkflow)) {
-      const modifier = {
-        departmentId: user.departmentId,
-        departments: user.departments,
-        excelType: user.excelType,
-        id: user.id,
-        imgUrl: user.imgUrl,
-        name: user.name,
-        parentId: user.parentId,
-        type: user.type,
-        unitType: user.unitType
-      }
-      res.data.bizObject.data = Object.assign(res.data.bizObject.data, {
-        modifier: [modifier],
-        createdTime: res.data.bizObject.data.createdTime ? res.data.bizObject.data.createdTime : dateFormatter(new Date(), "YYYY-MM-DD"),
-        modifiedTime: res.data.bizObject.data.modifiedTime ? res.data.bizObject.data.modifiedTime : dateFormatter(new Date(), "YYYY-MM-DD")
-      })
-    }
+    // if (isNew || (this.inEdit && !isWorkflow)) {
+    //   const modifier = {
+    //     departmentId: user.departmentId,
+    //     departments: user.departments,
+    //     excelType: user.excelType,
+    //     id: user.id,
+    //     imgUrl: user.imgUrl,
+    //     name: user.name,
+    //     parentId: user.parentId,
+    //     type: user.type,
+    //     unitType: user.unitType
+    //   };
+    //   res.data.bizObject.data = Object.assign(res.data.bizObject.data, {
+    //     modifier: [modifier],
+    //     createdTime: res.data.bizObject.data.createdTime ? res.data.bizObject.data.createdTime : dateFormatter(new Date(), 'YYYY-MM-DD'),
+    //     modifiedTime: res.data.bizObject.data.modifiedTime ? res.data.bizObject.data.modifiedTime : dateFormatter(new Date(), 'YYYY-MM-DD')
+    //   });
+    // }
+    // #46531 由于缺少后端缺少默认时间导致创建时间的显示条件不生效
+    res.data.bizObject.data = Object.assign(res.data.bizObject.data, {
+      createdTime: res.data.bizObject.data.createdTime
+        ? res.data.bizObject.data.createdTime
+        : dateFormatter(new Date(), "YYYY-MM-DD HH:mm:ss")
+    })
+
     const jsonPublished: any = JSON.parse(res.data.bizSheet.publishedAttributesJson)
     const changePublishJson: any = this.handleChangePublishJson(res.data.bizSchema, jsonPublished)
     this.stringToBoolean(changePublishJson)
@@ -696,7 +703,16 @@ export abstract class FormDetail extends Vue {
     console.log("formData =>", formData)
     const formDefine = this.formObj.bizSheet
     const actionObj = this.formObj.formPermission.actionPermission
-    this.actions = this.getActions(Object.assign({}, actionObj))
+
+    debugger
+    let vas = true
+    let actives = ["LDPS", "ZRPSD", "DBX", "FKD", "ZRBLD", "SJPSD"]
+    if (actives.indexOf(this.formObj.bizSchema.code) > -1) {
+      actionObj.save = false
+      vas = false
+    }
+    this.actions = this.getActions(Object.assign({}, actionObj), vas)
+
     // 1自定义表单
     if (formDefine.sheetType === 1) {
       await this.loadCustomForm(formDefine.pcUrl)
@@ -3006,7 +3022,7 @@ export abstract class FormDetail extends Vue {
                 } catch {}
               } else if (v[e] && Array.isArray(v[e])) {
                 v[e] = v[e].map((g: any) => {
-                  if (g.marked === true || g.marked === false) {
+                  if (g && (g.marked === true || g.marked === false)) {
                     g = g.value
                   }
                   return g
@@ -3315,7 +3331,7 @@ export abstract class FormDetail extends Vue {
           params.workflowInstanceId = this.formObj.workflowInstanceId
         }
         //如果没有流程id就不请求
-        if (params.workflowInstanceId) {
+        if (params.workflowInstanceId || this.$route.query.startWorkflowCode) {
           const res = await workflowApi.getTrustOriginatorList(params)
           if (!res.errcode && Array.isArray(res.data)) {
             trustList = res.data
@@ -3649,8 +3665,8 @@ export abstract class FormDetail extends Vue {
           nodeName: res.data.nodeName
         }).toString()
         break
-      default:
-        msg = defaultMsg || res.errmsg //this.$t('languages.common.tip.operationFail').toString();
+      default: //this.$t('languages.common.tip.operationFail').toString();
+        msg = defaultMsg || res.errmsg
         break
     }
     // 重复提交不获取 校验码,否则需要重新获取校验码

@@ -182,10 +182,11 @@ export default class Login extends Vue {
   async mounted() {
     // 获取环境配置
     localStorage.removeItem("token");
+    localStorage.removeItem("wydpet");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("expireTime");
     const config = await OAuthApi.getSystemConfig();
-
+    ``;
     // const config = {"pcServerUrl":"http://120.24.79.179",
     // "ssoServerUrl":"http://47.106.239.118/api/login",
     // "adminServerUrl":"http://47.106.239.118/admin",

@@ -5,14 +5,14 @@ import App from "./App.vue";
 import routes from "./routes";
 import store from "./store";
 import i18n from "./config/i18n";
-
 import * as platform from "@cloudpivot/platform";
 import { formApi } from "@cloudpivot/api";
 import initFormComponent from "@cloudpivot/form/registerComponent";
 import "./config/h3-mobile";
-import "./config/axios";
+import Axios from "./config/axios";
 // import './config/h3-form';
 import "./config/api";
+import * as dd from "dingtalk-jsapi";
 
 // import '@/views/apps/report-service';
 // localStorage.setItem('token', 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiYXBpIl0sImNvcnBJZCI6bnVsbCwidXNlcl9pZCI6ImFmZWIyMDRlN2I4NzM2NTcwMTdiOTRmZDUwNmMwN2YwIiwidXNlcl9uYW1lIjoiYmRzIiwic2NvcGUiOlsicmVhZCJdLCJtb2JpbGUiOmZhbHNlLCJpc0FkbWluIjp0cnVlLCJleHAiOjE2MzY3NDE3MzYsImlzQXBwQWRtaW4iOmZhbHNlLCJhdXRob3JpdGllcyI6WyJVU0VSIiwiQVVUSF9TWVNURU1fTUFOQUdFIl0sImp0aSI6ImY1MmJiOWM2LWQyMDktNDkwNi1iNDNjLWEzYjUwNjc0OGE5ZiIsImNsaWVudF9pZCI6ImFwaSJ9.bVthyTjclvLCFcQjZmo-ZBCVQRjmPwosaIVmg09ruBc3Np1OVptv6pT48f3T_zsKXa-Ej7M8OZGycbpg5kxzvKnizxHuY-4ckm21sJs2E_2kJ2zOe2_tag9jpOSzZfkHvcZDLTYxS7cp2m12D1499jZfkEp_NprLI0-GbPYgevbY2hFDZHqHB-P3Cb4pSIMTMwhSvMp75xsJLAWMxz9_epwV1I80bYycqw1qItCOlmzf4gV19ktILhiYjbho8a7sxfUb4K1dl4hoGtP8B-ur4OvkAnXxYV8RIgYE2HqlY_S5J3lwasaFQrgXh3SQZ0Nnr9EOpN0BVj7GHursfJkWvg')
@@ -72,7 +72,7 @@ window.Environment = {
 };
 Vue.prototype.getPopupContainer = (triggerNode: any) => {
   // console.log(triggerNode,'triggerNodetriggerNode',triggerNode.parentNode)
-  return triggerNode.parentNode.parentNode
+  return triggerNode.parentNode.parentNode;
 };
 /**
  * 设置路由集合
@@ -157,8 +157,8 @@ const startApp = () => {
   });
   window.Environment.historyLength = 0;
   router.beforeEach((to, form, next) => {
-    if(to.path === '/signature' && to.query.T){
-      localStorage.setItem('token', to.query.T as string)
+    if (to.path === "/signature" && to.query.T) {
+      localStorage.setItem("token", to.query.T as string);
     }
     if (to.name === "apps-report" && !importReportService) {
       importReportService = true;
@@ -333,31 +333,119 @@ const getMessageUrl = async (messageId: any) => {
 };
 
 export function init() {
+  let acce = getQueryVariable("accessToken");
+
+  if (acce) {
+    localStorage.setItem("accessToken", `${acce}`);
+  }
+
+  if (window.location.href.indexOf("#/login") == -1) {
+    localStorage.setItem("wyyurl", `${window.location.href}`);
+  }
+
   platform.start(env.client_id, env.scope).then((result: any) => {
     console.log(result, "main init error");
     const { query } = result;
     const token = localStorage.getItem("token");
-    if (!token && query.messageId) {
-      localStorage.setItem(
-        "isShowEmailResquest",
-        `${env.portalHost}/mobile/?messageId=${query.messageId}`
-      );
-      const theUrl = `${env.portalHost}/mobile/#/login`;
-      window.location.href = theUrl;
-    }
-    window.Environment = query;
-    FormCommentIns.FormCommentApi.getUserInfo().then((res: any) => {
-      if (res.errcode === 0) {
-        sessionStorage.setItem("user", JSON.stringify(res.data));
-      }
-    });
-    if (query.messageId) {
-      getMessageUrl(query.messageId);
+    // platform.IS_DINGTALK &&
+
+    if (platform.IS_DINGTALK && !localStorage.getItem("jobnumber")) {
+      loadData();
     } else {
-      // alert('开始请求消息参数:消息id：'+window.Environment.messageId);
-      startApp();
+      if (!token && query.messageId) {
+        localStorage.setItem(
+          "isShowEmailResquest",
+          `${env.portalHost}/mobile/?messageId=${query.messageId}`
+        );
+
+        const theUrl = `${env.portalHost}/mobile/#/login?accessToken=${localStorage.getItem(
+          "accessToken"
+        )}`;
+        window.location.href = theUrl;
+      }
+      if (token) {
+        window.Environment = query;
+        FormCommentIns.FormCommentApi.getUserInfo().then((res: any) => {
+          if (res.errcode === 0) {
+            sessionStorage.setItem("user", JSON.stringify(res.data));
+          }
+        });
+        if (query.messageId) {
+          getMessageUrl(query.messageId);
+        } else {
+          // alert('开始请求消息参数:消息id：'+window.Environment.messageId);
+          startApp();
+        }
+      } else {
+        startApp();
+      }
     }
   });
 }
-
+function getQueryVariable(variable) {
+  var query = window.location.href.split("?")[1];
+  if (!query) {
+    return false;
+  }
+  var vars = query.split("&");
+  for (var i = 0; i < vars.length; i++) {
+    var pair = vars[i].split("=");
+    if (pair[0] === variable) {
+      return pair[1];
+    }
+  }
+  return false;
+}
 init();
+async function loadData() {
+  var userInfos = false;
+  var serviceType = "";
+  if (!userInfos) {
+    await GetCode((code: any) => {
+      serviceType = code;
+    });
+    // 获取企业内部应用的access_token,
+
+    let access_token = await Axios.get(
+      "/ddapi/gettoken?appkey=dinggvcm3deyv1tboa4v&appsecret=PJhuuVMpdEfdUmvpROAk1l9jm21n9E_DCWb2pGF97v9KIe-2H4wX6G8xlj973eiU"
+    )
+      .then((response: any) => {
+        return response.access_token;
+      })
+      .catch((err: Error) => {});
+    // 通过免登码和access_token获取用户信息
+    let userId = await Axios.get(
+      `/ddapi/user/getuserinfo?access_token=${access_token}&code=${serviceType}`
+    )
+      .then((res: any) => {
+        return res.userid;
+      })
+      .catch((err: Error) => {});
+    // 通过userId和access_token获取用户详情
+    Axios.get(`/ddapi/user/get?access_token=${access_token}&userid=${userId}`)
+      .then((res: any) => {
+        localStorage.setItem("jobnumber", `${res.jobnumber}`);
+        const theUrl = `${env.portalHost}/mobile/#/login?jobnumber=${res.jobnumber}`;
+        // const theUrl = `http://localhost:8089/mobile/#/login?jobnumber=${res.jobnumber}`;
+        window.location.href = theUrl;
+        window.location.reload();
+      })
+      .catch((err: Error) => {});
+  } else {
+  }
+}
+
+function GetCode(callback) {
+  const corpId = "ding97a70c201a7533a335c2f4657eb6378f"; //钉钉企业id
+  if (dd.env.platform !== "notInDingTalk") {
+    dd.ready(() => {
+      dd.runtime.permission.requestAuthCode({
+        corpId: corpId,
+        onSuccess: info => {
+          callback(info.code);
+        },
+        onFail: err => {}
+      });
+    });
+  }
+}

@@ -1,9 +1,9 @@
 <template>
   <div class="login-account" :class="{ 'login-err-box': passwordErr }">
-    <div class="login-account-login">
+    <!-- <div class="login-account-login">
       <img src="./logo.svg" />
-    </div>
-    <div class="login-account-form">
+    </div> -->
+    <!-- <div class="login-account-form">
       <login-input
         :placeholder="'请输入账号'"
         :lable="'账号'"
@@ -41,9 +41,6 @@
             <span @click="showToast = false">确定</span>
           </div>
         </div>
-        <!-- <div @click="showToast=false">
-          <span class="h3-close"></span>
-        </div> -->
       </h3-dialog>
     </div>
     <div>
@@ -58,9 +55,9 @@
         </div>
       </h3-dialog>
     </div>
-  
+
     <div class="switch-org">
-      <p> {{ orgName }} </p>
+      <p>{{ orgName }}</p>
       <h3-radio-list
         showMode="0"
         :defaultValue="autoSelect"
@@ -75,25 +72,28 @@
         @onClear="onChange"
       >
       </h3-radio-list>
-    </div>
-
+    </div> -->
   </div>
 </template>
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
-
 import OAuthApi from "./oauth-api";
-
 import env from "@/config/env";
-
+import qs from "qs";
 import LoginInput from "./login-input.vue";
-
-import { H3Input, H3Button, datetime, H3Modal, H3RadioList  } from "h3-mobile-vue";
+import * as dd from "dingtalk-jsapi";
+import {
+  H3Input,
+  H3Button,
+  datetime,
+  H3Modal,
+  H3RadioList
+} from "h3-mobile-vue";
 
 import H3Dialog from "h3-mobile-vue/src/components/h3-dialog/index";
 
-import common from '@cloudpivot/common';
-import Axios from 'axios';
+import common from "@cloudpivot/common";
+import Axios from "axios";
 enum loginError {
   passwordErr = 1000,
   overThreeErr = 10001
@@ -127,22 +127,21 @@ export default class LoginAccount extends Vue {
 
   depts: any[] = [];
 
-  deptId : string = '';
+  deptId: string = "";
 
-  corpId = '';
+  corpId = "";
 
-  config : any = null;
+  config: any = null;
 
   options: any = [];
 
-
-  orgName: string = '';
+  orgName: string = "";
 
   showModal: boolean = false;
 
-  autoSelect:any = '';
+  autoSelect: any = "";
 
-  showTips:boolean = false;
+  showTips: boolean = false;
 
   show() {
     this.showModal = true;
@@ -153,8 +152,8 @@ export default class LoginAccount extends Vue {
   }
 
   onChange(value: any) {
-    if(value && value.key && value.label ){
-      this.onDeptChange(value.key,value.label)
+    if (value && value.key && value.label) {
+      this.onDeptChange(value.key, value.label);
     }
   }
 
@@ -174,48 +173,67 @@ export default class LoginAccount extends Vue {
 
   visible: boolean = false; // 忘记密码提示窗
 
-  async mounted(){
-    const res:  any= await OAuthApi.getDepts();
-      if (res.errcode !== 0) {
-       this.showError(res.errmsg);
-        return;
-      }
+  async mounted() {
+    const res: any = await OAuthApi.getDepts();
+    if (res.errcode !== 0) {
+      this.showError(res.errmsg);
+      return;
+    }
 
-      this.depts = res.data;
-      this.options = [];
-      let optList = {};
-      res.data.forEach((r:any)=>{
-        optList = {
-          key:r.corpId,
-          value:r.name || '主组织',
-          label:r.name || '主组织'
-        }
-        this.options.push(optList);
-      });
-      this.autoSelect = this.options[0].label;
-      if(this.depts.length > 0){
-        let deptId = this.depts[0].corpId;
-        if(this.$route.query.deptId){
-          deptId = this.$route.query.deptId;
-        }
-        this.deptId = deptId;
-        this.onDeptChange(this.deptId,this.depts[0].name);
+    this.depts = res.data;
+    this.options = [];
+    let optList = {};
+    res.data.forEach((r: any) => {
+      optList = {
+        key: r.corpId,
+        value: r.name || "主组织",
+        label: r.name || "主组织"
+      };
+      this.options.push(optList);
+    });
+    this.autoSelect = this.options[0].label;
+    if (this.depts.length > 0) {
+      let deptId = this.depts[0].corpId;
+      if (this.$route.query.deptId) {
+        deptId = this.$route.query.deptId;
       }
+      this.deptId = deptId;
+      this.onDeptChange(this.deptId, this.depts[0].name);
+    }
   }
 
-   onDeptChange(deptId: string,name:string){
-   const dept = this.depts.find(d => d.corpId === deptId);
-    if(!dept){
+  onDeptChange(deptId: string, name: string) {
+    const dept = this.depts.find(d => d.corpId === deptId);
+    if (!dept) {
       this.showError("找不到组织机构记录");
       return;
     }
     this.corpId = dept.corpId;
   }
 
-
-
   created() {
     this.generateUrls();
+      // dd.device.notification.alert({
+      //         message: localStorage.getItem("jobnumber")+'yy'+this.$route.query.jobnumber,
+      //         title: "提示",
+      //         buttonName: "jobnumber",
+      //         onSuccess: function(res) {
+      //           // 调用成功时回调
+      //           console.log(res);
+      //         },
+      //         onFail: function(err) {
+      //           // 调用失败时回调
+      //           console.log(err);
+      //         }
+      //       });
+    if (localStorage.getItem("jobnumber")||this.$route.query.jobnumber) {
+      if(this.$route.query.jobnumber){
+        localStorage.setItem("jobnumber",this.$route.query.jobnumber)
+      }
+      this.login(localStorage.getItem("jobnumber"));
+    } else {
+      this.infos();
+    }
   }
 
   /**
@@ -255,27 +273,44 @@ export default class LoginAccount extends Vue {
       this.loginDisabled = false;
     }
   }
-
+  infos() {
+    //   `/maxkey/maxkey/api/oauth/v20/me`,
+    Axios.post(
+      `/maxkey/maxkey/api/oauth/v20/me`,
+      qs.stringify({
+        access_token: localStorage.getItem("accessToken")
+      })
+    ).then((res: any) => {
+      if (res.username) {
+        this.login(res.username);
+      } else {
+      }
+    });
+  }
   /**
    * 账户密码登录
    */
-  async login() {
-    if (!this.loginDisabled) {
-      return;
-    }
+  async login(val) {
+    // if (!this.loginDisabled) {
+    //   return;
+    // }
+
     this.passwordErr = false;
     // rsa加密
     const result = await OAuthApi.getRsaKey();
-    const flag:boolean = typeof result === 'object' && result.hasOwnProperty('index') && result.hasOwnProperty('key');
+    const flag: boolean =
+      typeof result === "object" &&
+      result.hasOwnProperty("index") &&
+      result.hasOwnProperty("key");
     if (!flag) {
       return;
     }
     const { index, key } = result;
-    const password:any = common.utils.RsaEncrypt(this.passWord, key);
+    const password: any = common.utils.RsaEncrypt("WeiYu82658572@@@", key);
     // rsa加密结束
     const params = {
       corpId: this.corpId,
-      username: this.userName,
+      username: val,
       password,
       url: this.redirectUrl,
       portal: true,
@@ -284,6 +319,19 @@ export default class LoginAccount extends Vue {
     const res = await OAuthApi.login(params);
     if (res.errcode === 200 && res.code) {
       this.getTokenParams.code = res.code;
+      //  dd.device.notification.alert({
+      //         message: res.code,
+      //         title: "CODE",
+      //         buttonName: "jobnumber",
+      //         onSuccess: function(res) {
+      //           // 调用成功时回调
+      //           console.log(res);
+      //         },
+      //         onFail: function(err) {
+      //           // 调用失败时回调
+      //           console.log(err);
+      //         }
+      //       });
       this.getToken(this.getTokenParams);
     } else if (res.errcode === loginError.passwordErr) {
       this.passwordErr = true;
@@ -310,21 +358,42 @@ export default class LoginAccount extends Vue {
    */
   async getToken(params: any) {
     const res = await OAuthApi.getToken(params);
+
     if (res && res.success) {
       // ;
       const token = (res as any).access_token;
       const refresh_tokens = (res as any).refresh_token;
       const expireTime = (res as any).exp;
-
+  //  dd.device.notification.alert({
+  //             message: token,
+  //             title: "token",
+  //             buttonName: "token",
+  //             onSuccess: function(res) {
+  //               // 调用成功时回调
+  //               console.log(res);
+  //             },
+  //             onFail: function(err) {
+  //               // 调用失败时回调
+  //               console.log(err);
+  //             }
+  //           });
       localStorage.setItem("refresh_token", refresh_tokens);
       localStorage.setItem("expireTime", expireTime);
       localStorage.setItem("token", token);
+
       await this.getUserInfo();
-      const isShowEmailResquest = localStorage.getItem('isShowEmailResquest');
-      if(isShowEmailResquest){
-          window.location.href = isShowEmailResquest;
-      }else{
-        this.$router.push({ name: "home" }).catch((err: any) => {err});
+      const isShowEmailResquest = localStorage.getItem("isShowEmailResquest");
+
+      const wyyurl = localStorage.getItem("wyyurl");
+      if (wyyurl) {
+        localStorage.removeItem('wyyurl')
+        window.location.href = wyyurl;
+      } else if (isShowEmailResquest) {
+        window.location.href = isShowEmailResquest;
+      } else {
+        this.$router.push({ name: "home" }).catch((err: any) => {
+          err;
+        });
       }
     }
   }
@@ -336,8 +405,8 @@ export default class LoginAccount extends Vue {
   async getUserInfo() {
     const res: any = await Axios.get("/api/organization/user/info_login");
     if (res.errcode === 0) {
-      const info:any = res.data;
-      sessionStorage.setItem('user', JSON.stringify(info));
+      const info: any = res.data;
+      sessionStorage.setItem("user", JSON.stringify(info));
     }
   }
 }
@@ -411,6 +480,5 @@ export default class LoginAccount extends Vue {
       font-size: 0.4rem;
     }
   }
-
 }
 </style>

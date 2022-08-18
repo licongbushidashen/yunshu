@@ -114,6 +114,7 @@ export default class Login extends Vue {
   async mounted() {
     // 获取环境配置
     localStorage.removeItem("token");
+    localStorage.removeItem("wydpet");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("expireTime");
     const config = await OAuthApi.getSystemConfig();

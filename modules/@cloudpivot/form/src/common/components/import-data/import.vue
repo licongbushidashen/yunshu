@@ -211,6 +211,8 @@ export default class Import extends Vue {
     const params: any = Object.assign({}, this.params);
     params.fileName = this.importFileName;
     params.sequenceStatus = formStatus[params.sequenceStatus];
+     const { startWorkflowCode } = this.$route.query;
+    if (startWorkflowCode) params.startWorkflowCode = startWorkflowCode
     // 
     this.simulateImport();
 

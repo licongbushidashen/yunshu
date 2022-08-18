@@ -206,6 +206,9 @@ export default class List extends Vue {
           case 3:
             options.format1 = "YYYY-MM-DD hh:mm";
             break;
+              case 4:
+            options.format1 = "YYYY-MM";
+            break;
           case 5:
             options.format1 = "YYYY";
             break;

@@ -289,8 +289,9 @@ export default class PcUpload extends FileUploadControl {
       window.sessionStorage.getItem("uploadName") || userInfo.name;
     return true;
   }
-
+ timer: any = null
   onChange(info: { file: any; fileList: any[]; event: any }): void {
+    clearTimeout(this.timer);
     if (this.isReadonly) {
       return;
     }
@@ -390,7 +391,9 @@ export default class PcUpload extends FileUploadControl {
           uploadName: f.uploadName,
         };
       });
-    super.onFilesChange(files);
+        this.timer = setTimeout(() => {
+      super.onFilesChange(files);
+    }, 100);
     this.fileList = info.fileList.map((f: any) => {
       const obj = this.batchFileList.filter((v) => {
         if (v.uid === f.uid) {

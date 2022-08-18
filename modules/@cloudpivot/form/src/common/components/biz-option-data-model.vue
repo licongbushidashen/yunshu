@@ -861,6 +861,15 @@ export default class BizOptionDataModel extends Vue {
           return item.type === tar.propertyType;
         }
       });
+
+    //联动模型数据项构造，子表数据项增加子表编码.数据项编码
+    row.current.listOpt.forEach(item => {
+      if (item.parentCode) {
+        const sheet = this.dataItems.find((x) => x.code === item.parentCode);
+        item.code = `${sheet.code}.${item.code}`;
+        item.name = `${sheet.name}.${item.name}`;
+      }
+    });
   }
 
   getcomName(row: any) {

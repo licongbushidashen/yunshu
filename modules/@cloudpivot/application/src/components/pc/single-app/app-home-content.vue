@@ -26,11 +26,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue,Watch} from 'vue-property-decorator';
 import AppHomeHeader from './app-home-header.vue';
 import AppHomeGroups from './app-home-groups.vue';
 import AppSearch from './app-search.vue';
 import { listApi, listParams }  from '@cloudpivot/api';
+import { State, Action, } from "vuex-class";
 
 @Component({
   name: 'app-home-content',
@@ -42,6 +43,10 @@ import { listApi, listParams }  from '@cloudpivot/api';
 })
 export default class AppHomeContent extends Vue {
   @Prop() appCode!: string;
+
+  @Action('getAppGroups') getAppGroups!: any;
+  @State('singleAppGroups')  singleAppGroups!:  Array<any>;
+
 
   appName: string = '';
 
@@ -55,7 +60,10 @@ export default class AppHomeContent extends Vue {
     Normal: 0,
     Search: 1
   };
-
+  @Watch("singleAppGroups")
+  onAppGroupsChange() {
+    this.formatData(this.singleAppGroups,this.mode.Normal)
+  }
   get searchTotal() {
     let total = 0;
     this.searchGroups.forEach((group:any) => {
@@ -133,18 +141,14 @@ export default class AppHomeContent extends Vue {
   /**
    * 获取单应用分组信息
    */
-  async getAppGroups() {
+  async getSingleGroup() {
     const params : listParams.FolderSchema = {
       appCode: this.appCode,
       isMobile: false // 需要处理
     };
-    const res = await listApi.getFolder(params);
-    if (res.errcode === 0) {
-      if (!Array.isArray(res.data)) {
-        return;
-      }
-      this.formatData(res.data, this.mode.Normal);
-    }
+      this.getAppGroups(params).then(() => {
+         this.formatData(this.singleAppGroups, this.mode.Normal);  
+      })
   }
 
   /**
@@ -169,7 +173,7 @@ export default class AppHomeContent extends Vue {
     // alert('appcode'+ this.appCode);
     if (this.appCode) {
       this.getSingleAppInfo();
-      this.getAppGroups();
+      this.getSingleGroup();
     }
   }
 }

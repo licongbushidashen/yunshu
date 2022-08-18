@@ -222,7 +222,7 @@
         <div
           class="sheet__row"
           v-for="(row, rowIdx) in rows"
-          :key="rowIdx+ new Date()"
+          :key="rowIdx"
           :class="{ diffControls: !!row.diff }"
           @click="handleOnClickRows(rowIdx)"
         >
@@ -653,11 +653,11 @@
         :class="[getControlClass(col.type)]"
       ></div>
 
-      <div class="sheet__cols" @scroll="onScroll">
+      <div class="sheet__cols" @scroll="onScroll"  ref="sheet__cols" @mouseup="mouseup">
         <div class="sheet__row">
           <template v-for="col in unFreezeColumns">
             <div
-              v-if="columnSlots[col.key]"
+            v-if="columnSlots[col.key]"
               class="center middle sheet__col"
               :key="col.key"
               :class="[isLastUnFreeze(col.key) ? 'last' : '']"

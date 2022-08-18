@@ -330,10 +330,16 @@ export default class FormList extends Vue {
     let param = { schemaCode: this.schemaCode, ids };
     listApi.checkDeleteItems(param).then((res) => {
       if (res.errcode == 0) {
+         let info = '已选中'
+        res.data.forEach(item => {
+          if(item.objectIds.length > 0) {
+            info = info + item.objectIds.length + '条' + item.resultDesc + ','
+          }
+        })
         let dataNum = res.data.find(item=>item.resultCode===1000).objectIds.length;
         let flowNum = res.data.find(item=>item.resultCode===1004).objectIds.length;
         this.$h3.modal.show({
-          content: `已选中${dataNum}条业务数据，${flowNum}条流程数据删除后数据不可恢复，是否删除？`,
+          content: `${info}。删除后数据不可恢复，是否删除？`,
           actions: [
             {
               //@ts-ignore
@@ -664,6 +670,9 @@ export default class FormList extends Vue {
             vm.formList = res.data.content;
           } else {
             vm.formList = vm.formList.concat(res.data.content);
+             if(this.showFilter && this.selectAll) {
+              this.selectNum = vm.formList.length;
+            }
           }
           vm.isNoEmpty = !!vm.formList.length;
         } else {

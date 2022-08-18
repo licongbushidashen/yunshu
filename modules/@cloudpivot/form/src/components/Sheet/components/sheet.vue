@@ -366,7 +366,7 @@
         :class="[getControlClass(col.type)]"
       ></div>
 
-      <div class="sheet__cols" @scroll="onScroll">
+      <div class="sheet__cols" @scroll="onScroll"  ref="sheet__cols" @mouseup="mouseup">
         <div class="sheet__row">
           <template v-for="col in unFreezeColumns">
             <div
@@ -462,7 +462,7 @@
     width: 46px;
     padding: 8px;
     flex-shrink: 0;
-    border-right: 1px solid #e8e8e8;
+    border-right: 1px solid #e8e8e8 !important;
     border-bottom: 1px solid #e8e8e8;
     transition: width 1ms linear;
 

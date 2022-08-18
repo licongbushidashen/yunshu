@@ -983,6 +983,8 @@ export default class ListSelector extends Vue {
                   return "";
                 })
                 .join(";");
+            } else if (query.propertyType === DataItemType.RelevanceFormEx) {
+              propertyValue = propertyValue.map((item) => item.id).join(";");
             } else {
               propertyValue = propertyValue
                 .filter((x) => x !== null || x !== undefined)
@@ -1020,7 +1022,6 @@ export default class ListSelector extends Vue {
           }
           // propertyValue = `${propertyValue}`;
           console.log(filterArray,"filterArray-------------");
-          debugger
           let tepOpValue =  opValue && opValue[query.propertyCode]
           filterArray.push({
             propertyCode: query.propertyCode,

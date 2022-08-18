@@ -290,5 +290,13 @@ export default class InputDate extends DateInputControl {
 .ant-calendar-picker-container .ant-calendar-input-wrap {
   display: none;
 }
+.ant-calendar-time-picker {
+  top: unset !important;
+  .ant-calendar-time-picker-inner {
+    height: calc(100% - 40px) !important;
+    margin-top: 40px;
+    padding-top: unset !important;
+  }
+}
 </style>
 

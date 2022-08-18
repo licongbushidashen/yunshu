@@ -274,7 +274,7 @@ export default class VerifyFormulaNumber extends Vue{
               this.verifyFormula.rangeSelectDataItem2 = v
               break
             case 'prompt':
-              this.verifyFormula.promptText = decodeURIComponent(v)
+              this.verifyFormula.promptText = v
               break
             case 'dialogBox':
               this.verifyFormula.errDialogboxType = (+v as 1 | 2)
@@ -311,7 +311,7 @@ export default class VerifyFormulaNumber extends Vue{
               this.verifyFormula.rangeSelectDataItem2 = v
               break
             case 'prompt':
-              this.verifyFormula.promptText = decodeURIComponent(v)
+              this.verifyFormula.promptText = v
               break
             case 'dialogBox':
               this.verifyFormula.errDialogboxType = (+v as 1 | 2)
@@ -410,7 +410,7 @@ export default class VerifyFormulaNumber extends Vue{
           return {value: {...rValue, defaultPrompt: v}, status: true}
         }
       } else {
-        let encodeText = encodeURIComponent(promptText)
+        let encodeText = promptText
         return {value: {...rValue, prompt: encodeText}, status: true}
       }
     }

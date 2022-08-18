@@ -1,150 +1,164 @@
-import {
-  renderer
-} from '@cloudpivot/form';
+import { renderer } from "@cloudpivot/form"
 
 /**
  * 按控件类型构建控件选项
  * @param controlType
  * @param sourceOpts 需要合并的选项
  */
-export function buildControlOptions(controlType: renderer.FormControlType, sourceOpts?: renderer.FormControlOptions): renderer.FormControlOptions {
-  let options: renderer.FormControlOptions | null = null;
+export function buildControlOptions(
+  controlType: renderer.FormControlType,
+  sourceOpts?: renderer.FormControlOptions
+): renderer.FormControlOptions {
+  let options: renderer.FormControlOptions | null = null
 
   switch (controlType) {
     // 基础控件
     case renderer.FormControlType.Text:
-      options = new renderer.TextOptions();
-      break;
+      options = new renderer.TextOptions()
+      break
     case renderer.FormControlType.Textarea:
-      options = new renderer.TextareaOptions();
-      break;
+      options = new renderer.TextareaOptions()
+      break
     case renderer.FormControlType.Checkbox:
-      options = new renderer.CheckboxOptions();
-      break;
+      options = new renderer.CheckboxOptions()
+      break
     case renderer.FormControlType.Radio:
-      options = new renderer.CheckboxOptions();
-      break;
+      options = new renderer.CheckboxOptions()
+      break
     case renderer.FormControlType.Dropdown:
     case renderer.FormControlType.DropdownMulti:
-      options = new renderer.DropdownOptions();
-      break;
+      options = new renderer.DropdownOptions()
+      break
     case renderer.FormControlType.Logic:
-      options = new renderer.LogicOptions();
-      break;
+      options = new renderer.LogicOptions()
+      break
     case renderer.FormControlType.Date:
-      options = new renderer.DateOptions();
-      break;
+      options = new renderer.DateOptions()
+      break
     case renderer.FormControlType.Number:
-      options = new renderer.NumberOptions();
-      break;
+      options = new renderer.NumberOptions()
+      break
     case renderer.FormControlType.Label:
-      options = new renderer.StyleControlOptions();
-      break;
+      options = new renderer.StyleControlOptions()
+      break
     case renderer.FormControlType.Title:
-      options = new renderer.StyleControlOptions();
-      break;
+      options = new renderer.StyleControlOptions()
+      break
     case renderer.FormControlType.DateRange:
     case renderer.FormControlType.TimeRange:
-      options = new renderer.TimeOptions();
-      break;
+      options = new renderer.TimeOptions()
+      break
     case renderer.FormControlType.NumberRange:
-      options = new renderer.NumberOptions();
-      break;
-      case renderer.FormControlType.Address:
-      options = new renderer.AddressOptions();
-      break;
+      options = new renderer.NumberOptions()
+      break
+    case renderer.FormControlType.Address:
+      options = new renderer.AddressOptions()
+      break
 
     // 复合控件
     case renderer.FormControlType.Attachment:
-      options = new renderer.AttachmentOptions();
-      break;
+      options = new renderer.AttachmentOptions()
+      break
     case renderer.FormControlType.ApprovalOpinion:
-      options = new renderer.ApprovalOpinionOptions();
-      break;
+      options = new renderer.ApprovalOpinionOptions()
+      break
     case renderer.FormControlType.Image:
-      options = new renderer.ImageUploadOptions();
-      break;
+      options = new renderer.ImageUploadOptions()
+      break
     case renderer.FormControlType.Location:
-      options = new renderer.LocationOptions();
-      break;
+      options = new renderer.LocationOptions()
+      break
 
     case renderer.FormControlType.RelevanceForm:
     case renderer.FormControlType.RelevanceFormEx:
-      options = new renderer.RelevanceFormOptions();
-      break;
+      options = new renderer.RelevanceFormOptions()
+      break
 
     case renderer.FormControlType.StaffSelector:
     case renderer.FormControlType.StaffMultiSelector:
-      options = new renderer.StaffSelectorOptions();
-      options.deptVisible = false;
+      options = new renderer.StaffSelectorOptions()
+      options.deptVisible = false
       if (controlType === renderer.FormControlType.StaffMultiSelector) {
-        options.multi = true;
+        options.multi = true
       }
-      break;
+      break
     case renderer.FormControlType.StaffDeptMixed:
-      options = new renderer.StaffSelectorOptions();
-      options.userVisible = false;
-      options.multi = true;
-      break;
+      options = new renderer.StaffSelectorOptions()
+      options.userVisible = false
+      options.multi = true
+      break
     case renderer.FormControlType.DepartmentSelector:
     case renderer.FormControlType.DepartmentMultiSelector:
-      options = new renderer.StaffSelectorOptions();
-      options.userVisible = false;
+      options = new renderer.StaffSelectorOptions()
+      options.userVisible = false
       if (controlType === renderer.FormControlType.DepartmentMultiSelector) {
-        options.multi = true;
+        options.multi = true
       }
-      break;
+      break
 
     case renderer.FormControlType.Sheet:
-      options = new renderer.SheetOptions();
-      break;
+      options = new renderer.SheetOptions()
+      break
     case renderer.FormControlType.SheetStatistic:
-      options = new renderer.SheetStatisticOptions();
-      break;
-
+      options = new renderer.SheetStatisticOptions()
+      break
 
     // 系统控件
     case renderer.FormControlType.SequenceNo:
-      options = new renderer.SequenceNoOptions();
-      break;
+      options = new renderer.SequenceNoOptions()
+      break
 
     case renderer.FormControlType.CreateBy:
     case renderer.FormControlType.ModifyBy:
     case renderer.FormControlType.OwnerId:
     case renderer.FormControlType.CreateByParentId:
     case renderer.FormControlType.SystemOther:
-      options = new renderer.StyleControlOptions();
-      break;
+      options = new renderer.StyleControlOptions()
+      break
 
     case renderer.FormControlType.CreatedTime:
     case renderer.FormControlType.ModifiedTime:
-      options = new renderer.CreatedTimeOptions();
-      break;
-
+      options = new renderer.CreatedTimeOptions()
+      break
 
     // 布局控件
     case renderer.FormControlType.Description:
-      options = new renderer.LayoutControlOptions();
-      break;
+      options = new renderer.LayoutControlOptions()
+      break
     case renderer.FormControlType.Group:
-      options = new renderer.LayoutControlOptions();
-      break;
+      options = new renderer.LayoutControlOptions()
+      break
     case renderer.FormControlType.Title:
-      options = new renderer.StyleControlOptions();
-      break;
+      options = new renderer.StyleControlOptions()
+      break
   }
 
   if (!options) {
-    throw Error('未知的控件类型');
+    throw Error("未知的控件类型")
   }
 
   if (sourceOpts) {
-    Object.keys(options).forEach((k) => {
+    Object.keys(options).forEach(k => {
       if ((sourceOpts as any)[k] !== undefined) {
-        (options as any)[k] = (sourceOpts as any)[k];
+        ;(options as any)[k] = (sourceOpts as any)[k]
       }
-    });
+    })
   }
-
-  return options;
+  if (
+    [renderer.FormControlType.Dropdown, renderer.FormControlType.DropdownMulti].includes(controlType) &&
+    typeof options.options === "string" &&
+    options.options.indexOf("defaultValue") > -1 &&
+    options.options.indexOf("options") > -1
+  ) {
+    try {
+      const opt = JSON.parse(options.options as string)
+      if (opt) {
+        options.defaultValue = opt.defaultValue
+        options.options = opt.options
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  return options
 }

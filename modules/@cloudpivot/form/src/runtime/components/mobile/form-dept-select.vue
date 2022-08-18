@@ -3,7 +3,7 @@
   <div>
     <!-- 没有委托人时选择部门 -->
     <template v-if="!isTrust">
-      <approve-opinion :lastAttachment="lastAttachment" :control="options.approval"></approve-opinion>
+      <approve-opinion  v-if="options.approval" :lastAttachment="lastAttachment" :control="options.approval"></approve-opinion>
 
       <h3-radio-list
         v-if="depts.length > 0"

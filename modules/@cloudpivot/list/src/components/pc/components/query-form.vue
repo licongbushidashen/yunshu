@@ -401,7 +401,11 @@ export default class QueryForm extends Vue {
     const dv = field.defaultValue;
     if (dv !== undefined && dv !== null && dv !== "") {
       if (
-        type === renderer.FormControlType.StaffSelector &&
+         (type === renderer.FormControlType.StaffSelector || 
+        type === renderer.FormControlType.StaffMultiSelector || 
+        type === renderer.FormControlType.DepartmentSelector || 
+        type === renderer.FormControlType.DepartmentMultiSelector ||
+        type === renderer.FormControlType.StaffDeptMixed) &&
         typeof field.defaultValue === "string"
       ) {
         options.defaultValueType = this.staffSelectorDefaultMap[

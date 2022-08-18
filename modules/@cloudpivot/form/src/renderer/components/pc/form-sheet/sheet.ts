@@ -1,20 +1,11 @@
-import { Component, Vue, Prop, Watch, Inject } from "vue-property-decorator";
+import { Component, Vue, Prop, Watch, Inject } from "vue-property-decorator"
 import zhToEn from "@cloudpivot/list/src/components/pc/locales/zhToEn"
 
-import {
-  Popover,
-  Divider,
-  Button,
-  Checkbox,
-  Tooltip,
-  Icon,
-  Dropdown,
-  Menu,
-} from "@h3/antd-vue";
+import { Popover, Divider, Button, Checkbox, Tooltip, Icon, Dropdown, Menu } from "@h3/antd-vue"
 
-import { FormControlErrorCodes } from "h3-forms";
+import { FormControlErrorCodes } from "h3-forms"
 
-import common from "@cloudpivot/common/pc";
+import common from "@cloudpivot/common/pc"
 
 import {
   DataItemType,
@@ -22,23 +13,23 @@ import {
   FormSheetStatistic,
   SheetStatisticOptions,
   AggregateType,
-  FormControlType,
-} from "../../../../schema";
+  FormControlType
+} from "../../../../schema"
 
-import { FormRendererHelper } from "../../form-renderer-helper";
+import { FormRendererHelper } from "../../form-renderer-helper"
 
-import BaseControlAdapter from "../base-control-adapter.vue";
+import BaseControlAdapter from "../base-control-adapter.vue"
 
-import CheckboxText from "./checkbox-text.vue";
+import CheckboxText from "./checkbox-text.vue"
 
-import numberFilter from "../../number-filter";
+import numberFilter from "../../number-filter"
 
 export interface ColumnResize {
-  index: number;
+  index: number
 
-  column: FormSheetColumn;
+  column: FormSheetColumn
 
-  width: number;
+  width: number
 }
 
 @Component({
@@ -55,273 +46,254 @@ export interface ColumnResize {
     AMenuItem: Menu.Item,
     BaseControlAdapter,
     H3SizeSlider: common.components.H3SizeSlider,
-    CheckboxText,
+    CheckboxText
   },
   filters: {
-    number: numberFilter,
-  },
+    number: numberFilter
+  }
 })
 export default class Sheet extends Vue {
   @Prop({
-    default: 0,
+    default: 0
   })
-  rowNumber!: number;
+  rowNumber!: number
 
   @Prop({
-    default: false,
+    default: false
   })
-  checkbox!: boolean;
+  checkbox!: boolean
 
   @Prop({
-    default: false,
+    default: false
   })
-  radio!: boolean;
+  radio!: boolean
 
   @Prop({
-    default: false,
+    default: false
   })
-  showAction!: boolean;
+  showAction!: boolean
 
   @Prop({
-    default: false,
+    default: false
   })
-  showTotal!: boolean;
+  showTotal!: boolean
 
   @Prop({
-    default: () => [],
+    default: () => []
   })
-  columns!: FormSheetColumn[];
+  columns!: FormSheetColumn[]
   @Prop({
-    default: () => [],
+    default: () => []
   })
-  columnOptions!: any[];
+  columnOptions!: any[]
 
   @Prop({
-    default: () => [],
+    default: () => []
   })
-  frozenKeys!: string[];
+  frozenKeys!: string[]
 
   @Prop({
-    default: () => ({}),
+    default: () => ({})
   })
-  columnSlots!: { [key: string]: string };
+  columnSlots!: { [key: string]: string }
 
   @Prop({
-    default: () => [],
+    default: () => []
   })
-  rows!: any[];
+  rows!: any[]
 
   @Prop({
-    default: () => ({}),
+    default: () => ({})
   })
-  rowSlots!: { [key: string]: string };
+  rowSlots!: { [key: string]: string }
 
   @Prop({
-    default: () => [],
+    default: () => []
   })
-  checkeds!: boolean[];
+  checkeds!: boolean[]
 
   @Prop({
-    default: -1,
+    default: -1
   })
-  checked!: number;
+  checked!: number
 
   @Prop({
-    default: () => ({}),
+    default: () => ({})
   })
-  stats!: { [key: string]: FormSheetStatistic };
+  stats!: { [key: string]: FormSheetStatistic }
 
   @Inject()
-  getScrollEl!: () => HTMLDivElement;
+  getScrollEl!: () => HTMLDivElement
 
   @Inject()
-  isMultiStatus!: () => boolean;
+  isMultiStatus!: () => boolean
 
-  onScrollFn?: () => void;
+  onScrollFn?: () => void
 
-  shadowLeft = false;
+  shadowLeft = false
 
-  shadowRight = false;
+  shadowRight = false
 
-  scrollbar: HTMLDivElement | null = null;
+  scrollbar: HTMLDivElement | null = null
 
-  colStyles: any[] = [];
+  colStyles: any[] = []
 
-  sheetIsScroll = false; // 表格是否滚动
-  pageSize: number = 20; // 子表一页展示数据条数，默认为20
-  DataItemType: any = DataItemType;
+  sheetIsScroll = false // 表格是否滚动
+  pageSize: number = 20 // 子表一页展示数据条数，默认为20
+  DataItemType: any = DataItemType
 
   get canFrozen() {
-    return this.unFreezeColumns.length > 1;
+    return this.unFreezeColumns.length > 1
   }
 
   get canUnFrozen() {
-    return this.frozenKeys.length > 0;
+    return this.frozenKeys.length > 0
   }
 
   get checkedAll() {
-    return this.checkeds.length > 0 && this.checkeds.every((c) => c);
+    return this.checkeds.length > 0 && this.checkeds.every(c => c)
   }
 
   get indeterminate() {
-    const checkeds = this.checkeds.filter((c) => c);
-    return checkeds.length > 0 && checkeds.length < this.checkeds.length;
+    const checkeds = this.checkeds.filter(c => c)
+    return checkeds.length > 0 && checkeds.length < this.checkeds.length
   }
 
   get hasStat() {
-    return Object.keys(this.stats).length > 0;
+    return Object.keys(this.stats).length > 0
   }
 
   get freezeColumns() {
-    return this.frozenKeys.map((k) =>
-      this.columns.find((col) => col.key === k)
-    );
+    return this.frozenKeys.map(k => this.columns.find(col => col.key === k))
   }
 
   get unFreezeColumns() {
-    return this.columns.filter(
-      (col) => this.frozenKeys.indexOf(col.key) === -1
-    );
+    return this.columns.filter(col => this.frozenKeys.indexOf(col.key) === -1)
   }
 
   freezeColumn(key: string, freeze: boolean) {
     if (freeze) {
       if (this.frozenKeys.length >= 3) {
-        this.$message.error(
-          this.$t("cloudpivot.form.renderer.tip.frozenColumnMax") as string
-        );
-        return;
+        this.$message.error(this.$t("cloudpivot.form.renderer.tip.frozenColumnMax") as string)
+        return
       }
 
-      let width = 0;
+      let width = 0
       this.columns
-        .map((col, i) =>
-          this.frozenKeys.indexOf(col.key) > -1 || col.key === key
-            ? this.colStyles[i].width
-            : 0
-        )
-        .forEach((w) => (width += parseInt(w)));
+        .map((col, i) => (this.frozenKeys.indexOf(col.key) > -1 || col.key === key ? this.colStyles[i].width : 0))
+        .forEach(w => (width += parseInt(w)))
 
       if (width > 854) {
-        this.$message.error(
-          this.$t("cloudpivot.form.renderer.tip.frozenColumnWidthMax") as string
-        );
-        return;
+        this.$message.error(this.$t("cloudpivot.form.renderer.tip.frozenColumnWidthMax") as string)
+        return
       }
     }
 
-    this.$emit("freezeColumn", key, freeze);
+    this.$emit("freezeColumn", key, freeze)
 
     if (!freeze) {
       setTimeout(() => {
-        this.syncScrollLeft();
-      }, 100);
+        this.syncScrollLeft()
+      }, 100)
     }
   }
 
   getFreezeCells(row: any[]) {
-    return this.frozenKeys.map((k) => row.find((cell) => cell.key === k));
+    return this.frozenKeys.map(k => row.find(cell => cell.key === k))
   }
 
   isLastFreeze(key: string) {
-    return this.frozenKeys[this.frozenKeys.length - 1] === key;
+    return this.frozenKeys[this.frozenKeys.length - 1] === key
   }
 
   isLastUnFreeze(key: string) {
-	return true
-    const cols = this.unFreezeColumns;
+    return true
+    const cols = this.unFreezeColumns
     let visibles = cols.filter(el => el.options.visible)
-    return cols[cols.length - 1].key === key || visibles[visibles.length - 1].key === key;
+    return cols[cols.length - 1].key === key || visibles[visibles.length - 1].key === key
   }
 
   showColumn(key: string) {
-    const index = this.columns.findIndex((c) => c.key === key);
+    const index = this.columns.findIndex(c => c.key === key)
 
     if (index < 0) {
-      return false;
+      return false
     }
 
-    const col = this.columns[index];
+    const col = this.columns[index]
     if (!col || !col.options.visible) {
-      return false;
+      return false
     }
 
     if (this.rows.length === 0) {
-      return true;
+      return true
     }
 
-    const allHide = this.rows.every(
-      (row) => row[index].controller && !row[index].controller.display
-    );
-    return !allHide;
+    const allHide = this.rows.every(row => row[index].controller && !row[index].controller.display)
+    return !allHide
   }
 
   @Watch("columns", {
-    immediate: true,
+    immediate: true
   })
   onColumnsChange() {
-    this.initColStyleMap();
+    this.initColStyleMap()
     this.$nextTick(() => {
-      const el = this.$el.querySelector(
-        ".sheet__row:last-child > .sheet__cols"
-      ) as HTMLDivElement;
+      const el = this.$el.querySelector(".sheet__row:last-child > .sheet__cols") as HTMLDivElement
 
       if (el) {
-        this.sheetIsScroll = el.offsetWidth < el.scrollWidth;
+        this.sheetIsScroll = el.offsetWidth < el.scrollWidth
       }
-    });
+    })
   }
 
   @Watch("rows", {
-    immediate: true,
+    immediate: true
   })
   onRowsChange() {
     this.$nextTick(() => {
-      this.syncScrollLeft();
-    });
+      this.syncScrollLeft()
+    })
   }
 
   checkAll(evt: any) {
-    const checked = evt.target.checked;
-    const checkeds = this.checkeds.map((c) => checked);
-    this.$emit("check", checkeds);
-    this.$emit("checkAll", checked);
+    const checked = evt.target.checked
+    const checkeds = this.checkeds.map(c => checked)
+    this.$emit("check", checkeds)
+    this.$emit("checkAll", checked)
   }
 
   check(idx: number) {
-    const checked = this.checkeds[idx];
-    let checkeds = this.checkeds.slice();
+    const checked = this.checkeds[idx]
+    let checkeds = this.checkeds.slice()
     if (this.radio) {
-      checkeds = checkeds.map(() => false);
+      checkeds = checkeds.map(() => false)
     }
-    checkeds[idx] = !checked;
+    checkeds[idx] = !checked
     if (this.isMultiStatus && this.isMultiStatus()) {
-      const arr: any = this.rows[idx];
+      const arr: any = this.rows[idx]
       arr.forEach((a: any) => {
-        if (
-          a.options.propertyType === DataItemType.Sheet &&
-          Array.isArray(a.controller._value)
-        ) {
+        if (a.options.propertyType === DataItemType.Sheet && Array.isArray(a.controller._value)) {
           a.controller._value = a.controller._value.map((i: any) => {
-            i.checked = checkeds[idx];
-            return i;
-          });
+            i.checked = checkeds[idx]
+            return i
+          })
         }
-      });
+      })
     }
-    this.$emit("check", checkeds, idx);
+    this.$emit("check", checkeds, idx)
   }
 
   handleOnClickRows(rowIdx: any) {
     if (this.isMultiStatus && this.isMultiStatus()) {
-      this.check(rowIdx);
+      this.check(rowIdx)
     } else {
-      this.$emit("rowClick", rowIdx);
+      this.$emit("rowClick", rowIdx)
     }
   }
 
   async childCheckAll(val: any, colIdx: number) {
-    const checkeds = this.checkeds;
+    const checkeds = this.checkeds
     this.rows.forEach((o, e) => {
       o.forEach((i: any, v: number) => {
         if (
@@ -331,120 +303,112 @@ export default class Sheet extends Vue {
           i.controller._value.length
         ) {
           i.controller._value = i.controller._value.map((i: any) => {
-            i.checked = val.target.checked;
-            return i;
-          });
-          checkeds[e] = val.target.checked;
+            i.checked = val.target.checked
+            return i
+          })
+          checkeds[e] = val.target.checked
         }
-      });
-    });
+      })
+    })
 
-    this.$set(this.columns[colIdx], "checked", val.target.checked);
-    this.$emit("checkAll", checkeds);
+    this.$set(this.columns[colIdx], "checked", val.target.checked)
+    this.$emit("checkAll", checkeds)
   }
   getAllChildChecked(code: string) {
     //改变全选的状态
-    let checkArr: Array<any> = [];
+    let checkArr: Array<any> = []
     this.rows.forEach((t: any) => {
       t.forEach((a: any) => {
-        if (
-          a.key === code &&
-          Array.isArray(a.controller._value) &&
-          a.controller._value.length
-        ) {
-          checkArr = checkArr.concat(a.controller._value);
+        if (a.key === code && Array.isArray(a.controller._value) && a.controller._value.length) {
+          checkArr = checkArr.concat(a.controller._value)
         }
-      });
-    });
-    return checkArr.length ? checkArr.every((c: any) => c.checked) : false;
+      })
+    })
+    return checkArr.length ? checkArr.every((c: any) => c.checked) : false
   }
 
   checkboxChange(val: any, index: number, colIdx: number, idx: number) {
-    this.$set(
-      this.rows[index][colIdx].controller._value[idx],
-      "checked",
-      val.target.checked
-    );
+    this.$set(this.rows[index][colIdx].controller._value[idx], "checked", val.target.checked)
     if (this.rows[index][colIdx].controller._value.length > 0) {
-      const arr: any = this.rows[index][colIdx].controller._value.filter(
-        (o: any) => o.checked
-      );
+      const arr: any = this.rows[index][colIdx].controller._value.filter((o: any) => o.checked)
       if (arr.length > 0 && !this.checkeds[index]) {
-        const checked = this.checkeds[index];
-        let checkeds = this.checkeds.slice();
+        const checked = this.checkeds[index]
+        let checkeds = this.checkeds.slice()
         if (this.radio) {
-          checkeds = checkeds.map(() => false);
+          checkeds = checkeds.map(() => false)
         }
-        checkeds[index] = !checked;
-        this.$emit("check", checkeds, index);
+        checkeds[index] = !checked
+        this.$emit("check", checkeds, index)
       } else {
-        this.$emit("check", this.checkeds, index);
+        this.$emit("check", this.checkeds, index)
       }
     }
   }
 
   onScroll(evt: UIEvent) {
-    this.syncScroll(evt.target as any);
+    this.syncScroll(evt.target as any)
+  }
+  mouseup() {
+    let el = this.$refs.sheet__cols as HTMLDivElement
+    this.shadowLeft = el.scrollLeft > 0
+    this.$nextTick(() => {
+      this.syncScroll(el)
+    })
   }
 
   syncScrollLeft() {
     if (!this.scrollbar) {
-      this.scrollbar = this.$el.querySelector(".scrollbar");
+      this.scrollbar = this.$el.querySelector(".scrollbar")
       if (!this.scrollbar) {
-        return;
+        return
       }
     }
 
-    const el = this.scrollbar.querySelector(".sheet__cols") as HTMLDivElement;
+    const el = this.scrollbar.querySelector(".sheet__cols") as HTMLDivElement
     if (!el) {
-      return;
+      return
     }
-    this.syncScroll(el);
+    this.syncScroll(el)
   }
 
   syncScroll(el: HTMLDivElement) {
-    this.shadowLeft = el.scrollLeft > 0;
-    this.shadowRight = el.scrollLeft + el.offsetWidth < el.scrollWidth;
+    // this.shadowLeft = el.scrollLeft > 0
+    this.shadowRight = el.scrollLeft + el.offsetWidth < el.scrollWidth
     if (NodeList && !NodeList.prototype.forEach) {
       NodeList.prototype.forEach = function (callback, thisArg) {
-        thisArg = thisArg || window;
+        thisArg = thisArg || window
         for (let i = 0; i < this.length; i++) {
-          callback.call(thisArg, this[i], i, this);
+          callback.call(thisArg, this[i], i, this)
         }
-      };
+      }
     }
 
-    const $sheetBody = this.$el.querySelector(".sheet__body");
+    const $sheetBody = this.$el.querySelector(".sheet__body")
 
     if (!$sheetBody) {
-      return;
+      return
     }
-    let _el = this.$el.querySelectorAll(
-      ".sheet__cols"
-    ) as NodeListOf<HTMLDivElement>;
+    let _el = this.$el.querySelectorAll(".sheet__cols") as NodeListOf<HTMLDivElement>
     for (let dv of _el) {
       if (dv != el) {
         // dv.scrollLeft = el.scrollLeft - (el.scrollWidth - dv.scrollWidth);
-        dv.scrollLeft = el.scrollLeft;
+        dv.scrollLeft = el.scrollLeft
       }
     }
   }
 
   getErrorMessage(col: any, errCode: FormControlErrorCodes) {
-    return FormRendererHelper.getErrorMessage(col, errCode, this.$i18n.locale);
+    return FormRendererHelper.getErrorMessage(col, errCode, this.$i18n.locale)
   }
 
   getControlClass(type: number) {
-    return (FormControlType as any)[type].toLowerCase();
+    return (FormControlType as any)[type].toLowerCase()
   }
 
   getColSheetStyle(index: any, child: any) {
     return {
-      minWidth:
-        this.isMultiStatus && this.isMultiStatus() && index === 0
-          ? Number(child.width) - 20 + "px"
-          : child.width + "px",
-    };
+      minWidth: this.isMultiStatus && this.isMultiStatus() && index === 0 ? Number(child.width) - 20 + "px" : child.width + "px"
+    }
   }
 
   initColStyleMap() {
@@ -462,185 +426,180 @@ export default class Sheet extends Vue {
       //   }
       // }
 
-      let width = col.width + "px";
+      let width = col.width + "px"
 
       return {
-        width,
-      };
-    });
+        width
+      }
+    })
   }
 
   // 子表数据项加载更多
   loadMore(col: any) {
-    col.page += 1;
-    col.value = col.sourceValue.slice(0, col.page * this.pageSize);
-    col.last = col.value.length >= col.sourceValue.length;
+    col.page += 1
+    col.value = col.sourceValue.slice(0, col.page * this.pageSize)
+    col.last = col.value.length >= col.sourceValue.length
   }
 
   onColResize(evt: { width: number }, colIdx: number, col: FormSheetColumn) {
-    const width = evt.width + "px";
+    const width = evt.width + "px"
 
-    colIdx = this.columns.findIndex((c) => c.key === col.key);
+    colIdx = this.columns.findIndex(c => c.key === col.key)
 
     this.colStyles.splice(colIdx, 1, {
-      width,
-    });
+      width
+    })
 
     this.$emit("columnResize", {
       index: colIdx,
       column: col,
-      width: evt.width,
-    });
+      width: evt.width
+    })
 
     // this.$forceUpdate();
   }
 
   getColStyle(key: string) {
-    const index = this.columns.findIndex((c) => c.key === key);
+    const index = this.columns.findIndex(c => c.key === key)
 
     if (index < 0) {
-      return {};
+      return {}
     }
 
-    return this.colStyles[index];
+    return this.colStyles[index]
   }
 
   getColumnStyle(col: FormSheetColumn) {
-    return col.options && col.options.style;
+    return col.options && col.options.style
   }
 
   showStat(columnKey: string) {
-    const s = this.stats[columnKey];
+    const s = this.stats[columnKey]
     if (!s) {
-      return false;
+      return false
     }
-    const val = (s as any).value;
+    const val = (s as any).value
     if (!val && typeof val !== "number") {
-      return false;
+      return false
     }
-    return true;
+    return true
   }
 
   getStatText(columnKey: string) {
-    const s = this.stats[columnKey];
+    const s = this.stats[columnKey]
     if (!s) {
-      return;
+      return
     }
-    const opts = s.options as SheetStatisticOptions;
+    const opts = s.options as SheetStatisticOptions
     switch (opts.statisticMode) {
       case AggregateType.Sum:
-        return this.$t("cloudpivot.form.renderer.label.sum");
+        return this.$t("cloudpivot.form.renderer.label.sum")
       case AggregateType.Avg:
-        return this.$t("cloudpivot.form.renderer.label.avg");
+        return this.$t("cloudpivot.form.renderer.label.avg")
       case AggregateType.Min:
-        return this.$t("cloudpivot.form.renderer.label.min");
+        return this.$t("cloudpivot.form.renderer.label.min")
       case AggregateType.Max:
-        return this.$t("cloudpivot.form.renderer.label.max");
+        return this.$t("cloudpivot.form.renderer.label.max")
     }
   }
 
   getColumnLabel(col: FormSheetColumn) {
-    const label = col.options ? col.options.name : col.name;
-    const locale = this.$i18n.locale;
-    const name_i18n = col.options ? col.options.name_i18n : col.name_i18n;
+    const label = col.options ? col.options.name : col.name
+    const locale = this.$i18n.locale
+    const name_i18n = col.options ? col.options.name_i18n : col.name_i18n
 
     if (locale && name_i18n) {
-      const locales =
-        typeof name_i18n === "string" ? JSON.parse(name_i18n) : name_i18n;
+      const locales = typeof name_i18n === "string" ? JSON.parse(name_i18n) : name_i18n
       if (locales[locale]) {
-        return locales[locale];
+        return locales[locale]
       }
     }
 
-    return label;
+    return label
   }
   getColumnRequired(col: FormSheetColumn) {
-    let item = this.columnOptions.find((val) => val.key === col.key);
+    let item = this.columnOptions.find(val => val.key === col.key)
     if (item) {
-      return !!item.options.required;
+      return !!item.options.required
     } else {
-      return false;
+      return false
     }
   }
   getTips(col: FormSheetColumn) {
-    const { tips } = col.options;
+    const { tips } = col.options
 
-    return tips;
+    return tips
   }
   handleRootScroll() {
     if (!this.scrollbar) {
-      this.scrollbar = this.$el.querySelector(".scrollbar");
+      this.scrollbar = this.$el.querySelector(".scrollbar")
       if (!this.scrollbar) {
-        return;
+        return
       }
     }
 
-    const $sheet = this.$el.querySelector(".sheet") as HTMLDivElement;
+    const $sheet = this.$el.querySelector(".sheet") as HTMLDivElement
 
     if (!$sheet) {
-      return;
+      return
     }
 
-    const $sheetBody = $sheet.querySelector(".sheet__body");
+    const $sheetBody = $sheet.querySelector(".sheet__body")
 
     if (!$sheetBody) {
-      return;
+      return
     }
 
-    const sheetRect = $sheet.getBoundingClientRect() as DOMRect;
-    const bodyRect = $sheetBody.getBoundingClientRect() as DOMRect;
+    const sheetRect = $sheet.getBoundingClientRect() as DOMRect
+    const bodyRect = $sheetBody.getBoundingClientRect() as DOMRect
 
-    const clientHeight = (document as any).documentElement.clientHeight;
+    const clientHeight = (document as any).documentElement.clientHeight
 
-    const over =
-      sheetRect.top + sheetRect.height + this.scrollbar.offsetHeight >
-      clientHeight;
+    const over = sheetRect.top + sheetRect.height + this.scrollbar.offsetHeight > clientHeight
 
     if (bodyRect.top < clientHeight && over) {
-      this.scrollbar.style.width = $sheet.offsetWidth + "px";
-      this.scrollbar.classList.add("stick");
+      this.scrollbar.style.width = $sheet.offsetWidth + "px"
+      this.scrollbar.classList.add("stick")
     } else {
-      this.scrollbar.classList.remove("stick");
+      this.scrollbar.classList.remove("stick")
     }
   }
 
   mounted() {
     this.$nextTick(() => {
-      const el = this.$el.querySelector(
-        ".sheet__row:last-child > .sheet__cols"
-      ) as HTMLDivElement;
+      const el = this.$el.querySelector(".sheet__row:last-child > .sheet__cols") as HTMLDivElement
 
       if (el) {
-        this.shadowRight = el.offsetWidth < el.scrollWidth;
+        this.shadowRight = el.offsetWidth < el.scrollWidth
         // this.sheetIsScroll = this.shadowRight;
       }
 
-      this.handleRootScroll();
+      this.handleRootScroll()
 
       this.onScrollFn = () => {
-        this.handleRootScroll();
-      };
+        this.handleRootScroll()
+      }
 
       if (this.getScrollEl) {
-        const scrollEl = this.getScrollEl();
+        const scrollEl = this.getScrollEl()
         if (scrollEl) {
-          scrollEl.addEventListener("scroll", this.onScrollFn);
+          scrollEl.addEventListener("scroll", this.onScrollFn)
         }
       }
-    });
+    })
   }
 
-  language:string = localStorage.getItem('locale') || 'zh'
-  zhToEn:any = ''
-  created(){
+  language: string = localStorage.getItem("locale") || "zh"
+  zhToEn: any = ""
+  created() {
     this.zhToEn = zhToEn
   }
 
   destroyed() {
     if (this.getScrollEl && this.onScrollFn) {
-      const scrollEl = this.getScrollEl();
+      const scrollEl = this.getScrollEl()
       if (scrollEl) {
-        scrollEl.removeEventListener("scroll", this.onScrollFn);
+        scrollEl.removeEventListener("scroll", this.onScrollFn)
       }
     }
   }

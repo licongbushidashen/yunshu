@@ -22,25 +22,23 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue } from "vue-property-decorator";
 
-import { State, Action, namespace } from 'vuex-class';
+import { State, Action, namespace } from "vuex-class";
 
-import { LanguageTransform } from '@/utils';
+import { LanguageTransform } from "@/utils";
 
-const AppCenterModule = namespace('Apps/AppCenter');
-
+const AppCenterModule = namespace("Apps/AppCenter");
 
 @Component({
-  name: 'AppHeader'
+  name: "AppHeader"
 })
-
 export default class AppHeader extends Vue {
   /* State */
-  @AppCenterModule.State('appInfo') appInfo: any;
+  @AppCenterModule.State("appInfo") appInfo: any;
 
   /* Action */
-  @AppCenterModule.Action('getAppDetail') getAppDetail: any;
+  @AppCenterModule.Action("getAppDetail") getAppDetail: any;
 
   beforeMount() {
     const params: Apps.AppCenter.AppInfoParams = {
@@ -48,7 +46,7 @@ export default class AppHeader extends Vue {
     };
     if (params.appCode) {
       this.getAppDetail(params).then(() => {
-        document.title = '云枢-' + this.appName;
+        document.title = this.appName;
       });
     }
   }
@@ -58,7 +56,7 @@ export default class AppHeader extends Vue {
    */
   get appName() {
     if (!this.appInfo) {
-      return '';
+      return "";
     }
     return LanguageTransform.getLang(this.appInfo.name, this.appInfo.name_i18n);
   }
@@ -67,12 +65,16 @@ export default class AppHeader extends Vue {
    * 跳转到设置
    */
   toSetting() {
-    this.$router.push({
-      name: 'appSettings',
-      params: {
-        appCode: this.$route.params.appCode
-      }
-    }).catch((err: any) => {err});
+    this.$router
+      .push({
+        name: "appSettings",
+        params: {
+          appCode: this.$route.params.appCode
+        }
+      })
+      .catch((err: any) => {
+        err;
+      });
   }
 }
 </script>
@@ -110,10 +112,10 @@ export default class AppHeader extends Vue {
   span {
     display: inline-block;
     padding: 2px 8px;
-    border:1px solid #fff;
-    border-radius:4px;
-    font-family:PingFangSC-Regular;
-    font-weight:400;
+    border: 1px solid #fff;
+    border-radius: 4px;
+    font-family: PingFangSC-Regular;
+    font-weight: 400;
     cursor: pointer;
   }
   .h-icon-all-question-circle-o {

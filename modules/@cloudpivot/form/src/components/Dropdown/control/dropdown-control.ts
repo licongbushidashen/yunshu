@@ -6,102 +6,97 @@
  * @Description: In User Settings Edit
  * @FilePath: \frontend\modules\@cloudpivot\form\src\components\Dropdown\control\dropdown-control.ts
  */
-import * as typings from "@cloudpivot/form/schema";
+import * as typings from "@cloudpivot/form/schema"
 
-import { SelectControl } from "@cloudpivot/form/src/common/controls/select-control";
+import { SelectControl } from "@cloudpivot/form/src/common/controls/select-control"
 
-import { Watch } from "vue-property-decorator";
+import { Watch } from "vue-property-decorator"
 
-export abstract class DropdownControl extends SelectControl<
-  typings.DropdownOptions
-> {
-  disableds: boolean[] = [];
-  hasSelectBatchImport: boolean = false;
+export abstract class DropdownControl extends SelectControl<typings.DropdownOptions> {
+  disableds: boolean[] = []
+  hasSelectBatchImport: boolean = false
 
   get multiple() {
-    return this.controlOpts.multi;
+    return this.controlOpts.multi
   }
 
   get hasEmpty() {
-    return this.controlOpts.displayEmpty;
+    return this.controlOpts.displayEmpty
   }
 
   get emptyValue() {
-    return this.controlOpts.emptyValue || "(空)";
+    return this.controlOpts.emptyValue || "(空)"
   }
 
   get mode() {
-    return this.multiple ? "multiple" : "";
+    return this.multiple ? "multiple" : ""
   }
 
   get isLongText() {
-    let dateItem;
+    let dateItem
     if ((this.control as any).parentKey) {
-      dateItem = this.getDataItem(this.control.key, this.control.parentKey);
+      dateItem = this.getDataItem(this.control.key, this.control.parentKey)
     } else {
-      dateItem = this.getDataItem(this.control.key);
+      dateItem = this.getDataItem(this.control.key)
     }
-    if (!dateItem) return false;
-    return dateItem.propertyType === typings.DataItemType.LongText;
+    if (!dateItem) return false
+    return dateItem.propertyType === typings.DataItemType.LongText
   }
 
   @Watch("items")
   onItemsChange() {
-    this.options = this.initOptions(!this.multiple);
-    this.resetDisableds();
+    this.options = this.initOptions(!this.multiple) as string[]
+    this.resetDisableds()
   }
 
   setControl() {
     try {
       if (Array.isArray(this.ctrl.value)) {
         if (this.ctrl.value.length > 0 && this.ctrl.value[0].marked === true) {
-          this.hasSelectBatchImport =
-            this.ctrl.value[0].marked === true ? true : false;
+          this.hasSelectBatchImport = this.ctrl.value[0].marked === true ? true : false
           this.handleValueChange(
             this.ctrl.value[0].marked === true
               ? typeof this.ctrl.value[0].value === "string"
                 ? this.ctrl.value[0].value.split(";").filter((x: any) => !!x)
                 : this.ctrl.value[0].value
               : this.ctrl.value
-          );
+          )
         } else {
-          this.handleValueChange(this.ctrl.value);
+          this.handleValueChange(this.ctrl.value)
         }
       } else {
-        const obj = JSON.parse(this.ctrl.value);
-        this.hasSelectBatchImport = obj.marked === true ? true : false;
-        this.handleValueChange(
-          obj.marked === true ? obj.value : this.ctrl.value
-        );
+        const obj = JSON.parse(this.ctrl.value)
+        this.hasSelectBatchImport = obj.marked === true ? true : false
+        this.handleValueChange(obj.marked === true ? obj.value : this.ctrl.value)
       }
     } catch (e) {
-      this.handleValueChange(this.ctrl.value);
+      this.handleValueChange(this.ctrl.value)
     }
-    this.onItemsChange();
+    this.onItemsChange()
   }
 
   handleValueChange(value: any[]): void {
-    this.val = super.convertValue(this.multiple, value);
+    this.val = super.convertValue(this.multiple, value)
   }
 
   resetDisableds() {
     // ;
     if (!this.multiple || this.isLongText) {
-      return;
+      return
     }
-    const values = this.ctrl.value;
+    const values = this.ctrl.value
     if (!Array.isArray(values)) {
-      return;
+      return
     }
 
-    const len = this.countLengthOf(values.join(";"));
+    const len = this.countLengthOf(values.join(";"))
     this.options.forEach((k, i) => {
       if (values.indexOf(k) > -1) {
-        return;
+        return
       }
-      let l = this.countLengthOf(k) + 1;
-      this.disableds[i] = len + l > 200;
-    });
+      let l = this.countLengthOf(k) + 1
+      this.disableds[i] = len + l > 200
+    })
   }
 
   destroyed() {

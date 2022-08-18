@@ -22,7 +22,7 @@
             mockMode="true"
           ></workflow-info>
           <pc-form-renderer
-            :class="{'has-form-border': borderMode}"
+            :class="{ 'has-form-border': borderMode }"
             ref="formRenderer"
             :controls="controls"
             :relevanceDataList="dataModalList"
@@ -70,7 +70,8 @@
       type="info"
       banner
       closable
-      class="alert-info" />
+      class="alert-info"
+    />
 
     <a-alert
       v-if="showAlertWarn"
@@ -110,7 +111,7 @@ import FormDetailHeader from "./form-detail-header.vue";
     FormActionModal: pcForm.runtime.FormActionModal,
     Approval: flow.components.Approval,
     PcFormRenderer: pcForm.renderer.FormRenderer,
-    FormActions: pcForm.runtime.FormActions,
+    FormActions: pcForm.runtime.FormActions
   },
 
   beforeRouteEnter(to, from, next) {
@@ -141,11 +142,19 @@ export default class mockForm extends pcForm.runtime.FormDetail {
 
   @Provide()
   layoutTypeFn() {
-    return this.formObj && this.formObj.bizSheet && this.formObj.bizSheet.layoutType === "vertical";
+    return (
+      this.formObj &&
+      this.formObj.bizSheet &&
+      this.formObj.bizSheet.layoutType === "vertical"
+    );
   }
 
   get borderMode() {
-    return this.formObj && this.formObj.bizSheet && this.formObj.bizSheet.borderMode === "open";
+    return (
+      this.formObj &&
+      this.formObj.bizSheet &&
+      this.formObj.bizSheet.borderMode === "open"
+    );
   }
 
   get completed() {
@@ -158,17 +167,23 @@ export default class mockForm extends pcForm.runtime.FormDetail {
 
   get canceled() {
     return (
-      this.formObj && this.formObj.bizObject && this.formObj.bizObject.sequenceStatus === "CANCELED"
+      this.formObj &&
+      this.formObj.bizObject &&
+      this.formObj.bizObject.sequenceStatus === "CANCELED"
     );
   }
 
   get mockActions() {
     const { startWorkflowCode } = this.$route.query;
     if (startWorkflowCode && !this.formObj.workflowInstanceId) {
-      const action = this.actions.filter((ac:any) => ac.code === runtime.FormAction.Submit);
+      const action = this.actions.filter(
+        (ac: any) => ac.code === runtime.FormAction.Submit
+      );
       return action;
     }
-    return this.actions.filter((ac:any) => ac.code !== runtime.FormAction.Print);
+    return this.actions.filter(
+      (ac: any) => ac.code !== runtime.FormAction.Print
+    );
   }
 
   get showActions() {
@@ -183,7 +198,7 @@ export default class mockForm extends pcForm.runtime.FormDetail {
     });
     // 来自待阅的页面需要发出重载信号
     const { workitemType } = this.$route.query;
-    if (workitemType && workitemType === 'unreadWorkitem') {
+    if (workitemType && workitemType === "unreadWorkitem") {
       const url: any = this.$route.query.return;
       window.onbeforeunload = () => {
         opener.postMessage(url, opener.location.href);
@@ -191,14 +206,17 @@ export default class mockForm extends pcForm.runtime.FormDetail {
     }
   }
 
-
   /**
    * 让收起按钮始终可见
    * */
 
   makeRetractShow() {
-    const formWrap: HTMLDivElement = document.querySelector(".form-wrap") as HTMLDivElement;
-    const retractDom: HTMLDivElement = document.querySelector(".retract") as HTMLDivElement;
+    const formWrap: HTMLDivElement = document.querySelector(
+      ".form-wrap"
+    ) as HTMLDivElement;
+    const retractDom: HTMLDivElement = document.querySelector(
+      ".retract"
+    ) as HTMLDivElement;
     if (!retractDom) return;
     formWrap.addEventListener("scroll", (e: any) => {
       const st: number = formWrap.scrollTop as number;
@@ -300,17 +318,18 @@ export default class mockForm extends pcForm.runtime.FormDetail {
 
         // 附件上传者因为当前表单操作者
         const operater = window.sessionStorage.getItem("user");
-        operater ? name = JSON.parse(operater).name : name;
+        operater ? (name = JSON.parse(operater).name) : name;
         window.sessionStorage.setItem("uploadName", name);
         const title = this.formObj.instanceName || this.formObj.bizSheet.name;
-        document.title = `云枢-${title}`;
+        document.title = `${title}`;
       }
 
       this.$nextTick(() => {
         this.makeRetractShow();
       });
     } catch (e) {
-      console.log(e);return;
+      console.log(e);
+      return;
       if (e.errcode === 601010 || e.errcode === 6000018) {
         this.goPermission();
         return;
@@ -327,10 +346,14 @@ export default class mockForm extends pcForm.runtime.FormDetail {
       }
 
       const noData =
-        this.formObj && this.formObj.bizObject ? this.formObj.bizObject.loadedFromDb : true;
+        this.formObj && this.formObj.bizObject
+          ? this.formObj.bizObject.loadedFromDb
+          : true;
       if (e.errcode === 402500 || !noData) {
         setTimeout(() => {
-          this.$message.error("页面渲染失败或数据已删除，请检查HTML设置或者数据。");
+          this.$message.error(
+            "页面渲染失败或数据已删除，请检查HTML设置或者数据。"
+          );
         }, 50);
       }
 
@@ -344,7 +367,9 @@ export default class mockForm extends pcForm.runtime.FormDetail {
   }
 
   getSheetStorageKey(sheet: schema.FormSheet) {
-    return `${this.formObj.bizSchema.code}-${this.formObj.bizSheet.code}-${sheet.key}`;
+    return `${this.formObj.bizSchema.code}-${this.formObj.bizSheet.code}-${
+      sheet.key
+    }`;
   }
 
   onSheetColumnResize(data: {
@@ -359,7 +384,7 @@ export default class mockForm extends pcForm.runtime.FormDetail {
     if (json) {
       try {
         widthMap = JSON.parse(json);
-      } catch (error) { }
+      } catch (error) {}
     }
 
     if (!widthMap) {
@@ -374,7 +399,10 @@ export default class mockForm extends pcForm.runtime.FormDetail {
 
   loadSheetColumnWidth() {
     const formControls: schema.RendererFormControl[] = [];
-    renderer.components.FormRendererHelper.findFormControl(this.controls, formControls);
+    renderer.components.FormRendererHelper.findFormControl(
+      this.controls,
+      formControls
+    );
 
     const sheets = formControls.filter(
       c =>
@@ -403,7 +431,7 @@ export default class mockForm extends pcForm.runtime.FormDetail {
             col.width = w;
           }
         }
-      } catch { }
+      } catch {}
     }
   }
 
@@ -440,7 +468,8 @@ export default class mockForm extends pcForm.runtime.FormDetail {
         break;
 
       case runtime.FormAction.Retrieve:
-        const workflowInstanceId = this.$route.query.workflowInstanceId as string;
+        const workflowInstanceId = this.$route.query
+          .workflowInstanceId as string;
         this.goWfForm(res.data.id as string, workflowInstanceId, true);
         break;
 
@@ -456,7 +485,7 @@ export default class mockForm extends pcForm.runtime.FormDetail {
 
   goWfForm(workitemId: string, workflowInstanceId: string, reload?: boolean) {
     const params = {
-      name: 'mockForm',
+      name: "mockForm",
       params: {
         appCode: this.$route.params.appCode,
         bizSchemaCode: this.$route.params.bizSchemaCode,
@@ -465,9 +494,9 @@ export default class mockForm extends pcForm.runtime.FormDetail {
       query: {
         workitemId,
         workflowInstanceId,
-        workflowMock: 'true',
-        hideBtn: 'true',
-        t: new Date().getSeconds().toString() || ''
+        workflowMock: "true",
+        hideBtn: "true",
+        t: new Date().getSeconds().toString() || ""
       }
     };
 
@@ -475,49 +504,67 @@ export default class mockForm extends pcForm.runtime.FormDetail {
       const { href } = this.$router.resolve(params);
       window.location.href = href;
     } else {
-      this.workflowInstanceId = '';
+      this.workflowInstanceId = "";
       setTimeout(() => {
-        this.$router.push(params).catch((err: any) => {err});
+        this.$router.push(params).catch((err: any) => {
+          err;
+        });
       }, 0);
     }
   }
 
   goEmptyPage() {
-    this.$router.push({
-      name: "shared-empty"
-    }).catch((err: any) => {err});
+    this.$router
+      .push({
+        name: "shared-empty"
+      })
+      .catch((err: any) => {
+        err;
+      });
   }
 
   goUnpublished() {
-    this.$router.push({
-      name: "formUnpublished"
-    }).catch((err: any) => {err});
+    this.$router
+      .push({
+        name: "formUnpublished"
+      })
+      .catch((err: any) => {
+        err;
+      });
   }
 
   goPermission() {
-    this.$router.push({
-      name: "permission"
-    }).catch((err: any) => {err});
+    this.$router
+      .push({
+        name: "permission"
+      })
+      .catch((err: any) => {
+        err;
+      });
   }
 
   goSuccessPage(backData?: any) {
-    this.$message.success('已操作完成', 2, () => window.close());
+    this.$message.success("已操作完成", 2, () => window.close());
   }
 
   goDetailPage(backData?: any) {
-    this.$message.success('已操作完成', 2, () => {
-      this.$router.push({
-        name: 'mockDetail',
-        params: {
-          appCode: this.$route.params.appCode,
-          bizSchemaCode: this.$route.params.bizSchemaCode,
-          workflowCode: this.$route.params.workflowCode
-        },
-        query: {
-          workflowInstanceId: backData.workflowInstanceId,
-          workflowMock: 'true',
-        }
-      }).catch((err: any) => {err});
+    this.$message.success("已操作完成", 2, () => {
+      this.$router
+        .push({
+          name: "mockDetail",
+          params: {
+            appCode: this.$route.params.appCode,
+            bizSchemaCode: this.$route.params.bizSchemaCode,
+            workflowCode: this.$route.params.workflowCode
+          },
+          query: {
+            workflowInstanceId: backData.workflowInstanceId,
+            workflowMock: "true"
+          }
+        })
+        .catch((err: any) => {
+          err;
+        });
     });
   }
 
@@ -609,17 +656,17 @@ export default class mockForm extends pcForm.runtime.FormDetail {
   height: calc(100% - 64px);
   position: relative;
   min-width: 924px;
-  transition: all ease .5s;
+  transition: all ease 0.5s;
 }
 
 .retract {
   position: absolute;
   right: 0;
   top: 3px;
-  transition: all ease .1s;;
+  transition: all ease 0.1s;
   cursor: pointer;
   & > img {
-    opacity: .6;
+    opacity: 0.6;
     &:hover {
       opacity: 1;
     }

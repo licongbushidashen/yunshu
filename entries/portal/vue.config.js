@@ -49,7 +49,7 @@ module.exports = {
   pages,
   parallel: false,
   filenameHashing: true,
-  productionSourceMap: true,
+  productionSourceMap: false,
   // 处理IE兼容————vuex持久化脚本语法转译
   transpileDependencies: ['vuex-persist', 'flatted','ansi-regex', '@h3print/designer','@h3print/excellit','@h3print/runtime'],
   //打包分析插件

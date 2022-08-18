@@ -127,11 +127,18 @@ export default class AppList2 extends Vue {
     return this.DefaultFileService.getHeaders();
   }
   onChange(val) {
+    debugger;
+    if (!val.file.response) {
+      return;
+    }
+
     if (val.file.response.code == 200) {
       if (val.file.response.error == 0) {
-        this.$message.info(`导入成功`, 3000);
+        this.$message.info(`导入成功`);
         setTimeout(() => {
-          window.location.reload();
+          this.tableLoading = false;
+          // window.location.reload();
+          this.reload();
         }, 3000);
       } else {
         this.$confirm({
@@ -139,10 +146,16 @@ export default class AppList2 extends Vue {
           content: val.file.response.data,
           okType: "danger",
           okText: "确定",
-          cancelText: "取消",
-          onOk() {
+          cancelButtonProps: { style: { display: "none" } },
+          onCancel: () => {
+            this.tableLoading = false;
+            this.reload();
+          },
+          onOk: () => {
             // 彻底删除
-            window.location.reload();
+            // window.location.reload();
+            this.tableLoading = false;
+            this.reload();
           }
         });
       }
@@ -1463,9 +1476,6 @@ export default class AppList2 extends Vue {
       //   associationCode: "zsq1",
       // });
 
-      this.queryActions.splice(1, 0, {
-        associationType: 10
-      });
       const deleteBtn = this.queryActions.filter(
         (ac: any) => ac.actionCode === "delete" || ac.actionCode === "export"
       );
@@ -1777,7 +1787,7 @@ export default class AppList2 extends Vue {
       if (window.wy_query.time) {
         var propertyCode = "";
         if (this.$route.params.schemaCode == "SRW") {
-          propertyCode = "Date1645093298050";
+          propertyCode = "BLRQ";
         }
         if (this.$route.params.schemaCode == "LDPS") {
           propertyCode = "BLJZ";
@@ -1795,6 +1805,14 @@ export default class AppList2 extends Vue {
           propertyCode: propertyCode,
           propertyType: 3,
           propertyValue: window.wy_query.time,
+          propertyValueName: ""
+        });
+      }
+      if (window.wy_query.BLJZRQ) {
+        params.filters.push({
+          propertyCode: "BLJZRQ",
+          propertyType: 3,
+          propertyValue: window.wy_query.BLJZRQ,
           propertyValueName: ""
         });
       }
@@ -1870,9 +1888,33 @@ export default class AppList2 extends Vue {
           propertyValueName: ""
         });
       }
-      if (window.wy_query.CBBM) {
+      if (window.wy_query.CBDW) {
+        var propertyCode = "CBDW_1";
+        if (
+          this.$route.params.schemaCode == "ZRBLD" ||
+          this.$route.params.schemaCode == "SJPSD" ||
+          this.$route.params.schemaCode == "FKD"
+        ) {
+          propertyCode = "CBDW";
+        }
         params.filters.push({
-          propertyCode: "CBBM",
+          propertyCode: propertyCode,
+          propertyType: 61,
+          propertyValue: window.wy_query.CBDW,
+          propertyValueName: ""
+        });
+      }
+      if (window.wy_query.CBBM) {
+        var propertyCode = "CBDW_1";
+        if (
+          this.$route.params.schemaCode == "ZRBLD" ||
+          this.$route.params.schemaCode == "SJPSD" ||
+          this.$route.params.schemaCode == "FKD"
+        ) {
+          propertyCode = "CBDW";
+        }
+        params.filters.push({
+          propertyCode: propertyCode,
           propertyType: 60,
           propertyValue: window.wy_query.CBBM,
           propertyValueName: ""
@@ -2123,7 +2165,16 @@ export default class AppList2 extends Vue {
     dataOrigin.map(e => {
       ids.push(e.workflowInstanceId);
     });
-    await this.axiosMap(ids);
+    if (
+      !(
+        this.$route.params.schemaCode == "ZRBLD" ||
+        this.$route.params.schemaCode == "FKD" ||
+        this.$route.params.schemaCode == "SJPSD"
+      )
+    ) {
+      await this.axiosMap(ids);
+    }
+
     // this.isLoading = true;
     dataOrigin.forEach(async (item: any, index: number) => {
       const obj: any = {};
@@ -2364,6 +2415,59 @@ export default class AppList2 extends Vue {
       // console.log("---------------------sssss", res);
       // obj.urge = res.data.formPermission.actionPermission.urge;
       if (this.$route.name == "work") {
+        if (!obj.BLJZRQ) {
+          if (obj.SFFK == "是" || obj.FK == "是" || obj.SFXUFK == "是") {
+            this.flagids.map(e => {
+              if (e.id == obj.workflowInstanceId) {
+                if (e.flag1 && obj.sequenceStatus == "进行中") {
+                  obj.wystyle = "#be0404";
+                  obj.sequenceStatus = "已逾期";
+                } else if (e.flag2 && obj.sequenceStatus == "进行中") {
+                  obj.wystyle = "#ff8300";
+                  obj.sequenceStatus = "已延期";
+                } else {
+                  obj.wystyle = "#304265";
+                }
+              }
+            });
+            console.log(this.$route.params.schemaCode, 777);
+            dataSource.push(obj);
+          } else {
+            if (this.$route.params.schemaCode != "ZDGZ" && this.$route.params.schemaCode != "SRW") {
+              dataSource.push(obj);
+            }
+          }
+        } else {
+          if (
+            Date.parse(new Date()) - 24 * 60 * 60 * 1000 < Date.parse(obj.BLJZRQ) ||
+            obj.SFFK == "否" ||
+            obj.FK == "否"
+          ) {
+            obj.wystyle = "#304265";
+            dataSource.push(obj);
+          } else if (obj.BLJZRQ) {
+            debugger;
+            if (obj.SFFK == "是" || obj.FK == "是" || obj.SFXUFK == "是") {
+              this.flagids.map(e => {
+                if (e.id == obj.workflowInstanceId) {
+                  if (e.flag1 && obj.sequenceStatus == "进行中") {
+                    obj.wystyle = "#be0404";
+                    obj.sequenceStatus = "已逾期";
+                  } else if (e.flag2 && obj.sequenceStatus == "进行中") {
+                    obj.wystyle = "#ff8300";
+                    obj.sequenceStatus = "已延期";
+                  } else {
+                    obj.wystyle = "#304265";
+                  }
+                }
+              });
+            }
+            dataSource.push(obj);
+          }
+
+          this.total = dataSource.length;
+        }
+      } else {
         if (obj.SFFK == "是" || obj.FK == "是" || obj.SFXUFK == "是") {
           this.flagids.map(e => {
             if (e.id == obj.workflowInstanceId) {
@@ -2379,25 +2483,11 @@ export default class AppList2 extends Vue {
             }
           });
           dataSource.push(obj);
+        } else {
+          dataSource.push(obj);
         }
-        this.total = dataSource.length;
-      } else {
-        let wystyle = "";
-        this.flagids.map(e => {
-          if (e.id == obj.workflowInstanceId) {
-            if (e.flag1 && obj.sequenceStatus == "进行中") {
-              obj.wystyle = "#be0404";
-              obj.sequenceStatus = "已逾期";
-            } else if (e.flag2 && obj.sequenceStatus == "进行中") {
-              obj.wystyle = "#ff8300";
-              obj.sequenceStatus = "已延期";
-            } else {
-              obj.wystyle = "#304265";
-            }
-          }
-        });
-        dataSource.push(obj);
       }
+
       if (dataSource.length == 0) {
         this.isShowNoData = true;
         // this.total = 0;
@@ -2966,7 +3056,7 @@ export default class AppList2 extends Vue {
 
   @Watch("applicationPageTitle")
   onApplicationPageTitleChange(v: any) {
-    document.title = `奥哲云枢-${v}`;
+    document.title = `之江实验室-${v}`;
   }
 
   @Watch("$route")

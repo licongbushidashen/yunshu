@@ -22,7 +22,7 @@
         <a-icon type="question-circle"/>
       </a-tooltip>
     </div>
-    <div class="field__control">{{ ftext ? ftext : text }}</div>
+   <div class="field__control">{{ ftext ? ftext : text }}</div>
   </div>
 </template>
 
@@ -46,7 +46,7 @@ import { StaffSelectorMapping } from '@cloudpivot/form/src/common/components/for
   }
 })
 export default class PcSystemControl extends SystemControl {
-  ftext: string = ''
+  // ftext: string = ''
   created() {
     if(this.control.key === "createdTime" || this.control.key === "modifiedTime") {
       if(typeof this.control.value === 'string'){
@@ -59,7 +59,7 @@ export default class PcSystemControl extends SystemControl {
         this.control.value=new Date();
       }
       
-      this.ftext = DateHandle.dateFormatApm(new Date(this.control.value), this.control.options.format1)
+      // this.ftext = DateHandle.dateFormatApm(new Date(this.control.value), this.control.options.format1)
     }
     this.getUserInfo();
   }

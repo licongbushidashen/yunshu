@@ -123,7 +123,6 @@ axios.interceptors.response.use(
   },
   error => {
     if (error.response) {
-      debugger;
       switch (error.response.status) {
         case 401:
           if (
@@ -136,7 +135,13 @@ axios.interceptors.response.use(
             if (corpId) {
               url = `${url}?corpId=${corpId}`;
             }
-            window.location.href = url;
+            localStorage.removeItem("token");
+            localStorage.removeItem("wydpet");
+            localStorage.removeItem("refresh_token");
+            localStorage.removeItem("expireTime");
+            localStorage.removeItem("zj_code");
+            // window.location.href = url;
+            window.location.reload();
           }
           // Vue.prototype.$router && Vue.prototype.$router.replace({path: '/login'});
           break;

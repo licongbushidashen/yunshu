@@ -71,7 +71,7 @@ export default class PcInputNumber extends NumberInputControl {
     } else {
       //查看模式
       if(typeof this.formatter() === 'string' && this.formatter().includes("%")){
-        this.text = this.numberToDisplay(this.val*100,'format1')
+        this.text = this.numberToDisplay(this.accMul(this.val,100),'format1')
       }else{
         this.text = this.formatter();
       }
@@ -153,7 +153,7 @@ export default class PcInputNumber extends NumberInputControl {
     if(this.controlOpts.format1 && this.controlOpts.format1.includes("ratio") &&
     typeof format ==='string' && this.val) {
       setTimeout(() => {
-        let val = this.numberToDisplay(this.val*100,'format');
+        let val = this.numberToDisplay(this.accMul(this.val,100),'format');
         return input.value = val;
       }, 100);
     } else{
@@ -162,6 +162,25 @@ export default class PcInputNumber extends NumberInputControl {
         return input.value = format;
       }, 100);
     }
+  }
+
+  /*
+    *乘法函数，用来得到精确的乘法结果
+    *说明：javascript的乘法结果会有误差，在两个浮点数相乘的时候会比较明显。这个函数返回较为精确的乘法结果。
+    *调用：accMul(arg1,arg2)
+    *返回值：arg1乘以arg2的精确结果
+  */
+  accMul(arg1, arg2) {
+    var m = 0,
+      s1 = arg1.toString(),
+      s2 = arg2.toString();
+    try {
+      m += s1.split(".")[1].length
+    } catch (e) {}
+    try {
+      m += s2.split(".")[1].length
+    } catch (e) {}
+    return Number(s1.replace(".", "")) * Number(s2.replace(".", "")) / Math.pow(10, m)
   }
   
   /**
@@ -199,6 +218,11 @@ export default class PcInputNumber extends NumberInputControl {
   numberToDisplay(value:any,filed){
     let result:any = value;
     switch(this.controlOpts[filed]){
+      case 'ratio': 
+        result = numberFormatter.ratio.formatter(result, {
+          precision: 0,
+        });
+        break;
       case 'ratio.tenths' :
         result = numberFormatter.ratio.formatter(result, {
           precision: 1,

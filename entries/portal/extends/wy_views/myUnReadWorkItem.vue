@@ -1,34 +1,37 @@
 <template>
-  <div style="    height: 100%;">
-    <div class="wy_tabs">
-      <ul>
-        <li
-          v-for="(item, index) in dcdb"
-          :key="index"
-          @click="change(item, index)"
-          style="position: relative;"
-        >
-          <span :class="Tindex == index ? 'active' : ''">{{ item.label }}</span>
-          <span
-            v-if="item.num"
-            style=" background: rgb(186, 5, 5);
-                    border-radius: 50%;
-                    width: 22px;
-                    height: 22px;
-                    line-height: 22px;
-                    display: inline-block;
-                    position: absolute;
-                    top: 11px;
-                    right: 25px;
-                    font-size: 12px;
-                    text-align: center;
-                    color: rgb(255, 255, 255);"
-            >{{ item.num }}</span
-          >
-        </li>
-      </ul>
-    </div>
+  <div style="      height: calc(100% - 130px);">
     <div class="wy_select">
+      <a-form layout="inline" style="display:flex">
+        <label
+          style="    line-height: 43px;    margin-right: 10px;color:#000000d9"
+          >任务名称</label
+        >
+        <a-form-item :colon="false" ref="queryForm1">
+          <a-input
+            placeholder="任务名称"
+            v-model="queryData.workflowName"
+            class="workflow-name-input"
+          ></a-input>
+        </a-form-item>
+        <label
+          style="    line-height: 43px;    margin-right: 10px;color:#000000d9"
+          >重点任务来源</label
+        >
+        <a-select
+          show-search
+          style="width:180px;    padding-top: 5px;    margin-right: 20px;"
+          v-model="queryData.workflowCode"
+          allowClear
+        >
+          <template v-for="item in targetDataItems">
+            <a-select-option :value="item.status" :key="item.status">{{
+              item.name
+            }}</a-select-option>
+          </template>
+        </a-select>
+        <span class="wy_search" @click="seach"> </span>
+      </a-form>
+      <div class="wy_table" style="margin-top:20px;"></div>
       <List @openForm="openForm" ref="list1" />
     </div>
   </div>
@@ -49,7 +52,14 @@ import {
 } from "@h3/antd-vue";
 export default {
   components: {
-    List: List
+    List: List,
+    StaffSelector: formPc.StaffSelector,
+    AInput: Input,
+    AForm: Form,
+    AFormItem: Form.Item,
+    ASelect: Select,
+    ASelectOption: Select.Option,
+    ARangePicker: DatePicker.RangePicker
     // List: list.components.ApplicationList
   },
   data() {
@@ -58,29 +68,39 @@ export default {
       Tindex: 0,
       sheetDataItem: "",
       targetDataItems: [
+        // {
+        //   name: "上级批示",
+        //   status: "LDPS"
+        // },
+        // {
+        //   name: "实验室主任批示",
+        //   status: "default_1646214214918"
+        // },
+        // {
+        //   name: "日常督办事项",
+        //   status: "RCLC"
+        // },
         {
-          name: "进行中",
-          status: "PROCESSING"
+          name: "实验室年度重点工作",
+          status: "default_1646217559189"
         },
         {
-          name: "已完成",
-          status: "COMPLETED"
-        },
-        {
-          name: "已作废",
-          status: "CANCELED"
-        },
-        {
-          name: "草稿",
-          status: "DRAFT"
+          name: "省年度重点工作",
+          status: "default_1646218936192"
         }
+        // {
+        //   name: "任务办理反馈单",
+        //   status: "RWBL"
+        // }
       ],
+
       queryData: {
         activityName: "",
         sequenceNo: "",
         workflowName: "",
         participantName: "",
-        workflowCode: "default_1646217559189"
+        workflowCode: ""
+        // workflowCode: "default_1646217559189"
       },
       dcdb: [
         {
@@ -150,7 +170,8 @@ export default {
         sequenceNo: "",
         workflowName: "",
         participantName: "",
-        workflowCode: this.dcdb[index].id
+        workflowCode: ""
+        // workflowCode: this.dcdb[index].id
       };
       this.Tindex = index;
       this.$route.params.schemaCode = item.id;
@@ -177,11 +198,11 @@ export default {
     },
 
     onparchange() {
-      this.numall();
+      // this.numall();
     }
   },
   created() {
-    this.numall();
+    // this.numall();
   },
   mounted() {
     window.wy_query = null;
@@ -199,7 +220,7 @@ export default {
   margin-left: 60px;
   margin-right: 60px;
   margin-top: 10px;
-  height: calc(100% - 180px);
+  height: calc(100% - 40px);
 }
 .wy_tabs {
   border-top: 1px solid #e0e0e0;
@@ -290,12 +311,12 @@ export default {
   background-size: 100% 100%;
   margin-top: 6px;
 }
-.wy_select {
-  margin-left: 60px;
-  margin-right: 60px;
-  margin-top: 10px;
-  height: calc(100% - 180px);
-}
+// .wy_select {
+//   margin-left: 60px;
+//   margin-right: 60px;
+//   margin-top: 10px;
+//   height: calc(100% - 180px);
+// }
 .wy_tabs {
   border-top: 1px solid #e0e0e0;
   border-bottom: 1px solid #e0e0e0;

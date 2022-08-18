@@ -1,8 +1,8 @@
 <template>
   <div id="MyUnReadWorkItem" class="workitem-box" ref="workItem">
-    <div class="content-top">
-      <!-- <h2>{{ $t("cloudpivot.flowCenter.pc.toreadList") }}</h2> -->
-    </div>
+    <!-- <div class="content-top">
+      <h2>{{ $t("cloudpivot.flowCenter.pc.toreadList") }}</h2>
+    </div> -->
 
     <PageLoading v-model="isLoading" shadeColor="#F4F6FC" :shadeOpacity="1" />
 
@@ -56,11 +56,10 @@
               @click="openDetail(record)"
             ></span>
           </template>
-
           <!-- 流程类型 -->
           <span slot="workflowNameTitle">
             <!-- {{ $t("cloudpivot.flowCenter.pc.flowTemplate") }} -->
-            任务名称
+            任务来源
           </span>
           <template slot="workflowName" slot-scope="{ text, record }">
             <span
@@ -74,9 +73,8 @@
               >{{ record.name_i18n[$i18n.locale] }}</span
             >
           </template>
-
           <!-- 单据号 -->
-          <span slot="sequenceNoTitle">
+          <!-- <span slot="sequenceNoTitle">
             {{ $t("cloudpivot.flowCenter.pc.sequenceNo") }}
           </span>
           <template slot="sequenceNo" slot-scope="{ text, record }">
@@ -84,7 +82,7 @@
               :class="record.isRead ? 'gray text-ellipsis' : 'text-ellipsis'"
               >{{ text }}</span
             >
-          </template>
+          </template> -->
 
           <!-- 传阅来源 -->
           <span slot="sourceNameTitle">{{
@@ -288,13 +286,19 @@ export default class MyUnReadWorkItem extends mixins(WorkItemMixin) {
       hSlot: "indexTitle",
       bSlot: "orderNumber"
     },
+
     {
       dataIndex: "instanceName",
       width: 220,
       hSlot: "instanceNameTitle",
       bSlot: "instanceName"
     },
-
+    {
+      dataIndex: "workflowName",
+      width: 220,
+      hSlot: "workflowNameTitle",
+      bSlot: "workflowName"
+    },
     {
       dataIndex: "sequenceNo",
       width: 130,
@@ -397,7 +401,25 @@ export default class MyUnReadWorkItem extends mixins(WorkItemMixin) {
     window.removeEventListener("message", this.reloadMessage, false);
     this.$message.destroy();
   }
-
+  openDetail(obj: any) {
+    obj.vm = this;
+    const url = `/form/detail?workitemId=${obj.id}&workflowInstanceId=${
+      obj.instanceId
+    }&return=${location.pathname + location.search}&workitemType=queryInstance`;
+    if (this.isDingTalk) {
+      this.$router
+        .push({
+          path: url
+        })
+        .catch((err: any) => {
+          err;
+        });
+    } else {
+      // const newWindow: any = window.open();
+      this.showIframeForm = true;
+      this.IframeFormUrl = url;
+    }
+  }
   // 全选
   selectAll(e: Event) {
     const isChecked = (e.target as any).checked;

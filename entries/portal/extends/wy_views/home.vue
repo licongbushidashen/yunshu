@@ -141,7 +141,7 @@ export default {
       tasks: [],
       echar: [],
       childrenList: false,
-      Tindex: 0,
+      Tindex: 1,
       sheetDataItem: "",
       targetDataItems: [],
       queryData: {
@@ -176,7 +176,7 @@ export default {
   async mounted() {
     // document.title = `督查督办系统-${this.$route.meta.title}` || "督查督办系统";
     this.isLoading = true;
-    this.$route.params.schemaCode = "ZDGZ";
+    this.$route.params.schemaCode = "ZRPSD";
     let res = await this.tj();
     let res1 = await this.rw();
     this.rwlys = res1;

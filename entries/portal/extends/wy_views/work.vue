@@ -15,7 +15,7 @@
       <a-form layout="inline" style="display:flex">
         <label
           style="    line-height: 39px;    margin-right: 10px;color:#000000d9"
-          >截止日期</label
+          >反馈日期</label
         >
         <a-form-item
           :colon="false"
@@ -46,7 +46,7 @@
             }}</a-select-option>
           </template>
         </a-select> -->
-        <label
+        <!-- <label
           style="    line-height: 39px;    margin-right: 10px;color: #000000d9;"
           >是否逾期</label
         >
@@ -61,8 +61,8 @@
               item.name
             }}</a-select-option>
           </template>
-        </a-select>
-        <label
+        </a-select> -->
+        <!-- <label
           style="line-height: 39px; margin-right: 10px;color: #000000d9;"
           v-if="Tindex == 1 || Tindex == 2 || Tindex == 3"
           >是否延期</label
@@ -79,7 +79,7 @@
               item.name
             }}</a-select-option>
           </template>
-        </a-select>
+        </a-select> -->
         <label
           style="    line-height: 39px;    margin-right: 10px;color: #000000d9;"
           v-if="Tindex == 0 || Tindex == 4"
@@ -98,7 +98,7 @@
             }}</a-select-option>
           </template>
         </a-select>
-        <label
+        <!-- <label
           style="    line-height: 39px;    margin-right: 10px;color: #000000d9;"
           v-if="Tindex == 2"
           >任务来源</label
@@ -115,15 +115,13 @@
               item.name
             }}</a-select-option>
           </template>
-        </a-select>
+        </a-select> -->
         <label
-          v-if="!$store.state.dept.name"
           for=""
           style="    line-height: 39px;    margin-right: 10px;color: #000000d9;"
-          >承办部门</label
+          >承办单位</label
         >
         <staff-selector
-          v-if="!$store.state.dept.name"
           style="width:200px;position: relative;    top: 4px;    margin-right: 20px;"
           v-model="depts"
           :options="taffSelectorOpts"
@@ -160,6 +158,7 @@ import Axios from "axios";
 import List from "../views/wy_application-list.vue";
 import StaffSelector from "@cloudpivot/form/src/common/components/form-staff-selector/pc/staff-selector.vue";
 import list from "@cloudpivot/list/pc";
+import { userApi } from "@cloudpivot/api";
 import {
   Form,
   Input,
@@ -194,7 +193,7 @@ export default {
       },
       depts: "",
       childrenList: false,
-      Tindex: 0,
+      Tindex: 1,
       sheetDataItem1: "",
       sheetDataItem2: "",
       sheetDataItem3: "",
@@ -260,15 +259,16 @@ export default {
         },
         {
           label: "实验室主任批示",
-          id: "ZRPSD"
+          // id: "ZRPSD"
+          id: "ZRBLD"
         },
         {
           label: "日常督办事项",
-          id: "DBX"
+          id: "FKD"
         },
         {
           label: "上级批示",
-          id: "LDPS"
+          id: "SJPSD"
         },
         {
           label: "省年度重点工作",
@@ -278,6 +278,24 @@ export default {
     };
   },
   methods: {
+    onValueChange(value) {
+      if (value.length > 0) {
+        // this.getUserDepartments(value[0].id);
+      } else {
+        this.departmentsList = [];
+        this.departments = undefined;
+      }
+    },
+    // async getUserDepartments(userId) {
+    //   const res = await userApi.getUserDepartments(userId);
+    //   if (res && res.errcode === 0) {
+    //     this.departmentsList = res.data;
+    //     let resoure = res.data.find(d => d.isMain);
+    //     this.departments = resoure.deptId;
+    //   } else {
+    //     this.$message.error(res.errmsg);
+    //   }
+    // },
     rw() {
       return Axios.get("/weiyuapi/authine-lowCode/dcdb/report/getRWLY", {});
     },
@@ -292,9 +310,9 @@ export default {
     seach() {
       let dept = [];
 
-      if (this.$store.state.dept.name) {
-        this.depts = [this.$store.state.dept];
-      }
+      // if (this.$store.state.dept.name) {
+      //   this.depts = [this.$store.state.dept];
+      // }
       for (let i = 0; i < this.depts.length; i++) {
         dept.push({
           name: this.depts[i].name,
@@ -306,32 +324,54 @@ export default {
       if (dept.length) {
         depts = JSON.stringify(dept);
       }
-      window.wy_query = {
-        select: this.sheetDataItem,
-        time:
-          this.queryData.time.length > 0
-            ? this.datePick(this.queryData.time[0]) +
-              ";" +
-              this.datePick(this.queryData.time[1])
-            : null,
-        YQZT: this.sheetDataItem1,
-        SFTQ: this.sheetDataItem2,
-        YJ: this.sheetDataItem3,
-        CBBM: depts,
-        LY: this.sheetDataItem4
-      };
+      if (this.Tindex == 1 || this.Tindex == 2 || this.Tindex == 3) {
+        window.wy_query = {
+          select: this.sheetDataItem,
+          BLJZRQ:
+            this.queryData.time.length > 0
+              ? this.datePick(this.queryData.time[0]) +
+                ";" +
+                this.datePick(this.queryData.time[1])
+              : null,
+          YQZT: this.sheetDataItem1,
+          SFTQ: this.sheetDataItem2,
+          YJ: this.sheetDataItem3,
+          CBDW: depts,
+          LY: this.sheetDataItem4
+        };
+      } else {
+        window.wy_query = {
+          select: this.sheetDataItem,
+          time:
+            this.queryData.time.length > 0
+              ? this.datePick(this.queryData.time[0]) +
+                ";" +
+                this.datePick(this.queryData.time[1])
+              : null,
+          YQZT: this.sheetDataItem1,
+          SFTQ: this.sheetDataItem2,
+          YJ: this.sheetDataItem3,
+          CBDW: depts,
+          LY: this.sheetDataItem4
+        };
+      }
+
       this.$refs.lists.reload();
     },
     change(item, index) {
+      debugger;
+      this.depts = "";
       this.sheetDataItem = "";
+      this.sheetDataItem3 = "";
+      this.$route.params.schemaCode = item.id;
       this.queryData = {
         time: [],
         workflowName: ""
       };
       let dept = [];
-      if (this.$store.state.dept.name) {
-        this.depts = [this.$store.state.dept];
-      }
+      // if (this.$store.state.dept.name) {
+      //   this.depts = [this.$store.state.dept];
+      // }
       for (let i = 0; i < this.depts.length; i++) {
         dept.push({
           name: this.depts[i].name,
@@ -349,8 +389,7 @@ export default {
       this.sheetDataItem1 = "";
       this.sheetDataItem2 = "";
       this.Tindex = index;
-      console.log(this.$route.params.schemaCode);
-      this.$route.params.schemaCode = item.id;
+
       this.childrenList = false;
       this.$nextTick(() => {
         this.childrenList = true;
@@ -361,9 +400,9 @@ export default {
   async mounted() {
     this.targetDataItems4 = await this.rw();
     let dept = [];
-    if (this.$store.state.dept.name) {
-      this.depts = [this.$store.state.dept];
-    }
+    // if (this.$store.state.dept.name) {
+    //   this.depts = [this.$store.state.dept];
+    // }
     for (let i = 0; i < this.depts.length; i++) {
       dept.push({
         name: this.depts[i].name,
@@ -379,7 +418,7 @@ export default {
     window.wy_query = {
       CBBM: depts
     };
-    this.$route.params.schemaCode = "ZDGZ";
+    this.$route.params.schemaCode = this.dcdb[this.Tindex].id;
     this.childrenList = true;
   }
 };

@@ -71,7 +71,7 @@ export default class LoginAccount extends Vue {
   async mounted() {
     // this.login();
     if (localStorage.getItem("token")) {
-      this.$router.push({ path: "" });
+      this.$router.push({ path: "/wyviews" });
     }
     if (localStorage.getItem("zj_code")) {
       this.vtoken();
@@ -80,6 +80,34 @@ export default class LoginAccount extends Vue {
     }
   }
   backhome() {
+    if (!window.wyml) {
+      let oauthst = window.location.href;
+      if (oauthst.indexOf("-test") > -1) {
+        window.wyml = {
+          wyml: {
+            ID: "913bf547-fda9-4c4d-afb6-ec58ab4e3bf4",
+            secret: "S7NoMjUwMjIwMjIxNTM5NDg3NjgeiZ",
+            url: "https://onekey-test.zhejianglab.com/maxkey"
+          },
+          // 领导组
+          ldroleId: "督办领导组(勿删勿改)",
+          // 督查督办管理员
+          glyId: "督办管理员(勿删勿改)"
+        };
+      } else {
+        window.wyml = {
+          wyml: {
+            ID: "ba59c997-fa3a-40fe-b9cf-208d9dbeabc6",
+            secret: "KTWvMjUwMjIwMjIxNTMzMTYyMDE1NF",
+            url: "https://onekey.zhejianglab.com/maxkey"
+          },
+          // 领导组
+          ldroleId: "督办领导组(勿删勿改)",
+          // 督查督办管理员
+          glyId: "督办管理员(勿删勿改)"
+        };
+      }
+    }
     axios
       .post(
         `/maxkey/maxkey/authz/cas/logout/${
@@ -88,36 +116,77 @@ export default class LoginAccount extends Vue {
       )
       .then(res => {
         localStorage.removeItem("token");
+        localStorage.removeItem("wydpet");
         localStorage.removeItem("refresh_token");
         localStorage.removeItem("expireTime");
+        localStorage.removeItem("zj_code");
         sessionStorage.removeItem("user");
+        let urls =
+          localStorage.getItem("copy_link_url_path") || window.location.href;
+        if (urls.indexOf("/login") > -1) {
+          urls = window.location.origin;
+        }
         window.location.href = `${
           window.wyml.wyml.url
         }/oauth/v20/authorize?response_type=code&client_id=${
           window.wyml.wyml.ID
-        }&scope=all&redirect_uri=${window.location.href.split("?")[0]}`;
+        }&scope=all&redirect_uri=${urls}`;
       });
     // window.location.href = `https://onekey-test.zhejianglab.com/maxkey/oauth/v20/authorize?response_type=code&client_id=913bf547-fda9-4c4d-afb6-ec58ab4e3bf4&scope=all&redirect_uri=${
     //   window.location.origin
     // }`;
   }
   vtoken() {
+    if (!window.wyml) {
+      let oauthst = window.location.href;
+      if (oauthst.indexOf("-test") > -1) {
+        window.wyml = {
+          wyml: {
+            ID: "913bf547-fda9-4c4d-afb6-ec58ab4e3bf4",
+            secret: "S7NoMjUwMjIwMjIxNTM5NDg3NjgeiZ",
+            url: "https://onekey-test.zhejianglab.com/maxkey"
+          },
+          // 领导组
+          ldroleId: "督办领导组(勿删勿改)",
+          // 督查督办管理员
+          glyId: "督办管理员(勿删勿改)"
+        };
+      } else {
+        window.wyml = {
+          wyml: {
+            ID: "ba59c997-fa3a-40fe-b9cf-208d9dbeabc6",
+            secret: "KTWvMjUwMjIwMjIxNTMzMTYyMDE1NF",
+            url: "https://onekey.zhejianglab.com/maxkey"
+          },
+          // 领导组
+          ldroleId: "督办领导组(勿删勿改)",
+          // 督查督办管理员
+          glyId: "督办管理员(勿删勿改)"
+        };
+      }
+    }
     // https://onekey-test.zhejianglab.com/maxkey
+    let urls =
+      localStorage.getItem("copy_link_url_path") || window.location.href;
+    if (urls.indexOf("/login") > -1) {
+      urls = window.location.origin;
+    }
     axios
       .post(
         `/maxkey/maxkey/oauth/v20/token?client_id=${
           window.wyml.wyml.ID
         }&client_secret=${window.wyml.wyml.secret}&code=${localStorage.getItem(
           "zj_code"
-        )}&grant_type=authorization_code&redirect_uri=${
-          window.location.href.split("?")[0]
-        }`
+        )}&grant_type=authorization_code&redirect_uri=${urls}`
       )
       .then(res => {
         if (res.access_token) {
+          localStorage.setItem('wyusertoken',res.access_token)
           this.infos(res.access_token);
+          
         } else {
           this.tokenerror = "未能获取token,请返回登录页面";
+          this.backhome();
         }
       });
   }
@@ -255,6 +324,15 @@ export default class LoginAccount extends Vue {
   /**
    * 获取token
    */
+  getCookie(name) {
+    var _name = name + "=";
+    var ca = document.cookie.split(";");
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i].trim();
+      if (c.indexOf(_name) === 0) return c.substring(_name.length, c.length);
+    }
+    return "";
+  }
   async getToken(params: any) {
     const res = await OAuthApi.getToken(params);
 
@@ -283,16 +361,15 @@ export default class LoginAccount extends Vue {
           window.location.href = isShowEmailResquest;
         }
       } else {
-        const copyUrl = localStorage.getItem("copy_link_url_path");
-        if (copyUrl) {
+        const copyUrl =
+          localStorage.getItem("copy_link_url_path") || window.location.href;
+        if (copyUrl && copyUrl.indexOf("/login") == -1) {
           localStorage.removeItem("copy_link_url_path");
           window.open(copyUrl, "_self");
         }
-        this.$router
-          .push({ name: "myUnfinishedWorkItem" })
-          .catch((err: any) => {
-            err;
-          });
+        this.$router.push({ path: "/wyviews" }).catch((err: any) => {
+          err;
+        });
       }
     }
   }

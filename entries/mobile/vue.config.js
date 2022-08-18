@@ -61,6 +61,20 @@ module.exports = {
         //   '^/api': '', // app/mock/94968
         // },
       },
+      '/ddapi/': {
+        target: 'https://oapi.dingtalk.com',
+        autoRewrite: true,
+          pathRewrite: {
+            '^/ddapi': ''
+          },        
+      },
+      '/maxkey/': {
+        target: process.env.VUE_APP_API_VY + '/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/maxkey': ''
+        },
+      },
       '/externalLink/': {
         target: process.env.VUE_APP_API + '/',
         changeOrigin: true,

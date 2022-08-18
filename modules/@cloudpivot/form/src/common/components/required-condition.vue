@@ -192,7 +192,7 @@ export default class RequiredConditon extends Vue {
     // this.showDataItems = JSON.parse(JSON.stringify(items));
     this.showDataItems = cloneDeep(items);
     console.log(this.showDataItems, 'this.showDataItems')
-    items = items.filter(x => x.code !== this.dataItem.code)
+    // items = items.filter(x => x.code !== this.dataItem.code)
 
     this.dataItems = items;
 

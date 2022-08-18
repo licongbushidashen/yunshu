@@ -38,18 +38,18 @@
           style="margin-left:31px ;width:38px;height:28px;    object-fit: scale-down;"
         />
         <span
-          v-if="$store.state.wynum > 0"
+          v-if="$store.state.wynum > 0 || $store.state.wynum1 > 0"
           style="background: rgb(186, 5, 5);border-radius: 50%;width: 24px;height: 24px;line-height: 24px; display: inline-block;
                     position: absolute;
                     top: 6px;
                     right: 23px;
                     font-size: 12px;
                     color: rgb(255, 255, 255);"
-          >{{ $store.state.wynum }}</span
+          >{{ $store.state.wynum + $store.state.wynum1 }}</span
         >
-        我的待办
+        任务中心
       </h2>
-      <h2 :class="flag == 4 ? 'active' : ''" @click="lrouter(4)">
+      <!-- <h2 :class="flag == 4 ? 'active' : ''" @click="lrouter(4)">
         <img
           src="./dy.png"
           alt=""
@@ -66,7 +66,7 @@
           >{{ $store.state.wynum1 }}</span
         >
         我的待阅
-      </h2>
+      </h2> -->
       <h2
         :class="flag == 2 ? 'active' : ''"
         @click="lrouter(2)"
@@ -197,7 +197,8 @@
 <script lang="ts">
 import {
   workflowCenterApi,
-  workflowCenter as workflowCenterParams
+  workflowCenter as workflowCenterParams,
+  homeApi
 } from "@cloudpivot/api";
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 
@@ -259,7 +260,7 @@ export default class CommonHeader extends Vue {
       case "work":
         this.flag = 2;
         break;
-      case "unfinished":
+      case "task":
         this.flag = 3;
         break;
     }
@@ -307,14 +308,15 @@ export default class CommonHeader extends Vue {
   flag: number = 1;
   flagNum: number = 0;
   created() {
-    this.getUnfinishedWorkflowItems("default_1646218936192");
-    this.getUnfinishedWorkflowItems("LDPS");
-    this.getUnfinishedWorkflowItems("default_1646214214918");
-    this.getUnfinishedWorkflowItems("default_1646217559189");
-    this.getUnfinishedWorkflowItems("RCLC");
+    debugger;
+    // this.getUnfinishedWorkflowItems();
     // 获取当前选中的菜单名称
     this.getUserInfo();
     switch (this.$route.name) {
+      case "wyviews":
+        this.flag = 0;
+        this.lrouter(0);
+        break;
       case "home":
         this.flag = 0;
         break;
@@ -324,7 +326,7 @@ export default class CommonHeader extends Vue {
       case "work":
         this.flag = 2;
         break;
-      case "unfinished":
+      case "task":
         this.flag = 3;
         break;
       case "workItem":
@@ -337,19 +339,23 @@ export default class CommonHeader extends Vue {
     // }, 0);
   }
   async numall() {
-    const res = await OAuthApi.getUserInfo();
-    let num = await axios.get(
-      `/weiyuapi/authine-lowCode/RuntimeForm/getWaitToRead?gh=${(res.data
-        ? res.data.userId
-        : "") || "000814"}`,
-      {}
-    );
+    // const res = await OAuthApi.getUserInfo();
     // let num = await axios.get(
-    //   `/weiyuapi/authine-lowCode/RuntimeForm/getWaitToRead?gh=000814`,
+    //   `/weiyuapi/authine-lowCode/RuntimeForm/getWaitToRead?gh=${(res.data
+    //     ? res.data.userId
+    //     : "") || "000814"}`,
     //   {}
     // );
-    let data = num.data;
-    this.$store.state.wynum1 = data.total;
+    // // let num = await axios.get(
+    // //   `/weiyuapi/authine-lowCode/RuntimeForm/getWaitToRead?gh=000814`,
+    // //   {}
+    // // );
+    // let data = num.data;
+    const res = await homeApi.getWorkCount("DB");
+    if (res.errcode === 0) {
+      this.$store.state.wynum = res.data.workItemCount;
+      this.$store.state.wynum1 = res.data.circulateItemCount;
+    }
   }
   async getUnfinishedWorkflowItems(type?: string) {
     const params = {
@@ -364,9 +370,18 @@ export default class CommonHeader extends Vue {
       workItemSource: ""
     };
 
-    const res = await workflowCenterApi.searchWorkitems(params);
-    this.flagNum += res.data.totalElements;
-    this.$store.state.wynum = this.flagNum;
+    // const res = await workflowCenterApi.searchWorkitems(params);
+    // debugger;
+    const res = await OAuthApi.getUserInfo();
+    // console.log(res, 123123123);
+    // res.data?.employeeNo ||
+    let num = await axios.get(
+      `/weiyuapi/authine-lowCode/RuntimeForm/getWaitTodo?gh=${(res.data
+        ? res.data.userId
+        : "") || "000814"}`,
+      {}
+    );
+    this.$store.state.wynum = num.data.total;
   }
   lrouter(val) {
     this.flag = val;
@@ -381,7 +396,8 @@ export default class CommonHeader extends Vue {
         this.$router.push("/wyviews/work");
         break;
       case 3:
-        this.$router.push("/wyviews/unfinished");
+        this.$router.push("/wyviews/task");
+        // this.$router.push("/wyviews/unfinished");
         break;
       case 4:
         this.$router.push("/wyviews/workItem");
@@ -431,27 +447,31 @@ export default class CommonHeader extends Vue {
       T: token
     }).then((res: any) => {
       localStorage.removeItem("token");
+      localStorage.removeItem("wydpet");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("expireTime");
       sessionStorage.removeItem("user");
       this.$router.replace({ name: "login" });
-      axios
-        .post(
-          `/maxkey/maxkey/authz/cas/logout/${
-            window.wyml.wyml.ID
-          }?globalSessionId=${localStorage.getItem("globalSessionId")}`
-        )
-        .then(res => {
-          localStorage.removeItem("token");
-          localStorage.removeItem("refresh_token");
-          localStorage.removeItem("expireTime");
-          sessionStorage.removeItem("user");
-          window.location.href = `${
-            window.wyml.wyml.url
-          }/oauth/v20/authorize?response_type=code&client_id=${
-            window.wyml.wyml.ID
-          }&scope=all&redirect_uri=${window.location.href.split("?")[0]}`;
-        });
+      if (window.location.href.indexOf("test") == -1) {
+        axios
+          .post(
+            `/maxkey/maxkey/authz/cas/logout/${
+              window.wyml.wyml.ID
+            }?globalSessionId=${localStorage.getItem("globalSessionId")}`
+          )
+          .then(res => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("wydpet");
+            localStorage.removeItem("refresh_token");
+            localStorage.removeItem("expireTime");
+            sessionStorage.removeItem("user");
+            window.location.href = `${
+              window.wyml.wyml.url
+            }/oauth/v20/authorize?response_type=code&client_id=${
+              window.wyml.wyml.ID
+            }&scope=all&redirect_uri=${window.location.href.split("?")[0]}`;
+          });
+      }
     });
   }
 
@@ -497,7 +517,6 @@ export default class CommonHeader extends Vue {
   // 获取当前用户信息
   async getUserInfo() {
     const res = await OAuthApi.getUserInfo();
-    debugger;
     if (res.errcode === 0) {
       const info: any = res.data;
       this.userInfo = info;

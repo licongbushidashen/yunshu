@@ -96,6 +96,7 @@ async function openMessage(messageId: string) {
       $a.href = theUrl;
       $a.target = "_blank";
       $a.innerText = "浏览器打开应用";
+      window.location.href = theUrl;
       $app.appendChild($a);
 
       // window.location.href = theUrl;

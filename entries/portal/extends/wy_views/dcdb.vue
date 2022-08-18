@@ -14,7 +14,7 @@
     <div class="wy_select">
       <a-form layout="inline" style="display:flex">
         <label style="line-height: 39px;margin-right: 10px;color:#000000d9"
-          >截止日期</label
+          >反馈日期</label
         >
         <a-form-item
           :colon="false"
@@ -61,7 +61,7 @@
             }}</a-select-option>
           </template>
         </a-select>
-        <label
+        <!-- <label
           style="    line-height: 39px;    margin-right: 10px;color: #000000d9;"
           v-if="Tindex == 1 || Tindex == 2 || Tindex == 3"
           >是否延期</label
@@ -78,7 +78,7 @@
               item.name
             }}</a-select-option>
           </template>
-        </a-select>
+        </a-select> -->
         <label
           style="    line-height: 39px;    margin-right: 10px;color: #000000d9;"
           v-if="Tindex == 0 || Tindex == 4"
@@ -119,7 +119,7 @@
           v-if="Tindex == 0 || Tindex == 4"
           for=""
           style="    line-height: 39px;    margin-right: 10px;color: #000000d9;"
-          >承办部门</label
+          >承办单位</label
         >
         <!-- v-if="!$store.state.dept.name" -->
         <staff-selector
@@ -184,7 +184,7 @@ export default {
       },
       depts: "",
       childrenList: false,
-      Tindex: 0,
+      Tindex: 1,
       sheetDataItem1: "",
       sheetDataItem2: "",
       sheetDataItem3: "",
@@ -335,6 +335,9 @@ export default {
     },
     change(item, index) {
       this.sheetDataItem = "";
+      this.sheetDataItem3 = "";
+      this.sheetDataItem4 = "";
+      this.depts = "";
       this.queryData = {
         time: [],
         workflowName: ""
@@ -361,6 +364,7 @@ export default {
       this.sheetDataItem1 = "";
       this.sheetDataItem2 = "";
       this.Tindex = index;
+
       this.$router.push({
         path: `/wyviews/dcdb?Tindex=${this.Tindex}`
       });

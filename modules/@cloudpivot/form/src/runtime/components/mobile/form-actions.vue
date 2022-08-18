@@ -110,6 +110,12 @@ export default class FormActions extends Vue {
   background-color: #fff;
   .px2rem(font-size, @font-size-base);
   height: 44px;
+   position: fixed !important;
+  bottom: 0;
+  bottom: constant(safe-area-inset-bottom);
+  bottom: env(safe-area-inset-bottom);
+  left: 0;
+  width: 100%;
   // .px2rem(padding-top, @font-size-xxs);
   // .px2rem(padding-bottom, @font-size-xxs);
 

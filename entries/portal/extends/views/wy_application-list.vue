@@ -69,7 +69,7 @@
           <div id="list-actions" ref="actions">
             <template v-for="(ac, index) in queryActions">
               <template v-if="ac.actionCode !== 'batch_print'">
-                <template
+                <!-- <template
                   v-if="ac.associationType === 1 && ac.actionCode === 'import'"
                 >
                   <a-tooltip :key="index">
@@ -87,11 +87,15 @@
                       style="margin-right: 8px"
                       :disabled="true"
                     >
-                      {{ isChinese ? ac.name : ac.name_i18n[$i18n.locale] }}
+                      {{
+                        isChinese ? ac.name + "111" : ac.name_i18n[$i18n.locale]
+                      }}
                     </a-button>
                   </a-tooltip>
-                </template>
-                <template v-else-if="ac.associationType == '10'">
+                </template> -->
+                <template
+                  v-if="ac.associationType === 1 && ac.actionCode === 'import'"
+                >
                   <a-upload
                     :key="index"
                     :action="actionsUp"

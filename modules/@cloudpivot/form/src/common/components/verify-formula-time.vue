@@ -529,7 +529,7 @@ export default class VerifyFormulaTime extends Vue {
             this.rangeSelectDataItem2 = v;
             break;
           case "prompt":
-            this.promptText = decodeURIComponent(v);
+            this.promptText = v;
             break;
           case "day":
             this.dynamicTypeValue = +v === 1 ? 2 : 1;
@@ -591,7 +591,7 @@ export default class VerifyFormulaTime extends Vue {
             this.rangeSelectDataItem2 = v;
             break;
           case "prompt":
-            this.promptText = decodeURIComponent(v);
+            this.promptText = v;
             break;
           case "day":
             this.dynamicTypeValue = +v === 1 ? 2 : 1;

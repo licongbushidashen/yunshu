@@ -309,9 +309,9 @@ export default class listCustomTemplate extends Vue {
           });
 
           // 批量删除时过滤进行中的
-          if(batchFlag) {
-            z = z.filter((item: any) => item.sequenceStatus !== 'PROCESSING')
-          }
+          // if(batchFlag) {
+          //   z = z.filter((item: any) => item.sequenceStatus !== 'PROCESSING')
+          // }
           return z;
         },
         // 扩展

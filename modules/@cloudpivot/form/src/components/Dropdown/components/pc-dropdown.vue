@@ -85,11 +85,14 @@ export default class Dropdown extends DropdownControl {
   }
 
   getOPt() {
-    console.log(this.control)
-    // debugger
+    let dateItem;
+    if ((this.control as any).parentKey) {
+      dateItem = this.getDataItem(this.control.key, this.control.parentKey);
+    } else {
+      dateItem = this.getDataItem(this.control.key);
+    }
     // 如果是单选，复选的业务模型 , 3种数据格式，注意，大坑！！！！！！！！！
     if(this.control.type == 7) {
-      //console.log(JSON.parse(this.control.options.options))
       if(this.control.options) {
         const data = this.control.options.options
         if(data.indexOf('schemaCode') != -1) {
@@ -105,7 +108,6 @@ export default class Dropdown extends DropdownControl {
             super.getOptions();
           }
         } else {
-
            try {
              if(JSON.parse(JSON.parse(data).options).labels && JSON.parse(JSON.parse(data).options).labels.length > 0) {
                 const sheetDataItem = JSON.parse(JSON.parse(data).options).sheetDataItem
@@ -114,11 +116,26 @@ export default class Dropdown extends DropdownControl {
                   return item.data[sheetDataItem]
                 })
                 this.control.options.options = options.join(';')
-              }else {
+              } else {
                 super.getOptions();
               }
            } catch (error) {
-             this.options = data.split(";");
+             if (dateItem) {
+               const optionsJson = dateItem.options ? JSON.parse(dateItem.options) : '';
+               if(optionsJson) {
+                 let dropDownOptionsJson = optionsJson.options ? JSON.parse(optionsJson.options) : '';
+                 if(dropDownOptionsJson && dropDownOptionsJson.schemaCode && dropDownOptionsJson.condition) {
+                  // 业务模型配置方式并且配置查询条件，则需要重新请求后台加载数据
+                   super.getOptions();
+                 } else {
+                    this.options = data.split(";");
+                 }
+               } else{
+                  this.options = data.split(";");
+               }
+             } else {
+               this.options = data.split(";");
+             }
            }
         }
       }

@@ -354,7 +354,7 @@
               this.verifyFormula.rangeSelectDataItem2 = objs ? v : '';
               break;
             case "prompt":
-              this.verifyFormula.promptText = decodeURIComponent(v);
+              this.verifyFormula.promptText = v;
               break;
             case "day":
               this.verifyFormula.dynamicTypeValue = +v === 1 ? 2 : 1;
@@ -422,7 +422,7 @@
               this.verifyFormula.rangeSelectDataItem2 = objs ? v : '';
               break;
             case "prompt":
-              this.verifyFormula.promptText = decodeURIComponent(v);
+              this.verifyFormula.promptText = v;
               break;
             case "day":
               this.verifyFormula.dynamicTypeValue = +v === 1 ? 2 : 1;

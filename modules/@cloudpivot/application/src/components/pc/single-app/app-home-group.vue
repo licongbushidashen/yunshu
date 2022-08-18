@@ -14,6 +14,7 @@
         :openMode="item.openMode"
         :pcUrl="item.pcUrl"
         :parentId="item.parentId"
+        @changeParent ="changeChildrens(item)"
       >
       </app-group-item>
     </div>
@@ -23,6 +24,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import AppGroupItem from './app-group-item.vue';
+import { Mutation } from "vuex-class";
 @Component({
   name: 'app-home-group',
   components: {
@@ -33,6 +35,13 @@ export default class AppHomeGroup extends Vue {
   @Prop() title!: string;
 
   @Prop() childrens!: Array<any>;
+  @Mutation('setAppGroups') setAppGroups!: any;
+  changeChildrens(item:any){
+    let newArray: Array<any> = [];
+    newArray.push(item)
+    this.setAppGroups(newArray)
+  }
+
 }
 
 </script>

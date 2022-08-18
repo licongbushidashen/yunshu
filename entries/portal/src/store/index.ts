@@ -12,6 +12,7 @@ import VuexPersistence from "vuex-persist";
 import System from "./modules/system/index";
 import WorkflowCenter from "./modules/workflow-center/index";
 import { bizproperty, bizpropertyApi } from "@cloudpivot/api";
+import { listApi } from "@cloudpivot/api";
 
 const vuexLocal = new VuexPersistence({
   key: "vuex",
@@ -30,6 +31,7 @@ export default new Vuex.Store({
     config: {},
     formRuleList: [],
     motalflag: null,
+    singleAppGroups: [], //singleApp 菜单
     wynum: 0,
     wynum1: 0,
     dept: {},
@@ -37,6 +39,10 @@ export default new Vuex.Store({
     wyadmin: false
   },
   mutations: {
+    setAppGroups(state: any, singleAppGroups: Array<any>) {
+      state.singleAppGroups = null;
+      state.singleAppGroups = singleAppGroups;
+    },
     setAppCode(state: any, appCode: string) {
       state.appCode = appCode;
     },
@@ -51,6 +57,15 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    async getAppGroups({ commit, state }: any, param?: any) {
+      const res = await listApi.getFolder(param);
+      if (res.errcode === 0) {
+        if (!Array.isArray(res.data)) {
+          return;
+        }
+        commit("setAppGroups", res.data);
+      }
+    },
     async getFormRuleList({ commit, state }: any, param?: any) {
       const params: bizproperty.dataRlueParam = {
         schemaCode: param.bizSchemaCode

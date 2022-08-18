@@ -11,6 +11,7 @@
     :destroyOnClose="true"
     @ok="ok"
     :class="modalClass"
+     @cancel="cancelClick"
   >
     <component
       ref="component"
@@ -130,7 +131,11 @@ export default class FormActionModal extends Vue {
     );
     this.close();
   }
-
+ cancelClick() {
+    if (this.modal == 'FormReject' && this.options && this.options.approval && this.options.approval.controller && this.options.approval.controller.value && this.options.approval.controller.value.content == '不同意') {
+      this.options.approval.controller.value.content = ''
+    }
+  }
   handleNextNodeOk(data:any){
     this.$emit(
       "ok",

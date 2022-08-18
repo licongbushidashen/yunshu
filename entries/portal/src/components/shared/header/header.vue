@@ -290,28 +290,34 @@ export default class CommonHeader extends Vue {
       T: token
     }).then((res: any) => {
       // console.log(res);
-      axios
-        .post(
-          `/maxkey/maxkey/authz/cas/logout/${
-            window.wyml.wyml.ID
-          }?globalSessionId=${localStorage.getItem("globalSessionId")}`
-        )
-        .then(res => {
-          localStorage.removeItem("token");
-          localStorage.removeItem("refresh_token");
-          localStorage.removeItem("expireTime");
-          sessionStorage.removeItem("user");
-          window.location.href = `${
-            window.wyml.wyml.url
-          }/oauth/v20/authorize?response_type=code&client_id=${
-            window.wyml.wyml.ID
-          }&scope=all&redirect_uri=${window.location.href.split("?")[0]}`;
-        });
-      // localStorage.removeItem("token");
-      // localStorage.removeItem("refresh_token");
-      // localStorage.removeItem("expireTime");
-      // sessionStorage.removeItem("user");
-      // this.$router.replace({ name: "login" });
+      localStorage.removeItem("token");
+      localStorage.removeItem("wydpet");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("expireTime");
+      sessionStorage.removeItem("user");
+
+      if (window.location.href.indexOf("test") == -1) {
+        axios
+          .post(
+            `/maxkey/maxkey/authz/cas/logout/${
+              window.wyml.wyml.ID
+            }?globalSessionId=${localStorage.getItem("globalSessionId")}`
+          )
+          .then(res => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("wydpet");
+            localStorage.removeItem("refresh_token");
+            localStorage.removeItem("expireTime");
+            sessionStorage.removeItem("user");
+            window.location.href = `${
+              window.wyml.wyml.url
+            }/oauth/v20/authorize?response_type=code&client_id=${
+              window.wyml.wyml.ID
+            }&scope=all&redirect_uri=${window.location.href.split("?")[0]}`;
+          });
+      } else {
+        this.$router.replace({ name: "login" });
+      }
     });
   }
 

@@ -1,101 +1,116 @@
-import { Vue, Prop, Component, Inject } from "vue-property-decorator";
+import { Vue, Prop, Component, Inject } from "vue-property-decorator"
 
-import * as typings from "../typings";
+import * as typings from "../typings"
 
-import { FormControlType, RendererFormControl } from "../typings";
+import { FormControlType, RendererFormControl } from "../typings"
 
-import { FormControl, FormControlErrorCodes } from "h3-forms";
+import { FormControl, FormControlErrorCodes } from "h3-forms"
 
-import { FormRendererHelper } from "./form-renderer-helper";
+import { FormRendererHelper } from "./form-renderer-helper"
 
-import { ControlHelper } from "@cloudpivot/form/src/common/controls/control-helper";
-
+import { ControlHelper } from "@cloudpivot/form/src/common/controls/control-helper"
+import { Watch } from "vue-property-decorator"
 export default class ControlAdapter extends Vue {
   @Prop()
-  control!: RendererFormControl;
+  control!: RendererFormControl
 
   get id() {
     if (this.control.parentKey) {
-      return `${this.control.parentKey}-${this.control.key}`;
+      return `${this.control.parentKey}-${this.control.key}`
     }
-    return this.control.key;
+    return this.control.key
   }
 
   get ctrl() {
-    return this.control.controller as FormControl<any>;
+    return this.control.controller as FormControl<any>
   }
 
   get hasError() {
     if (this.ctrl) {
-      return this.ctrl.hasError;
+      return this.ctrl.hasError
     }
-    return false;
+    return false
   }
 
   get errors() {
     if (this.ctrl) {
-      return this.ctrl.errors;
+      return this.ctrl.errors
     }
-    return [];
+    return []
   }
 
   get isSystem() {
-    return (
-      this.control.type >= FormControlType.SequenceNo &&
-      this.control.type <= FormControlType.SystemOther
-    );
+    return this.control.type >= FormControlType.SequenceNo && this.control.type <= FormControlType.SystemOther
     // && this.control.type !== FormControlType.OwnerId;
   }
 
   get isTitle() {
-    return this.control.type === FormControlType.Title;
+    return this.control.type === FormControlType.Title
   }
 
   get isDescription() {
-    return this.control.type === FormControlType.Description;
+    return this.control.type === FormControlType.Description
   }
 
   get isStaffSelector() {
-    return this.control.type === FormControlType.StaffSelector;
+    return this.control.type === FormControlType.StaffSelector
   }
 
   get isSheet() {
-    return this.control.type === FormControlType.Sheet;
+    return this.control.type === FormControlType.Sheet
   }
 
   get isDropdown() {
-    return this.control.type === FormControlType.Dropdown;
+    return this.control.type === FormControlType.Dropdown
   }
 
   get isReverseRelevance() {
-    return this.control.type === FormControlType.ReverseRelevance;
+    return this.control.type === FormControlType.ReverseRelevance
   }
 
   get isHtml() {
-    return this.control.type === FormControlType.Html;
+    return this.control.type === FormControlType.Html
   }
 
   get show() {
-    const visible = this.control.options.visible;
+    const visible = this.control.options.visible
     if (visible === false || visible === 0) {
-      return false;
+      return false
     }
     if (this.ctrl && this.ctrl.display === false) {
-      return false;
+      return false
     }
-    return true;
+    return true
   }
-
+  @Watch("show")
+  onShowChange(show: any) {
+    //监听单选框显示隐藏时将之前选择的值置空，防止显示条件或者必填条件此时不生效不触发
+    if (this.control.type === 5) {
+      if (show) {
+        const defaultValue = this.control.options.defaultValue
+        //显示时若有设置默认值则将默认值赋值到控件
+        if (defaultValue) {
+          this.control.controller.value = defaultValue
+        } else {
+          this.control.controller.value = ""
+        }
+      } else {
+        this.control.controller.value = ""
+      }
+    }
+  }
   get required() {
     // 表单被流程引用后，如表单设计发生变更，审批中的表单会因新的约束条件（如必填项），导致审批流程无法进行
     // 当前产品设计逻辑为：表单新增字段在审批中的流程上显示规则为可见不可写
     // 期望结果：表单新增字段为必填，在运行中的流程里新增字段可不校验必填。
-    if(!this.show){return false} //如果是可见不可写，手动改为不校验必填
-    return this.ctrl && this.ctrl.required;
+    if (!this.show) {
+      return false
+    } //如果是可见不可写，手动改为不校验必填
+    return this.ctrl && this.ctrl.required
   }
 
   get isHigh() {
-    const type = this.control.type;
+    const type = this.control.type
 
     // 选人控件
     if (
@@ -107,43 +122,39 @@ export default class ControlAdapter extends Vue {
       type === FormControlType.Attachment ||
       type === FormControlType.Image
     ) {
-      return true;
+      return true
     }
 
     // 只读
     if (this.control.edit === false) {
-      return false;
+      return false
     }
 
-    return true;
+    return true
   }
 
   get style() {
-    const opt = this.control.options;
+    const opt = this.control.options
     if (!opt || !opt.style) {
-      return "";
+      return ""
     }
-    return opt.style;
+    return opt.style
   }
 
   get label() {
-    return ControlHelper.getControlLabel(this.control, this.$i18n.locale);
+    return ControlHelper.getControlLabel(this.control, this.$i18n.locale)
   }
 
   get tips() {
-    let { tips } = this.control.options;
-    return tips;
+    let { tips } = this.control.options
+    return tips
   }
 
   get isApproval() {
-    return this.control.key === '$approval';
+    return this.control.key === "$approval"
   }
 
   getErrorMessage(errCode: FormControlErrorCodes) {
-    return FormRendererHelper.getErrorMessage(
-      this.control,
-      errCode,
-      this.$i18n.locale
-    );
+    return FormRendererHelper.getErrorMessage(this.control, errCode, this.$i18n.locale)
   }
 }

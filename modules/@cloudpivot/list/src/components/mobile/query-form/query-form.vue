@@ -265,7 +265,9 @@ export default class QueryForm extends Vue {
         
         break;
       case FormControlType.RelevanceForm:
-        options.showStyle = JSON.parse(field.options).showStyle;
+       if(field.options) {
+          options.showStyle = JSON.parse(field.options).showStyle;
+        }
       case FormControlType.RelevanceFormEx:
         options.queryCode = field.associationCode;
         options.schemaCode = field.relativeSchemaCode;

@@ -1,22 +1,7 @@
 import "@/config/h3-form";
 
-import {
-  Component,
-  Prop,
-  Vue,
-  Watch,
-  Provide,
-  Emit,
-} from "vue-property-decorator";
-import {
-  Button,
-  Modal,
-  Table,
-  Pagination,
-  Checkbox,
-  Icon,
-  Tooltip,
-} from "@h3/antd-vue"; // todo
+import { Component, Prop, Vue, Watch, Provide, Emit } from "vue-property-decorator";
+import { Button, Modal, Table, Pagination, Checkbox, Icon, Tooltip } from "@h3/antd-vue"; // todo
 
 import { State, Action, namespace } from "vuex-class";
 
@@ -80,19 +65,17 @@ import ModifyOwner from "@cloudpivot/list/src/components/pc/components/modify-ow
 import GenerateHtml from "@cloudpivot/list/src/components/pc/GenerateHtmlForm.vue";
 import TempPrintHtml from "@cloudpivot/list/src/components/pc/TempPrintHTMLForm.vue";
 import printFormCode from "@cloudpivot/list/src/components/pc/scripts/printFormCode";
-import ModelTableImport from '@cloudpivot/list/src/components/pc/components/model-table-import/import.vue';
+import ModelTableImport from "@cloudpivot/list/src/components/pc/components/model-table-import/import.vue";
 import FormMarking from "@cloudpivot/list/src/components/pc/components/form-marking.vue";
-import batchUpdate from '@cloudpivot/list/src/components/pc/scripts/batch_update.vue'
+import batchUpdate from "@cloudpivot/list/src/components/pc/scripts/batch_update.vue";
 
 import Bus from "@cloudpivot/form/utils/bus";
-import H3PrintRuntime from '@h3print/runtime';
+import H3PrintRuntime from "@h3print/runtime";
 @Component({
   name: "app-list",
   components: {
     sheet: () =>
-      import(
-        /* webpackChunkName: "sheet" */ "@cloudpivot/form/src/renderer/components/pc/form-sheet/sheet.vue"
-      ),
+      import(/* webpackChunkName: "sheet" */ "@cloudpivot/form/src/renderer/components/pc/form-sheet/sheet.vue"),
     ImportErrModal,
     listCustomTemplate, //: () => import(/* webpackChunkName: "listCustomTemplate" */"@cloudpivot/list/src/components/pc/listCustomTemplate.vue"), // 模板抽离
     printHtml,
@@ -127,9 +110,8 @@ import H3PrintRuntime from '@h3print/runtime';
     ModelTableImport,
     batchUpdate,
     H3PrintRuntime
-  },
+  }
 })
-
 export default class AppList2 extends Vue {
   @WorkflowCenterModule.State("applicationPageTitle") applicationPageTitle: any;
 
@@ -140,7 +122,7 @@ export default class AppList2 extends Vue {
   axios: any = axios;
 
   @Prop({
-    default: true,
+    default: true
   })
   showTitle!: boolean;
 
@@ -152,51 +134,51 @@ export default class AppList2 extends Vue {
     return this;
   }
 
-  updateVisible: boolean = false
-  updateVisibleChange(val){
-    this.updateVisible = val
+  updateVisible: boolean = false;
+  updateVisibleChange(val) {
+    this.updateVisible = val;
   }
-  updateOver(){
-    this.reload()
+  updateOver() {
+    this.reload();
   }
 
   // 获取已选中的列表数据id
-  get objectIds(){
+  get objectIds() {
     let objectIds: any = [];
     this.checkeds.forEach((c: boolean, index: number) => {
       if (c) {
         objectIds.push(this.dataSource[index].id);
       }
     });
-    return objectIds
+    return objectIds;
   }
 
-  get isCheckedWorkFlow(){
-    let checked:any[] = []
-    this.checkedWorkflows = []
+  get isCheckedWorkFlow() {
+    let checked: any[] = [];
+    this.checkedWorkflows = [];
     this.checkeds.forEach((c: boolean, index: number) => {
       if (c) {
         checked.push(this.dataSource[index]);
-        if(this.dataSource[index].workflowInstanceId !== '--'){
-          this.checkedWorkflows.push(this.dataSource[index].id)
+        if (this.dataSource[index].workflowInstanceId !== "--") {
+          this.checkedWorkflows.push(this.dataSource[index].id);
         }
       }
     });
-    console.log(checked)
-    return checked.every((el:any) => el.workflowInstanceId !== '--')
+    console.log(checked);
+    return checked.every((el: any) => el.workflowInstanceId !== "--");
   }
-  checkedWorkflows: Array<string> = [] // 保存选中的数据中的流程表单id
-  
+  checkedWorkflows: Array<string> = []; // 保存选中的数据中的流程表单id
+
   // 批量更新数据
-  get updateOptions(){
+  get updateOptions() {
     const { queryCode } = this.$route.query;
     return {
       visible: this.updateVisible,
-      checkeds : this.objectIds,
+      checkeds: this.objectIds,
       queryCode: this.curListCode,
       schemaCode: this.schemaCode,
       checkedWorkflows: this.checkedWorkflows
-    }
+    };
   }
 
   // 判断当前是否是中文版本
@@ -233,10 +215,7 @@ export default class AppList2 extends Vue {
   }
 
   get showCancelButton() {
-    return (
-      this.isInitView ||
-      this.importStatus === listParams.ImportResult.SystemError
-    );
+    return this.isInitView || this.importStatus === listParams.ImportResult.SystemError;
   }
 
   get schemaCode() {
@@ -261,9 +240,11 @@ export default class AppList2 extends Vue {
 
   // 是否展示留痕ICON
   get formTrackPermission() {
-    console.log("queryActions==>",this.queryActions);
-    const show:boolean =this.queryActions.some((item: any) => item.actionCode === 'form_track' || item.actionCode === 'FORM_TRACK');
-    sessionStorage.setItem("formTrack",show.toString())
+    console.log("queryActions==>", this.queryActions);
+    const show: boolean = this.queryActions.some(
+      (item: any) => item.actionCode === "form_track" || item.actionCode === "FORM_TRACK"
+    );
+    sessionStorage.setItem("formTrack", show.toString());
     return show;
   }
 
@@ -321,8 +302,7 @@ export default class AppList2 extends Vue {
 
   secondFailNum = 0;
 
-  secondImportStatus: listParams.ImportResult =
-    listParams.ImportResult.FaileReImport;
+  secondImportStatus: listParams.ImportResult = listParams.ImportResult.FaileReImport;
 
   isImportEnd: boolean = false;
 
@@ -334,7 +314,7 @@ export default class AppList2 extends Vue {
 
   successNum: number = 0;
 
-  errorMsg: string = '';
+  errorMsg: string = "";
 
   failNum: number = 0;
 
@@ -436,7 +416,7 @@ export default class AppList2 extends Vue {
   importData: any = {
     headColumns: [],
     secondImportData: [],
-    queryField: "",
+    queryField: ""
   };
 
   tableConfig: any = {
@@ -449,7 +429,7 @@ export default class AppList2 extends Vue {
     columnResizable: true,
     rowOrdinal: true,
     rowSelectable: false,
-    scrollbarAutoHidding: false,
+    scrollbarAutoHidding: false
   };
   //数值汇总数据
   numberData: any = "";
@@ -479,7 +459,7 @@ export default class AppList2 extends Vue {
   tempPrintPageSettings: any = "";
 
   collectorTempPrintContainer: any = {
-    _num: 0,
+    _num: 0
   };
 
   toShowPrints: boolean = false;
@@ -495,7 +475,7 @@ export default class AppList2 extends Vue {
 
   created() {
     Bus.$on("startToPrintBatch", (res: any) => {
-      let {templateData, packageArr, loadingFn} = res;
+      let { templateData, packageArr, loadingFn } = res;
       try {
         const runtimePrint = new H3PrintRuntime(templateData, packageArr);
         if (loadingFn) {
@@ -503,28 +483,26 @@ export default class AppList2 extends Vue {
           loadingFn = null;
         }
         runtimePrint.printPreview();
-      } catch(err) {
+      } catch (err) {
         if (loadingFn) {
           loadingFn();
           loadingFn = null;
         }
       }
-    })
+    });
     this.getQueryHeaders();
     document.addEventListener("click", this.clickBatchPrintOut, true);
   }
 
   mounted() {
-    const records: string = window.localStorage.getItem(
-      this.recordKey
-    ) as string;
+    const records: string = window.localStorage.getItem(this.recordKey) as string;
     this.adaptWidth = !!records;
 
-    document.title = `奥哲云枢-${this.applicationPageTitle}` || "奥哲云枢";
+    document.title = `之江实验室-${this.applicationPageTitle}` || "之江实验室";
 
     this.$message.config({
       maxCount: 1,
-      duration: 2,
+      duration: 2
     });
     // 接收消息
     window.addEventListener("message", this.reloadMessage, false);
@@ -550,7 +528,11 @@ export default class AppList2 extends Vue {
   }
 
   clickBatchPrintOut(e: any) {
-    if (this.$refs.printBatchShow && this.$refs.printBatchShow[0] && !this.$refs.printBatchShow[0].contains(e.target)) {
+    if (
+      this.$refs.printBatchShow &&
+      this.$refs.printBatchShow[0] &&
+      !this.$refs.printBatchShow[0].contains(e.target)
+    ) {
       this.toShowPrints = false;
     }
   }
@@ -593,7 +575,7 @@ export default class AppList2 extends Vue {
     }
     const params = {
       schemaCode,
-      clientType: listParams.QueryClientType.PC,
+      clientType: listParams.QueryClientType.PC
     };
     const res = await listApi.getQueryHeaders(params);
     if (res.errcode === 0 && Array.isArray(res.data)) {
@@ -608,7 +590,7 @@ export default class AppList2 extends Vue {
       this.loadData({
         code: res.data[0].code,
         schemaCode: res.data[0].schemaCode,
-        source: 1,
+        source: 1
       });
     }
 
@@ -644,7 +626,7 @@ export default class AppList2 extends Vue {
   loadData(param?: any) {
     // 并行获取数据
     const reqs = [this.getDataItem(), this.getListConfigData(param)];
-    return Promise.all(reqs).then((results) => {
+    return Promise.all(reqs).then(results => {
       return results[1];
     });
   }
@@ -653,10 +635,10 @@ export default class AppList2 extends Vue {
    * 获取数据项列表
    */
   getDataItem() {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const { schemaCode } = this.$route.params;
       const params = {
-        schemaCode,
+        schemaCode
       };
       this.getDataItemList(params).finally(() => {
         resolve();
@@ -668,21 +650,18 @@ export default class AppList2 extends Vue {
    * 新增按钮打开新窗口新增表单后，关闭页面原列表刷新
    */
   reloadMessage(event: any) {
-    if(event.data === 'close'){
-      this.showIframeForm = false
-      this.IframeFormUrl = ''
+    if (event.data === "close") {
+      this.showIframeForm = false;
+      this.IframeFormUrl = "";
       this.getQueryList("append");
-      return
+      return;
     }
-    if(event.data === 'reload'){
+    if (event.data === "reload") {
       this.getQueryList("append");
-      return
+      return;
     }
     if (event.source === window) return;
-    if (
-      event.data.indexOf("/application") !== -1 ||
-      event.data.indexOf("%2Fapplication") !== -1
-    ) {
+    if (event.data.indexOf("/application") !== -1 || event.data.indexOf("%2Fapplication") !== -1) {
       // 如果是新增动作,
       if (event.data.indexOf("iframeAction=add") >= 0) {
         this.getQueryList("append");
@@ -698,9 +677,7 @@ export default class AppList2 extends Vue {
   setTableMaxHeight() {
     this.$nextTick(() => {
       const table = this.$refs.table as HTMLElement;
-      const tbody: HTMLElement = document.querySelector(
-        ".sheet__body"
-      ) as HTMLElement;
+      const tbody: HTMLElement = document.querySelector(".sheet__body") as HTMLElement;
       if (tbody) {
         tbody.style.maxHeight = `${table.clientHeight - 45}px`;
       }
@@ -712,15 +689,13 @@ export default class AppList2 extends Vue {
    */
   setTableScroller() {
     this.$nextTick(() => {
-      const tableBody: HTMLElement = document.querySelector(
-        "div.table"
-      ) as HTMLElement;
+      const tableBody: HTMLElement = document.querySelector("div.table") as HTMLElement;
       if (!tableBody) return;
-      tableBody.onmouseenter = function () {
+      tableBody.onmouseenter = function() {
         tableBody.className = "table active";
       };
 
-      tableBody.onmouseleave = function () {
+      tableBody.onmouseleave = function() {
         tableBody.className = "table";
       };
     });
@@ -760,17 +735,11 @@ export default class AppList2 extends Vue {
    */
   caculateColWidth(columns: any, parentCode?: string): number {
     let colWidth: number = 0;
-    const records: string = window.localStorage.getItem(
-      this.recordKey
-    ) as string;
+    const records: string = window.localStorage.getItem(this.recordKey) as string;
 
     if (records) {
-      const code = parentCode
-        ? `${parentCode}.${columns.propertyCode}`
-        : columns.propertyCode;
-      const recordJson: AllTypes.WidthRecords = JSON.parse(
-        records
-      ) as AllTypes.WidthRecords;
+      const code = parentCode ? `${parentCode}.${columns.propertyCode}` : columns.propertyCode;
+      const recordJson: AllTypes.WidthRecords = JSON.parse(records) as AllTypes.WidthRecords;
       const item: AllTypes.Record = recordJson.value.find(
         (d: AllTypes.Record) => Object.keys(d)[0] === code
       ) as AllTypes.Record;
@@ -799,7 +768,7 @@ export default class AppList2 extends Vue {
     if (columnsArray.some((c: any) => c.propertyCode === "name")) {
       isShortText = false;
     }
-    console.log('------------------------')
+    console.log("------------------------");
     const columns: any[] = columnsArray
       .map((c: any) => {
         let colWidth: number = this.caculateColWidth(c);
@@ -812,10 +781,7 @@ export default class AppList2 extends Vue {
           }
           let childSheetWidth: number = 0;
           childColumns = c.childColumns.map((child: any) => {
-            const childWidth: number = this.caculateColWidth(
-              child,
-              c.propertyCode
-            );
+            const childWidth: number = this.caculateColWidth(child, c.propertyCode);
             childSheetWidth += childWidth;
             return {
               vcTitle: child.name,
@@ -827,7 +793,7 @@ export default class AppList2 extends Vue {
               displayFormat: child.displayFormat,
               id: child.propertyCode,
               key: child.propertyCode,
-              isShow: true,
+              isShow: true
             };
           });
           colWidth = childSheetWidth;
@@ -845,7 +811,7 @@ export default class AppList2 extends Vue {
           key: c.propertyCode,
           childColumns,
           sumType: c.sumType,
-          isShow: true,
+          isShow: true
         };
         if (isShortText && c.propertyType === 0) {
           isShortText = false;
@@ -874,16 +840,13 @@ export default class AppList2 extends Vue {
       const showColumns = _column.filter((col: any) => col.isShow);
       // 记录列是否全在请求列中
       const isAllIncluded: boolean = showColumns.every(
-        (col: any) =>
-          !!columns.find((innerCol: any) => innerCol.key === col.key)
+        (col: any) => !!columns.find((innerCol: any) => innerCol.key === col.key)
       );
       if (isAllIncluded) {
         // 把剩余列修改成不显示
         const fCols: any = columns
           .map((col: any) => {
-            const item: any = _column.find(
-              (innerCol: any) => col.key === innerCol.key
-            );
+            const item: any = _column.find((innerCol: any) => col.key === innerCol.key);
             if (!item) {
               // 新增的展示列
               col.isShow = true;
@@ -893,9 +856,7 @@ export default class AppList2 extends Vue {
           .filter((col: any) => !!col);
         const _showColumns = _column
           .map((col: any) => {
-            const item: any = columns.find(
-              (innerCol: any) => col.key === innerCol.key
-            );
+            const item: any = columns.find((innerCol: any) => col.key === innerCol.key);
             if (item) {
               item.isShow = col.isShow;
               return item;
@@ -920,9 +881,7 @@ export default class AppList2 extends Vue {
         // 记录列是否全不在请求列中
         let isAllNotInclude: boolean = true;
         showColumns.forEach((sCol: any) => {
-          const f: boolean = !!columns.find(
-            (innerCol: any) => innerCol.key === sCol.key
-          );
+          const f: boolean = !!columns.find((innerCol: any) => innerCol.key === sCol.key);
           if (!f) {
             isAllNotInclude = true;
           } else {
@@ -939,9 +898,7 @@ export default class AppList2 extends Vue {
           // 1. 找出展示列
           const sCols: any = showColumns
             .map((col: any) => {
-              const c: any = columns.find(
-                (innerCol: any) => col.key === innerCol.key
-              );
+              const c: any = columns.find((innerCol: any) => col.key === innerCol.key);
               if (c) {
                 c.isShow = true;
                 return c;
@@ -953,9 +910,7 @@ export default class AppList2 extends Vue {
           // 2. 把剩余列修改成不显示
           const fCols: any = columns
             .map((col: any) => {
-              const item: any = sCols.find(
-                (innerCol: any) => col.key === innerCol.key
-              );
+              const item: any = sCols.find((innerCol: any) => col.key === innerCol.key);
               if (!item) {
                 col.isShow = false;
                 return col;
@@ -994,9 +949,9 @@ export default class AppList2 extends Vue {
     if (this.queryActions.length) {
       this.queryActions.forEach(item => {
         if (item.queryActionType === 6 && item.extend1 !== null) {
-          this.extend1 = item.extend1
+          this.extend1 = item.extend1;
         }
-      })
+      });
     }
   }
 
@@ -1036,20 +991,18 @@ export default class AppList2 extends Vue {
     }
 
     try {
-      this.eventHooksHandler = listEventHooksHandler.loadSupportingVersionHandler(
-        {
-          vm,
-          scriptString: htmlObj.scriptJson,
-          hooksOption: [
-            { name: "onPreLoad", params: [] },
-            { name: "onLoad", params: ["dataSource"] },
-            { name: "onRendered", params: ["dataSource"] },
-            { name: "onPreAction", params: ["dataSource"] },
-            { name: "onCustomAction", params: ["dataSource"] },
-            { name: "onActionDone", params: [] },
-          ],
-        }
-      );
+      this.eventHooksHandler = listEventHooksHandler.loadSupportingVersionHandler({
+        vm,
+        scriptString: htmlObj.scriptJson,
+        hooksOption: [
+          { name: "onPreLoad", params: [] },
+          { name: "onLoad", params: ["dataSource"] },
+          { name: "onRendered", params: ["dataSource"] },
+          { name: "onPreAction", params: ["dataSource"] },
+          { name: "onCustomAction", params: ["dataSource"] },
+          { name: "onActionDone", params: [] }
+        ]
+      });
       // 初始化完毕直接调用 onPreLoad;
       await this.eventHooksHandler.exec("onPreLoad");
     } catch (err) {
@@ -1091,7 +1044,7 @@ export default class AppList2 extends Vue {
    */
 
   getAction(code: string) {
-    return this.queryActions.find((a) => a.actionCode === code);
+    return this.queryActions.find(a => a.actionCode === code);
   }
 
   /*
@@ -1100,20 +1053,20 @@ export default class AppList2 extends Vue {
   // @ts-ignore
   async actionClick(action: listParams.QueryActions, e: any) {
     const type = action.actionCode;
-    console.log(action, 'action');
+    console.log(action, "action");
     // console.log(this.visible, 'this.visible');
     // onPreAction 执行前
     if (
       this.eventHooksHandler &&
       (await this.eventHooksHandler.exec("onPreAction", action)) === false
-    ){
+    ) {
       return;
     }
 
     // executeAction 确认执行
     switch (type) {
-      case "batch_update": 
-        this.updateVisible = true
+      case "batch_update":
+        this.updateVisible = true;
         break;
       case "add":
         onActionClick.handleAdd(this, action);
@@ -1136,12 +1089,9 @@ export default class AppList2 extends Vue {
               okText: this.$t("languages.form.go").toString(),
               cancelText: this.$t("cloudpivot.flowCenter.pc.cancel").toString(),
               onOk() {
-                let url =
-                  location.href +
-                  "&T=" +
-                  localStorage.getItem("token");
+                let url = location.href + "&T=" + localStorage.getItem("token");
                 platform.service.openLink(url);
-              },
+              }
             });
             return;
           }
@@ -1156,17 +1106,14 @@ export default class AppList2 extends Vue {
         const { schemaCode } = this.$route.params;
 
         const { data, errcode, errmsg } = await listApi.getConfirmIsPrint({
-          schemaCode,
+          schemaCode
         });
         if (errcode !== 0) {
           this.$message.error(errmsg as string, 3);
           return;
         }
         if (!data.printSheetCodes.length) {
-          this.$message.error(
-            this.$t("cloudpivot.list.pc.isCustomizePrintTemp") as string,
-            4
-          );
+          this.$message.error(this.$t("cloudpivot.list.pc.isCustomizePrintTemp") as string, 4);
           return;
         }
         this.toShowPrints = true;
@@ -1176,19 +1123,19 @@ export default class AppList2 extends Vue {
       case "editowner":
         this.getEditPresentation(action);
         break;
-        // 表单留痕按钮逻辑
+      // 表单留痕按钮逻辑
       case "form_track":
-        const markingInstanceLower: any = this.$refs.FormMarking
-        markingInstanceLower.changeVisible(true)
-        break;  
+        const markingInstanceLower: any = this.$refs.FormMarking;
+        markingInstanceLower.changeVisible(true);
+        break;
       case "FORM_TRACK":
-        const markingInstance: any = this.$refs.FormMarking
-        markingInstance.changeVisible(true)
+        const markingInstance: any = this.$refs.FormMarking;
+        markingInstance.changeVisible(true);
         break;
       // 自定义按钮, 如果返回异步, 则等待异步完成触发 done; 否则直接触发 done;
       default: {
         if (this.eventHooksHandler) {
-          this.eventHooksHandler.exec("onCustomAction", action).then((resp) => {
+          this.eventHooksHandler.exec("onCustomAction", action).then(resp => {
             this.eventHooksHandler.exec("onActionDone", action, resp);
           });
         }
@@ -1197,8 +1144,8 @@ export default class AppList2 extends Vue {
   }
 
   async showFormTrack() {
-    const markingInstanceLower: any = this.$refs.FormMarking
-    markingInstanceLower.changeVisible(true)
+    const markingInstanceLower: any = this.$refs.FormMarking;
+    markingInstanceLower.changeVisible(true);
   }
 
   handleBatchPrintHide(codeTemp: string) {
@@ -1215,19 +1162,21 @@ export default class AppList2 extends Vue {
       }
     });
     let obj: any = {
-      filters: [{
-        propertyCode: "id",
-        propertyType: 13,
-        propertyValue: objectIds.join(";"),
-        propertyValueName: ""
-      }],
+      filters: [
+        {
+          propertyCode: "id",
+          propertyType: 13,
+          propertyValue: objectIds.join(";"),
+          propertyValueName: ""
+        }
+      ],
       mobile: false,
       page: this.curPage - 1,
       size: this.pageSize,
       queryCode: this.curListCode,
       schemaCode: this.schemaCode,
       isSheet: false,
-      objectIds,
+      objectIds
     };
     let res: any = await listApi.getNoPresentationNumber(obj);
     if (res && res.errcode === 0) {
@@ -1236,8 +1185,6 @@ export default class AppList2 extends Vue {
     } else {
       this.$message.error(res.errmsg as string);
     }
-
-
   }
 
   /*
@@ -1254,10 +1201,10 @@ export default class AppList2 extends Vue {
     const params = param
       ? param
       : {
-        code: this.curListCode,
-        schemaCode,
-        source: 1,
-      };
+          code: this.curListCode,
+          schemaCode,
+          source: 1
+        };
     this.isLoading = true;
     const res = await listApi.getListConfigData(params);
 
@@ -1275,26 +1222,28 @@ export default class AppList2 extends Vue {
 
       return;
     } else {
-
-      let queryConditions = res.data.queryConditions
-      if(Array.isArray(queryConditions) && queryConditions.length){
-        queryConditions.forEach((item:any) => {
+      let queryConditions = res.data.queryConditions;
+      if (Array.isArray(queryConditions) && queryConditions.length) {
+        queryConditions.forEach((item: any) => {
           try {
-            let dictionaryData = JSON.parse(item.options)
-            if(!dictionaryData.dictionaryData && dictionaryData.options && dictionaryData.options.includes('checkedDictionary')){
-              dictionaryData = JSON.parse(dictionaryData.options)
+            let dictionaryData = JSON.parse(item.options);
+            if (
+              !dictionaryData.dictionaryData &&
+              dictionaryData.options &&
+              dictionaryData.options.includes("checkedDictionary")
+            ) {
+              dictionaryData = JSON.parse(dictionaryData.options);
             }
-            if(dictionaryData && dictionaryData.checkedDictionary){ // 单选、多选、下拉单选、下拉多选使用了数据字典数据
-              let resOptions = dictionaryData.useDictionariesData.map((el:any) => el.name)
-              item.options = resOptions.join(';')
-            }else if(dictionaryData && dictionaryData.dictionaryData){
-              console.log('33',dictionaryData)
-            }else if(dictionaryData.options){
-              item.options = dictionaryData.options
+            if (dictionaryData && dictionaryData.checkedDictionary) {
+              // 单选、多选、下拉单选、下拉多选使用了数据字典数据
+              let resOptions = dictionaryData.useDictionariesData.map((el: any) => el.name);
+              item.options = resOptions.join(";");
+            } else if (dictionaryData && dictionaryData.dictionaryData) {
+              console.log("33", dictionaryData);
+            } else if (dictionaryData.options) {
+              item.options = dictionaryData.options;
             }
-          } catch (error) {
-            
-          }
+          } catch (error) {}
         });
       }
       this.listConfig = res.data;
@@ -1321,8 +1270,7 @@ export default class AppList2 extends Vue {
 
     // let hasCallRenderEvent = false;
 
-    if (res.data.length === 0)
-      return this.$message.error(res.errmsg as string, 3);
+    if (res.data.length === 0) return this.$message.error(res.errmsg as string, 3);
     if (!res.data.queryConditions || res.data.queryConditions.length <= 0) {
       // this.isShowFilterBox = false;
       // WARN: 异步获取列表
@@ -1384,32 +1332,32 @@ export default class AppList2 extends Vue {
     }
     this.queryConditions = res.data.queryConditions;
 
-    this.visibleQueryConditions = this.queryConditions && this.queryConditions.filter(function(a) { return a.visible }) || [];
+    this.visibleQueryConditions =
+      (this.queryConditions &&
+        this.queryConditions.filter(function(a) {
+          return a.visible;
+        })) ||
+      [];
     // console.log("VISIBLEQUERYCONDITIONS: "+this.visibleQueryConditions);
 
     let presentationActions = [];
-    if (
-      res.data.queryPresentation &&
-      typeof res.data.queryPresentation === "object"
-    ) {
+    if (res.data.queryPresentation && typeof res.data.queryPresentation === "object") {
       this.queryPresentation = res.data.queryPresentation;
       try {
-        presentationActions = JSON.parse(
-          (this.queryPresentation as any).actionsJson
-        );
-      } catch (err) { }
+        presentationActions = JSON.parse((this.queryPresentation as any).actionsJson);
+      } catch (err) {}
     }
 
     let associationType = 0;
-    res.data.queryActions = res.data.queryActions.map((i:any) => {
-      if(i.actionCode === 'add'){
+    res.data.queryActions = res.data.queryActions.map((i: any) => {
+      if (i.actionCode === "add") {
         associationType = i.associationType;
       }
-      if(i.actionCode === 'import'){
+      if (i.actionCode === "import") {
         i.associationType = associationType;
       }
       return i;
-    })
+    });
 
     // 如果视图设计里有自定义按钮数据, 择取 queryActions 包含的系统按钮和 actionsJson 包含的自定义按钮:
     // 原本 actionsJson 只做 queryActions 的补充, 存些类名之类, 具体显示和默认数据都由 queryActions 来决定
@@ -1421,9 +1369,7 @@ export default class AppList2 extends Vue {
       // 获取 queryActions 中存在的数据还自定义数据
       this.queryActions = res.data.queryActions = presentationActions
         .map((a1: any) => {
-          let a2 = queryActions.find(
-            (a: any) => a.actionCode === a1.actionCode
-          );
+          let a2 = queryActions.find((a: any) => a.actionCode === a1.actionCode);
           if (a2 || a1.queryActionType === QueryActionTypes.CUSTOM) {
             return { ...a2, ...a1, sortKey: a2.sortKey }; // sortKey 以接口为准
           } else return null;
@@ -1473,7 +1419,7 @@ export default class AppList2 extends Vue {
         common.utils.compatible(action, "name");
       });
     }
-    
+
     // 批量操作合在一个按钮，以下拉展示形式展示， 暂时不能合并批量打印，功能暂时注释保留，后续如果需要合并其他批量操作，可以放开start
     // let batchs = []
     // let batchsIndexs = []
@@ -1489,7 +1435,7 @@ export default class AppList2 extends Vue {
     // batchsIndexs.forEach((el,index) => {
     //   this.queryActions.splice(el, 1)
     //   if(index === batchsIndexs.length - 1){
-    //     this.queryActions.splice(el, 0, Object.assign({}, batchs[0], 
+    //     this.queryActions.splice(el, 0, Object.assign({}, batchs[0],
     //         {
     //           name: "批量操作",
     //           actionCode: "batchs",
@@ -1502,7 +1448,6 @@ export default class AppList2 extends Vue {
     //   }
     // })
     // 批量操作合在一个按钮，以下拉展示形式展示， 暂时不能合并批量打印，功能暂时注释保留，后续如果需要合并其他批量操作，可以放开end
-
 
     if (res.data.queryColumns) {
       this.queryColumns = res.data.queryColumns; //.filter((query: any) => query.propertyType !== 6);
@@ -1588,26 +1533,26 @@ export default class AppList2 extends Vue {
               propertyValue = sequenceStatus.join(";");
             } else if (propertyValue.length === 1 && query.propertyType === 2) {
               propertyValue = `${propertyValue};`;
-            } else if (query.propertyType === DataItemType.StaffSingle || query.propertyType === DataItemType.StaffMulti || query.propertyType === DataItemType.DeptSingle || query.propertyType === DataItemType.DeptMulti || query.propertyType === DataItemType.StaffDeptMix) {
+            } else if (
+              query.propertyType === DataItemType.StaffSingle ||
+              query.propertyType === DataItemType.StaffMulti ||
+              query.propertyType === DataItemType.DeptSingle ||
+              query.propertyType === DataItemType.DeptMulti ||
+              query.propertyType === DataItemType.StaffDeptMix
+            ) {
               propertyValue = JSON.stringify(
-                propertyValue.map((p) => ({
+                propertyValue.map(p => ({
                   id: p.id,
                   unitType: p.unitType,
-                  name: p.name,
+                  name: p.name
                 }))
               );
-            } else if (
-              query.propertyType === DataItemType.Date &&
-              propertyValue.length === 2
-            ) {
-              propertyValue = propertyValue.map((x) => {
+            } else if (query.propertyType === DataItemType.Date && propertyValue.length === 2) {
+              propertyValue = propertyValue.map(x => {
                 if (typeof x === "string") {
                   return x;
                 } else if (x instanceof Date) {
-                  return common.utils.DateHandle.dateFormat(
-                    x,
-                    this.getFormat(displayFormat)
-                  );
+                  return common.utils.DateHandle.dateFormat(x, this.getFormat(displayFormat));
                 } else if (x && typeof x === "object") {
                   const d = x.format(this.getFormat(displayFormat));
                   return d;
@@ -1623,19 +1568,18 @@ export default class AppList2 extends Vue {
               //   propertyValue[1] = `${propertyValue[1]} 23:59:59`;
               // }
               propertyValue = propertyValue.join(";");
-            } else if (query.propertyType === DataItemType.Time &&
-              propertyValue.length === 2) {
-                propertyValue = propertyValue.map((x) => {
-                  if (typeof x === "string") {
-                    return x;
-                  } else if (moment.isMoment(x)) {
-                    return x.format(this.getFormat(displayFormat));
-                  }
-                  return "";
-                });
-                propertyValue = propertyValue.join(";");
-            }else if (query.propertyType === DataItemType.RelevanceFormEx) {
-              propertyValue = propertyValue.map((item) => item.id).join(";");
+            } else if (query.propertyType === DataItemType.Time && propertyValue.length === 2) {
+              propertyValue = propertyValue.map(x => {
+                if (typeof x === "string") {
+                  return x;
+                } else if (moment.isMoment(x)) {
+                  return x.format(this.getFormat(displayFormat));
+                }
+                return "";
+              });
+              propertyValue = propertyValue.join(";");
+            } else if (query.propertyType === DataItemType.RelevanceFormEx) {
+              propertyValue = propertyValue.map(item => item.id).join(";");
             } else {
               propertyValue = propertyValue.join(";");
             }
@@ -1647,14 +1591,8 @@ export default class AppList2 extends Vue {
                 // propertyValueName = value ? value.name : "";
                 // 获取关联表单的值
                 propertyValueName = "";
-                if (
-                  value &&
-                  relevanceDataList &&
-                  relevanceDataList.length > 0
-                ) {
-                  const rele = relevanceDataList.find(
-                    (r: any) => r.code === key
-                  );
+                if (value && relevanceDataList && relevanceDataList.length > 0) {
+                  const rele = relevanceDataList.find((r: any) => r.code === key);
                   let val: any;
                   rele.relativePropertyCode = rele.relativePropertyCode
                     ? rele.relativePropertyCode
@@ -1673,7 +1611,9 @@ export default class AppList2 extends Vue {
                       propertyValueName = `${val.provinceName}${val.cityName}${val.districtName}`;
                     } else {
                       const address: any = JSON.parse(val);
-                      propertyValueName = `${address.provinceName}${address.cityName}${address.districtName}`;
+                      propertyValueName = `${address.provinceName}${address.cityName}${
+                        address.districtName
+                      }`;
                     }
                   }
                 }
@@ -1697,7 +1637,7 @@ export default class AppList2 extends Vue {
             propertyCode: query.propertyCode,
             propertyType: query.propertyType,
             propertyValue,
-            propertyValueName,
+            propertyValueName
           });
         }
       });
@@ -1723,7 +1663,7 @@ export default class AppList2 extends Vue {
     if (hasRelevanceForm) {
       // 在过滤查询,如果有关联表单查询,需要传 display给后台.
       this.getQueryList(_type, {
-        display: hasRelevanceForm,
+        display: hasRelevanceForm
       });
     } else {
       this.getQueryList(_type);
@@ -1754,15 +1694,15 @@ export default class AppList2 extends Vue {
       page: this.curPage - 1,
       queryCode: this.curListCode,
       schemaCode,
-      size: this.pageSize,
+      size: this.pageSize
     };
 
     // 判断是否有排序
     if (this.$refs.listCustomTemplate) {
       if ((this.$refs.listCustomTemplate as any).isSort) {
         if ((this.$refs.listCustomTemplate as any).sortAscDesc !== 0) {
-          params.orderByFields = [(this.$refs.listCustomTemplate as any).sortCode]
-          params.orderType = (this.$refs.listCustomTemplate as any).sortAscDesc
+          params.orderByFields = [(this.$refs.listCustomTemplate as any).sortCode];
+          params.orderType = (this.$refs.listCustomTemplate as any).sortAscDesc;
         }
       }
     }
@@ -1770,7 +1710,7 @@ export default class AppList2 extends Vue {
     return params;
   }
 
-  oldParams:any = {};
+  oldParams: any = {};
 
   async getQueryList(type?: string, ...otherParams) {
     const vm: any = this;
@@ -1790,9 +1730,9 @@ export default class AppList2 extends Vue {
         }
       }
     }
-	
-    this.oldParams = JSON.parse(JSON.stringify(params))
-    
+
+    this.oldParams = JSON.parse(JSON.stringify(params));
+
     // 外部请求
     let res;
     let isCustomRequest = false;
@@ -1802,9 +1742,7 @@ export default class AppList2 extends Vue {
     // 检测版本
     if (
       this.eventHooksHandler &&
-      (scriptVersion = parseFloat(
-        this.eventHooksHandler.scription.options.version
-      )) > 1
+      (scriptVersion = parseFloat(this.eventHooksHandler.scription.options.version)) > 1
     ) {
       let listData = this.eventHooksHandler.getApi("listData");
       if (listData) {
@@ -1815,10 +1753,8 @@ export default class AppList2 extends Vue {
         res = await this.eventHooksHandler.fetchApi(listData, params);
 
         if (customRequestMode === "replace") {
-          this.eventHooksHandler.hooksOption.forEach((o) => {
-            o.params.includes("dataSource")
-              ? (o.params = ["userListData"])
-              : undefined;
+          this.eventHooksHandler.hooksOption.forEach(o => {
+            o.params.includes("dataSource") ? (o.params = ["userListData"]) : undefined;
           });
           console.log(this.eventHooksHandler.hooksOption);
         }
@@ -1880,9 +1816,7 @@ export default class AppList2 extends Vue {
             }
           }
 
-          const columnOpts: any = window.localStorage.getItem(
-            this.columnsOptsKey
-          );
+          const columnOpts: any = window.localStorage.getItem(this.columnsOptsKey);
           if (columnOpts) {
             this.rowsFormatter(this.cusColumns);
           }
@@ -1899,10 +1833,7 @@ export default class AppList2 extends Vue {
     // 触发 onLoad 只在成功加载数据时触发
     // 而 onLoad 的触发又会带动 onRendered 的触发
     // isShowTable 也会根据 if/else, 同步/异步的情况情况来做触发
-    if (
-      (isCustomRequest && customRequestMode !== "combine") ||
-      res.errcode === 0
-    ) {
+    if ((isCustomRequest && customRequestMode !== "combine") || res.errcode === 0) {
       // 触发onLoad钩子: 第一次加载/过滤/分页器 时, 新增/删除 成功时
       if (
         !hasData ||
@@ -1975,58 +1906,50 @@ export default class AppList2 extends Vue {
     // this.getQueryList("pageChange");
     // this.resetSelectAll(this);
     // 获取参数
-    let params: any = this.queryParamsFormater()
+    let params: any = this.queryParamsFormater();
     if (sortData) {
-      const { orderByFields, orderType } = sortData
-      if (!orderByFields.length) return
-      params = { ...params, orderByFields, orderType }
+      const { orderByFields, orderType } = sortData;
+      if (!orderByFields.length) return;
+      params = { ...params, orderByFields, orderType };
     }
 
     // 加载中
-    this.tableLoading = true
+    this.tableLoading = true;
     // 调用接口
     const res: any = await listApi.getQueryList(params);
     if (res.errcode !== 0) {
-      this.$message.error(res.errmsg)
+      this.$message.error(res.errmsg);
     }
     // 加载完成
-    this.tableLoading = false
-    this.dataSource = []
+    this.tableLoading = false;
+    this.dataSource = [];
     this.listDataFormatter(res.data.content, this.dataSource, this.columns);
   }
 
   // 列表数据格式化
-  listDataFormatter(
-    dataOrigin: any,
-    dataSource: any,
-    sourceColumns: any,
-    isChildSheet?: any
-  ) {
+  listDataFormatter(dataOrigin: any, dataSource: any, sourceColumns: any, isChildSheet?: any) {
     dataOrigin.forEach((item: any, index: number) => {
       const obj: any = {};
       const itemData = isChildSheet ? item : item.data;
       Object.entries(itemData).forEach((data: any, i: number) => {
         const [key, value] = data;
         const column: any = sourceColumns.find((c: any) => c.dataIndex === key);
-        console.log('sourceColumns', sourceColumns)
+        console.log("sourceColumns", sourceColumns);
         // 键值
         if (value && typeof value === "object") {
-
           if (Array.isArray(value)) {
             // MARK: 如果是附件、子表, 返回全部, 而不只是名字;
             const ignoreType = [6, 8];
             obj[key] =
               column && ignoreType.includes(column.propertyType)
                 ? value
-                : value.map((x) => x.name || "").join();
+                : value.map(x => x.name || "").join();
           } else {
             obj[key] = value.name || value.address || "";
           }
 
           // 关联表单显示字段赋值
-          if (
-            column &&
-            column.propertyType === 9) {
+          if (column && column.propertyType === 9) {
             const code: string = value.displayCode;
             if (Array.isArray(value[code])) {
               obj[key] = value[code][0].name;
@@ -2040,18 +1963,12 @@ export default class AppList2 extends Vue {
               if (value.propertyType === 10) {
                 const addressObj = JSON.parse(value[code]);
                 if (addressObj) {
-                  addressObj.provinceName
-                    ? (obj[key] = addressObj.provinceName)
-                    : (obj[key] = "");
-                  addressObj.cityName
-                    ? (obj[key] += addressObj.cityName)
-                    : (obj[key] += "");
+                  addressObj.provinceName ? (obj[key] = addressObj.provinceName) : (obj[key] = "");
+                  addressObj.cityName ? (obj[key] += addressObj.cityName) : (obj[key] += "");
                   addressObj.districtName
                     ? (obj[key] += addressObj.districtName)
                     : (obj[key] += "");
-                  addressObj.address
-                    ? (obj[key] += addressObj.address)
-                    : (obj[key] += "");
+                  addressObj.address ? (obj[key] += addressObj.address) : (obj[key] += "");
                 }
               }
 
@@ -2083,12 +2000,14 @@ export default class AppList2 extends Vue {
             const showCode: string = value[code];
             if (showCode) {
               let resArr = showCode.split(";");
-              obj[key] = resArr.map(x => { return x ? x : "空" }).join(";");
+              obj[key] = resArr
+                .map(x => {
+                  return x ? x : "空";
+                })
+                .join(";");
             }
           }
-        } else if (
-          value === "null" &&
-          column && column.propertyType === 9) {
+        } else if (value === "null" && column && column.propertyType === 9) {
           obj[key] = null;
         } else if (typeof value === "boolean") {
           obj[key] = value ? "是" : "否";
@@ -2104,39 +2023,28 @@ export default class AppList2 extends Vue {
               address = JSON.parse(address);
             }
             // 省市区如果为空则展示空字符
-            address.provinceName = address.provinceName
-              ? address.provinceName
-              : "";
+            address.provinceName = address.provinceName ? address.provinceName : "";
             address.cityName = address.cityName ? address.cityName : "";
-            address.districtName = address.districtName
-              ? address.districtName
-              : "";
+            address.districtName = address.districtName ? address.districtName : "";
             address.address = address.address ? address.address : "";
 
-            obj[
-              key
-            ] = `${address.provinceName}${address.cityName}${address.districtName}${address.address}`;
+            obj[key] = `${address.provinceName}${address.cityName}${address.districtName}${
+              address.address
+            }`;
           } catch {
             console.log("位置控件格式正确！");
           }
         } else if (value && column && column.propertyType === 3) {
           // 日期数据项展示格式处理
-          const date = new Date(typeof(value) === 'string' ? value.replace(/-/g, "/") : value); // 修复safari/ie下日期转换问题
-          const month =
-            date.getMonth() + 1 > 9
-              ? date.getMonth() + 1
-              : `0${date.getMonth() + 1}`;
-          const day =
-            date.getDate() > 9 ? date.getDate() : `0${date.getDate()}`;
+          const date = new Date(typeof value === "string" ? value.replace(/-/g, "/") : value); // 修复safari/ie下日期转换问题
+          const month = date.getMonth() + 1 > 9 ? date.getMonth() + 1 : `0${date.getMonth() + 1}`;
+          const day = date.getDate() > 9 ? date.getDate() : `0${date.getDate()}`;
           const yearAndMonth = `${date.getFullYear()}-${month}`;
           const time = `${date.getFullYear()}-${month}-${day}`;
-          const hours =
-            date.getHours() > 9 ? date.getHours() : `0${date.getHours()}`;
-          const minutes =
-            date.getMinutes() > 9 ? date.getMinutes() : `0${date.getMinutes()}`;
-          const seconds =
-            date.getSeconds() > 9 ? date.getSeconds() : `0${date.getSeconds()}`;
-          // 
+          const hours = date.getHours() > 9 ? date.getHours() : `0${date.getHours()}`;
+          const minutes = date.getMinutes() > 9 ? date.getMinutes() : `0${date.getMinutes()}`;
+          const seconds = date.getSeconds() > 9 ? date.getSeconds() : `0${date.getSeconds()}`;
+          //
           switch (column.displayFormat) {
             case 0:
               break;
@@ -2184,37 +2092,41 @@ export default class AppList2 extends Vue {
           if (value === 0) {
             obj[key] = "0";
           } else if (value) {
-            if(column.displayFormat){
+            if (column.displayFormat) {
               // if(key.includes("Number") && typeof value ==='number') {
               //   obj[key] = Helper.numberToDisplay((value*100), column);
               // }else{
               //   obj[key] = Helper.numberToDisplay(value, column);
               // }
               obj[key] = Helper.numberToDisplay(value, column);
-              if(key.includes("Number") && typeof obj[key] ==='string' && obj[key].includes("%")){
+              if (
+                key.includes("Number") &&
+                typeof obj[key] === "string" &&
+                obj[key].includes("%")
+              ) {
                 //处理小数精度问题
-                let m=0;
-                let s1=(Number(obj[key].split('%')[0])).toString();
-                let s2="100"; 
-                try{m+=s1.split(".")[1].length}catch(e){};
-                try{m+=s2.split(".")[1].length}catch(e){};
-                 obj[key]=Number(s1.replace(".",""))*Number(s2.replace(".",""))/(10 ** m)  + "%";
+                let m = 0;
+                let s1 = Number(obj[key].split("%")[0]).toString();
+                let s2 = "100";
+                try {
+                  m += s1.split(".")[1].length;
+                } catch (e) {}
+                try {
+                  m += s2.split(".")[1].length;
+                } catch (e) {}
+                obj[key] =
+                  (Number(s1.replace(".", "")) * Number(s2.replace(".", ""))) / 10 ** m + "%";
               }
-            }else{
+            } else {
               const arrs = this.dataItemList.find(i => i.code === column.key);
-              if(arrs.options){
+              if (arrs.options) {
                 let objs = JSON.parse(arrs.options);
                 const status = Helper.numberToDisplayModel(value, objs.format);
-                if(status) obj[key] = status;
+                if (status) obj[key] = status;
               }
             }
           }
-        } else if (
-          value &&
-          column &&
-          column.propertyType === 8 &&
-          !isChildSheet
-        ) {
+        } else if (value && column && column.propertyType === 8 && !isChildSheet) {
           // 子表数据项格式化处理
           obj[key] = [];
           if (value.length) {
@@ -2243,7 +2155,7 @@ export default class AppList2 extends Vue {
         if (key === "isChecked") {
           obj[key] = false;
         } else {
-          console.log('---------------------sssss', obj[key])
+          console.log("---------------------sssss", obj[key]);
           obj[key] = obj[key] || "--";
         }
       });
@@ -2339,7 +2251,7 @@ export default class AppList2 extends Vue {
    * 新增按钮
    */
   handleAdd(obj: listParams.QueryActions) {
-    // 
+    //
     let url: string = "";
     const code = obj.associationCode;
     if (obj.associationType === 1) {
@@ -2384,7 +2296,7 @@ export default class AppList2 extends Vue {
 
     const params: listParams.DeleteListParams = {
       ids: _ids,
-      schemaCode,
+      schemaCode
     };
 
     const res = await listApi.checkDeleteItems(params);
@@ -2414,54 +2326,52 @@ export default class AppList2 extends Vue {
       const h = this.$createElement;
       vm.$confirm({
         title: h("span", { class: "delete-title" }, [
-          `${vm.$t("cloudpivot.list.pc.DeleteItems").toString()}`,
+          `${vm.$t("cloudpivot.list.pc.DeleteItems").toString()}`
         ]), // 以下数据删除后不能恢复，确定要删除吗？
         content: h("div", { class: "delete-content" }, [
           h("div", { class: { hidden: !countObj.count1 } }, [
-            h("img", { attrs: { src: require("@cloudpivot/list/src/components/pc/image/dot.png") } }),
+            h("img", {
+              attrs: { src: require("@cloudpivot/list/src/components/pc/image/dot.png") }
+            }),
             "业务数据 ",
             h("span", `${countObj.count1}`),
-            " 条",
+            " 条"
           ]),
           h("div", { class: { hidden: !countObj.count2 } }, [
-            h("img", { attrs: { src: require("@cloudpivot/list/src/components/pc/image/dot.png") } }),
+            h("img", {
+              attrs: { src: require("@cloudpivot/list/src/components/pc/image/dot.png") }
+            }),
             "未关联父子流程的流程数据 ",
             h("span", `${countObj.count2}`),
             " 条",
-            h(
-              "p",
-              { class: "tip-text" },
-              "（数据删除后，将同步删除已产生的流程实例）"
-            ),
+            h("p", { class: "tip-text" }, "（数据删除后，将同步删除已产生的流程实例）")
           ]),
           h("div", { class: { hidden: !countObj.count3 } }, [
-            h("img", { attrs: { src: require("@cloudpivot/list/src/components/pc/image/dot.png") } }),
+            h("img", {
+              attrs: { src: require("@cloudpivot/list/src/components/pc/image/dot.png") }
+            }),
             "已关联子流程的父流程数据 ",
             h("span", `${countObj.count3}`),
             " 条",
-            h(
-              "p",
-              { class: "tip-text" },
-              "（父流程删除后将同步删除与其绑定的子流程数据及实例）"
-            ),
+            h("p", { class: "tip-text" }, "（父流程删除后将同步删除与其绑定的子流程数据及实例）")
           ]),
           h("div", { class: { hidden: !countObj.count4 } }, [
-            h("img", { attrs: { src: require("@cloudpivot/list/src/components/pc/image/dot.png") } }),
+            h("img", {
+              attrs: { src: require("@cloudpivot/list/src/components/pc/image/dot.png") }
+            }),
             "子流程数据 ",
             h("span", `${countObj.count4}`),
             " 条",
-            h(
-              "p",
-              { class: "tip-text" },
-              "（子流程删除后将同步删除实例及与父流程产生的映射关系）"
-            ),
+            h("p", { class: "tip-text" }, "（子流程删除后将同步删除实例及与父流程产生的映射关系）")
           ]),
           h("div", { class: { hidden: !countObj.count5 } }, [
-            h("img", { attrs: { src: require("@cloudpivot/list/src/components/pc/image/dot.png") } }),
+            h("img", {
+              attrs: { src: require("@cloudpivot/list/src/components/pc/image/dot.png") }
+            }),
             "普通用户不可删除流程数据 ",
             h("span", `${countObj.count5}`),
-            " 条",
-          ]),
+            " 条"
+          ])
         ]),
         width: "520px",
         okText: this.$t("cloudpivot.list.pc.OK").toString(),
@@ -2470,7 +2380,7 @@ export default class AppList2 extends Vue {
           vm.deleteListItems();
         },
         class: "test",
-        className: "test1",
+        className: "test1"
       } as any);
     } else if (res.errcode === -1) {
       vm.$message.warning(res.errmsg as string);
@@ -2499,7 +2409,7 @@ export default class AppList2 extends Vue {
 
     const params: listParams.DeleteListParams = {
       ids: _ids,
-      schemaCode,
+      schemaCode
     };
 
     const res = await listApi.deleteListData(params);
@@ -2515,15 +2425,12 @@ export default class AppList2 extends Vue {
 
       if (res.data && res.data.errorCount > 0) {
         if (res.data.successCount === 0) {
-          vm.$message.warning(
-            this.$t("cloudpivot.list.pc.NoPermissionDelete") as string,
-            4
-          );
+          vm.$message.warning(this.$t("cloudpivot.list.pc.NoPermissionDelete") as string, 4);
         } else {
           vm.$message.warning(
             this.$t("cloudpivot.list.pc.DeleteItemsTips", {
               successCount: res.data.successCount,
-              errorCount: res.data.errorCount,
+              errorCount: res.data.errorCount
             }) as string,
             4
           );
@@ -2532,10 +2439,7 @@ export default class AppList2 extends Vue {
       vm.resetSelectAll(vm);
       vm.getQueryList("delete");
     } else {
-      vm.$message.error(
-        this.$t("cloudpivot.list.pc.DeleteFailed") as string,
-        3
-      );
+      vm.$message.error(this.$t("cloudpivot.list.pc.DeleteFailed") as string, 3);
     }
   }
 
@@ -2545,14 +2449,10 @@ export default class AppList2 extends Vue {
   handleExportData(data: any) {
     // onActionClick.handleExportData(this, data);
     // console.log(onActionClick.handleExportData(this, data))
-    onActionClick.handleExportData(this, data).then((resp) => {
+    onActionClick.handleExportData(this, data).then(resp => {
       this.exportFileId = resp;
       if (this.eventHooksHandler) {
-        this.eventHooksHandler.exec(
-          "onActionDone",
-          this.getAction("export"),
-          resp ? true : false
-        );
+        this.eventHooksHandler.exec("onActionDone", this.getAction("export"), resp ? true : false);
       }
     });
   }
@@ -2568,9 +2468,8 @@ export default class AppList2 extends Vue {
     return this.dataSource[rowIndex][dataIndex];
   }
 
-
   showIframeForm = false;
-  IframeFormUrl = '';
+  IframeFormUrl = "";
   /**
    * 打开表单
    */
@@ -2580,7 +2479,7 @@ export default class AppList2 extends Vue {
     const { schemaCode } = this.$route.params;
     const params: listParams.FormUrlParams = {
       bizObjectId: rowData.id,
-      schemaCode,
+      schemaCode
     };
     const res = await listApi.getFormUrl(params);
     // 如果报错, 会返回一个对象
@@ -2590,7 +2489,7 @@ export default class AppList2 extends Vue {
     // 否则返回一个字符串
     else if (typeof res === "string") {
       let urlObj = new URL(location.href);
-      urlObj.searchParams.set('iframeAction','detail');
+      urlObj.searchParams.set("iframeAction", "detail");
       let search = urlObj.search;
       const url = `${res}&return=${location.pathname + encodeURIComponent(search)}`;
       if (platform.IS_DINGTALK) {
@@ -2600,7 +2499,7 @@ export default class AppList2 extends Vue {
           curPage,
           filterData,
           queryFormValues,
-          pageSize,
+          pageSize
         };
         window.sessionStorage.setItem("filterData", JSON.stringify(cacheData));
         this.$router.push(url).catch((err: any) => {
@@ -2638,9 +2537,7 @@ export default class AppList2 extends Vue {
     onActionClick.import(this);
   }
 
-  setImportData(data){
-
-  }
+  setImportData(data) {}
 
   /**
    * 导入结束（不管成功与失败）
@@ -2648,11 +2545,7 @@ export default class AppList2 extends Vue {
   importEnd(data: any) {
     onActionClick.importEnd(this, data);
     if (this.eventHooksHandler) {
-      this.eventHooksHandler.exec(
-        "onActionDone",
-        this.getAction("import"),
-        data
-      );
+      this.eventHooksHandler.exec("onActionDone", this.getAction("import"), data);
     }
   }
 
@@ -2676,7 +2569,7 @@ export default class AppList2 extends Vue {
     this.import();
   }
 
-  percentInterval:any = null;
+  percentInterval: any = null;
 
   reset() {
     this.isInitView = true;
@@ -2685,7 +2578,7 @@ export default class AppList2 extends Vue {
     this.importPercent = 0;
     this.isImportEnd = false;
     this.successNum = 0;
-    this.errorMsg = '';
+    this.errorMsg = "";
     this.failNum = 0;
     this.importSize = 0;
     this.importrQueryField = "";
@@ -2723,11 +2616,7 @@ export default class AppList2 extends Vue {
    * 拖拽结束, 记录列宽
    */
   onResizeEnd(params: AllTypes.ColumnOption) {
-    columnWidthRecord.handleColumResizeEnd(
-      params,
-      this.recordKey,
-      this.columnsOptsKey
-    );
+    columnWidthRecord.handleColumResizeEnd(params, this.recordKey, this.columnsOptsKey);
   }
 
   /**
@@ -2766,9 +2655,7 @@ export default class AppList2 extends Vue {
     (this.$refs.ModifyOwner as any).confirmLoading = true;
     let res: any = await listApi.modifyOwner(data);
     if (res && res.errcode === 0) {
-      this.$message.success(
-        this.$t("cloudpivot.list.pc.modifySuccess") as string
-      );
+      this.$message.success(this.$t("cloudpivot.list.pc.modifySuccess") as string);
       (this.$refs.ModifyOwner as any).close();
       this.reload();
     } else {
@@ -2789,9 +2676,7 @@ export default class AppList2 extends Vue {
     this.isShowTableBox = false;
     this.firstLoad = true;
     this.canDelete = false;
-    const records: string = window.localStorage.getItem(
-      this.recordKey
-    ) as string;
+    const records: string = window.localStorage.getItem(this.recordKey) as string;
     this.adaptWidth = !!records;
     this.resetSelectAll(this);
     this.resetParams();
@@ -2822,7 +2707,7 @@ export default class AppList2 extends Vue {
 
   @Watch("applicationPageTitle")
   onApplicationPageTitleChange(v: any) {
-    document.title = `奥哲云枢-${v}`;
+    document.title = `之江实验室-${v}`;
   }
 
   @Watch("$route")
