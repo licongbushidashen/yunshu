@@ -1,6 +1,74 @@
 <template>
-  <div>
-    <account-login :corpId="corpId" />
+  <div class="login">
+    <div class="login-head">
+      <img src="../../assets/images/yslogo.png" />
+      <a-select
+        v-model="deptId"
+        :defaultValue="deptId"
+        @change="onDeptChange"
+        show-search
+        :filter-option="filterOption"
+        :showArrow="false"
+        class="org-list"
+      >
+        <a-select-option
+          v-for="dept in depts"
+          :value="dept.corpId"
+          :key="dept.corpId"
+          >{{ dept.name ? dept.name : "主组织" }}</a-select-option
+        >
+      </a-select>
+    </div>
+    <div class="login-content">
+      <div class="login-content-contain">
+        <div class="login-content-contain__left">
+          <!-- <h1>重塑连接，赋能业务在线</h1>
+          <h2>弥合管理碎片，盘活IT资产</h2>-->
+          <img class="bj-image" src="../../assets/images/bj.png" />
+        </div>
+
+        <div class="login-types">
+          <div
+            class="tab-bar"
+            :class="{
+              'only-one': tabsDisplay.length === 1,
+              'only-two': tabsDisplay.length === 2
+            }"
+          >
+            <div
+              class="tab-bar-item"
+              :class="curTab === item.type ? 'active' : ''"
+              v-for="(item, index) in tabsDisplay"
+              :key="index"
+              @click="changeTab(item.type)"
+            >
+              {{ languages === "zh" ? item.name : "Account Login" }}
+            </div>
+          </div>
+
+          <div class="tab-content">
+            <template v-if="curTab === 'account'">
+              <account-login :corpId="corpId" />
+            </template>
+
+            <template v-if="curTab === 'dingding'">
+              <qrcode-login :appId="appId" :corpId="corpId" ref="qrcodeLogin" />
+            </template>
+
+            <template v-if="curTab === 'wechat'">
+              <wechat-login :agentid="agentid" :corpId="corpId" />
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="login-footer">
+      <div class="login-footer-center">
+        <div class="login-line"></div>
+        <div>版权所有 &copy;深圳奥哲网络科技有限公司 粤ICP备10083177号</div>
+        <div class="login-line"></div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -13,7 +81,7 @@ import { utils } from "@cloudpivot/common";
 
 import QrcodeLogin from "./qrcode-login.vue";
 
-import AccountLogin from "./account-login1.vue";
+import AccountLogin from "./account-login.vue";
 
 import WechatLogin from "./wechat-login.vue";
 
@@ -118,7 +186,7 @@ export default class Login extends Vue {
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("expireTime");
     const config = await OAuthApi.getSystemConfig();
-
+    ``;
     // const config = {"pcServerUrl":"http://120.24.79.179",
     // "ssoServerUrl":"http://47.106.239.118/api/login",
     // "adminServerUrl":"http://47.106.239.118/admin",

@@ -186,7 +186,8 @@ const startApp = () => {
     }
     window.Environment.historyLength += 1;
     if (!to.name && /unfinishedWorkitem/.test(to.path)) {
-      next({ name: "workitems" });
+      // next({ name: "workitems" });
+      next();
     } else {
       next();
     }
@@ -334,13 +335,24 @@ const getMessageUrl = async (messageId: any) => {
 
 export function init() {
   let acce = getQueryVariable("accessToken");
-
-  if (acce) {
-    localStorage.setItem("accessToken", `${acce}`);
+  let acce1=localStorage.getItem('accessToken');
+  if(acce){
+    if(acce!=acce1){
+      localStorage.removeItem('token')
+      localStorage.setItem("accessToken", `${acce}`);
+    }
   }
 
+  // if (acce) {
+  //   localStorage.setItem("accessToken", `${acce}`);
+  // }
+
   if (window.location.href.indexOf("#/login") == -1) {
-    localStorage.setItem("wyyurl", `${window.location.href}`);
+    if(acce){
+      localStorage.setItem("wyyurl", `${window.location.href}`);
+    }if(!localStorage.getItem('wyyurl')){
+        localStorage.setItem("wyyurl", `${window.location.href}`);
+    }
   }
 
   platform.start(env.client_id, env.scope).then((result: any) => {
@@ -363,7 +375,7 @@ export function init() {
         )}`;
         window.location.href = theUrl;
       }
-      if (token) {
+      if (token) { 
         window.Environment = query;
         FormCommentIns.FormCommentApi.getUserInfo().then((res: any) => {
           if (res.errcode === 0) {

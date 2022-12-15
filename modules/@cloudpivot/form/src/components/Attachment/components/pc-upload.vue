@@ -427,7 +427,6 @@ export default class PcUpload extends FileUploadControl {
   }
 
   handlePreview(file: any) {
-    // console.log(file)
     if (file.previewUrl) {
       file.previewUrl && window.open(file.previewUrl);
       event && event.stopPropagation();
@@ -437,6 +436,14 @@ export default class PcUpload extends FileUploadControl {
         this.$message.info("该格式附件暂不支持预览");
         return;
       } else {
+        if (type.indexOf("image") !== -1) {
+          const img=new Image()
+          img.src=file.url || file.thumbUrl;
+          const imgWindow=window.open(file.url)
+          imgWindow.document.write(img.outerHTML)
+          // window.location.href=file.url || file.thumbUrl;
+          return
+        }
         this.previewImage = file.url || file.thumbUrl;
         this.previewVisible = true;
       }

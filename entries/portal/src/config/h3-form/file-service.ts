@@ -18,6 +18,7 @@ export class DefaultFileService implements renderer.FileService {
   }
 
   getDownloadUrl(file: renderer.H3File): string {
+    debugger
     const url = `${env.apiHost}/api/aliyun/download?refId=${file.refId}`;
     const token = (window as any).externalLinkToken || localStorage.getItem("token");
     if (!token) {

@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
-    <!-- <link rel="stylesheet" href="https://at.alicdn.com/t/font_817620_g5q83gbq5h.css"> -->
-    <title></title>
-  </head>
-  <body style="overflow: hidden;">
-    <noscript>
-      <strong>We're sorry but portal doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app">loading…</div>
-    <script src="<%= BASE_URL %>config.js?v=1.7"></script>
-    <script src="../static/config.js"></script>
-    <!-- built files will be auto injected -->
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
+  <!-- <link rel="stylesheet" href="https://at.alicdn.com/t/font_817620_g5q83gbq5h.css"> -->
+  <title></title>
+</head>
+
+<body style="overflow: hidden;">
+  <noscript>
+    <strong>We're sorry but portal doesn't work properly without JavaScript enabled. Please enable it to
+      continue.</strong>
+  </noscript>
+  <div id="app">loading…</div>
+  <script
+    type="text/javascript">var TINGYUN_COOKIE_VALUE = document.cookie; document.cookie = "TINGYUN_DATA=; expires=Thu, 01 Jan 1970 00:00:01 GMT;"; document.cookie = "TINGYUN_DATA=; expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/"; (function (d, s, id) { if (/(MSIE [0-8].\d+)/.test(navigator.userAgent)) { return; } "use strict"; var __TINGYUN = function (t) { function e(t) { return function (e) { return "Array" === t && Array.isArray ? Array.isArray(e) : Object.prototype.toString.call(e) === "[object " + t + "]" } } function n(t, e, n) { if (t && n && b(n)) { var r = t[e]; if (!r || !r._wrapped) { var i = n(r, e); return i && (i._wrapped = !0), t[e] = i, i } } } function r(e, n) { return function (r) { if (t[h].hook && t[h].hook.eventCb && f(r)) { var i = { originalCallback: e, eventHandlerType: n }; return t[h].hook.eventCb.call(this, arguments, i) } return e.apply(this, arguments) } } function i(t, e, n) { return n === k ? r(t, e) : (t.handleEvent = r(t.handleEvent, e), t) } function o(t) { return b(t) } function a(t) { return L(t) && b(t.handleEvent) } function u(t) { var e; return o(t) ? e = k : a(t) && (e = j), { isValid: t && e, listenerType: e } } function s(t) { return function () { var e = arguments[0], n = arguments[1], r = arguments[2], o = !0; r && L(r) && r[y] && (o = !1); var a = u(n), s = a.isValid, l = a.listenerType; if (o && O.indexOf(e) > -1 && s) { var c; if (n[_] && n[_][this]) c = n[_][this]; else { var p = i(n, E, l); l === k && (n[_] || (n[_] = {}, n[_][T] = 0), n[_][this] = { listener: p, options: arguments[2] }, n[_][T]++, c = n[_][this]) } c && (c.listener && (arguments[1] = c.listener), c.options && (arguments[2] = c.options)) } return t && t.apply(this, arguments) } } function l(t) { return function (e, n) { var r; try { r = t && t.apply(this, arguments) } finally { try { if (n && O.indexOf(e) > -1) { var i = n[_]; i && i[this] && i[this].listener && (null != i[this].options ? this.removeEventListener(e, i[this].listener, i[this].options) : this.removeEventListener(e, i[this].listener), i[this] = null, i[T]--, i[T] <= 0 && (n[_] = null, delete n[_])) } } catch (o) { } } return r } } function c() { t.EventTarget && (n(t.EventTarget.prototype, "addEventListener", function (t) { return s(t) }), n(t.EventTarget.prototype, "removeEventListener", function (t) { return l(t) })) } function p() { Object.getOwnPropertyDescriptor && Object.defineProperty && O.forEach(function (e) { var n = "on" + e, r = Object.getOwnPropertyDescriptor(t.HTMLElement.prototype, n), o = r.get, a = r.set; Object.defineProperty(t.HTMLElement.prototype, n, { get: function () { return o.apply(this, arguments) }, set: function () { var t = arguments[0]; return t && (arguments[0] = i(t, d, k)), a && a.apply(this, arguments) }, configurable: !0, enumerable: !0 }) }) } function f(e) { return e && e.target instanceof t.HTMLElement && e.currentTarget instanceof t.HTMLElement } function v() { return t.HTMLElement && (c(), p()), t[h].listenerHooked = !0, t[h] } var h = "__TINGYUN", y = "__ty_event_patch_disable", g = "click", m = "submit", E = "addEventListener", d = "onProperty", _ = "__TY_ELEMENT_CB", T = "__TY_CB_COUNTER", b = e("Function"), L = e("Object"), O = [g, m], k = 1, j = 2; t[h] || (t[h] = {}), t[h].hook || (t[h].hook = {}), t[h].hook.eventCb = null; var C = v(); return C }(window); var js, tjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) { return; } js = d.createElement(s); js.id = id; js.async = true; js.src = "//collectn.zhejianglab.com:18588/js/MbVbeLGiVew.js"; tjs.parentNode.insertBefore(js, tjs); })(document, "script", "tingyun_agent");</script>
+
+  <script src="<%= BASE_URL %>config.js?v=1.7"></script>
+  <script src="../static/config.js"></script>
+  <!-- built files will be auto injected -->
+</body>
+
 </html>

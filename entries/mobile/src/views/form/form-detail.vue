@@ -1,7 +1,11 @@
 <template>
   <div class="form-detail">
     <a-progress :percent="percent" :isAuto="true" :loadding="loadding" />
-    <form-nodes-switch v-if="nodes.length > 0" :nodes="nodes" @nodesSwitch="nodesSwitch" />
+    <form-nodes-switch
+      v-if="nodes.length > 0"
+      :nodes="nodes"
+      @nodesSwitch="nodesSwitch"
+    />
     <div class="form-body" :class="{ hasnodes: nodes.length > 0 }">
       <transition>
         <toptip v-show="comment">{{ comment }}</toptip>
@@ -47,7 +51,9 @@
       <div class="shadow" @click.self="isAddAndCreateVisible = false"></div>
       <div class="add-type">
         <div class="add-type-item" @click="createEmpty(vm)">
-          <span class="add-type-icon"><i class="icon aufontAll h-icon-all-add-file-o"></i></span>
+          <span class="add-type-icon"
+            ><i class="icon aufontAll h-icon-all-add-file-o"></i
+          ></span>
           <div class="add-type-text">
             <div>空白新建</div>
             <span>重新填写新表单</span>
@@ -69,7 +75,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch, Inject, Provide } from "vue-property-decorator";
+import {
+  Component,
+  Vue,
+  Prop,
+  Watch,
+  Inject,
+  Provide,
+} from "vue-property-decorator";
 import * as dd from "dingtalk-jsapi";
 import { H3Button } from "h3-mobile-vue";
 
@@ -104,9 +117,9 @@ import "@/config/h3-form";
  */
 function checkRunPlatform(to) {
   if (platform.IS_DINGTALK && common.utils.Common.isPC) {
-    let url = `${(window as any).config.portalHost}${to.fullPath}&T=${localStorage.getItem(
-      "token"
-    )}`;
+    let url = `${(window as any).config.portalHost}${
+      to.fullPath
+    }&T=${localStorage.getItem("token")}`;
     platform.service.openLink(url);
     // window.open(url,'_blank')
     return [false, url];
@@ -114,7 +127,11 @@ function checkRunPlatform(to) {
   return [true, ""];
 }
 
-Component.registerHooks(["beforeRouteEnter", "beforeRouteLeave", "beforeRouteUpdate"]);
+Component.registerHooks([
+  "beforeRouteEnter",
+  "beforeRouteLeave",
+  "beforeRouteUpdate",
+]);
 
 @Component({
   name: "mobile-form-detail",
@@ -125,19 +142,19 @@ Component.registerHooks(["beforeRouteEnter", "beforeRouteLeave", "beforeRouteUpd
     MobileFormRenderer: mobileForm.renderer.FormRenderer,
     FormActionModal: mobileForm.runtime.FormActionModal,
     AProgress: Progress,
-    formNodesSwitch
+    formNodesSwitch,
   },
 
   beforeRouteEnter(to, from, next) {
     let [st, url] = checkRunPlatform(to);
     if (st) {
-      next(vm => {
+      next((vm) => {
         (vm as MobileFormDetail).beforeLoad();
       });
     } else {
       next({
         path: `/form/empty?openBrowser=${url}`,
-        replace: true
+        replace: true,
       });
     }
   },
@@ -147,7 +164,7 @@ Component.registerHooks(["beforeRouteEnter", "beforeRouteLeave", "beforeRouteUpd
     // vm.clean();
     next();
     vm.beforeLoad();
-  }
+  },
 })
 export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
   creater: any = {};
@@ -181,8 +198,8 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
       if (window.location.href.indexOf("#/login") == -1) {
         localStorage.setItem("wyyurl", window.location.href);
       }
-    }else if( !localStorage.getItem("token")){
-       if (window.location.href.indexOf("#/login") == -1) {
+    } else if (!localStorage.getItem("token")) {
+      if (window.location.href.indexOf("#/login") == -1) {
         localStorage.setItem("wyyurl", window.location.href);
       }
     }
@@ -207,7 +224,10 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
                 const key = keys[0];
                 // 防止将上一次的错误提示清空 #43219
                 if (this.error === "") {
-                  this.error = formRenderer.getErrorMessage(key, errors[key][0]);
+                  this.error = formRenderer.getErrorMessage(
+                    key,
+                    errors[key][0]
+                  );
                 }
                 return;
               }
@@ -215,7 +235,7 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
             this.error = "";
           },
           {
-            immediate: true
+            immediate: true,
           }
         );
       }, 200);
@@ -241,7 +261,7 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
       },
       info: (msg?: string) => {
         this.showInfo(msg || "");
-      }
+      },
     } as any;
   }
 
@@ -258,12 +278,14 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
         content: opts.content,
         actions: [
           {
-            text: (this as any).$t("cloudpivot.form.renderer.cancel").toString(),
+            text: (this as any)
+              .$t("cloudpivot.form.renderer.cancel")
+              .toString(),
             onPress() {
               if (opts.onCancel) {
                 opts.onCancel();
               }
-            }
+            },
           },
           {
             text: (this as any).$t("cloudpivot.form.renderer.ok").toString(),
@@ -271,16 +293,16 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
               if (opts.onOk) {
                 opts.onOk();
               }
-            }
-          }
-        ]
+            },
+          },
+        ],
       });
     }) as any;
   }
 
   get mobileActions() {
     let mobileActions = this.actions.filter(
-      ac =>
+      (ac) =>
         ac.visible !== false &&
         ac.code !== runtime.FormAction.Print &&
         ac.code !== runtime.FormAction.EditOwner
@@ -292,10 +314,10 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
         code: "addAndCreate",
         disabled: false,
         loading: false,
-        text: "提交并继续创建"
+        text: "提交并继续创建",
       });
     }
-    mobileActions = mobileActions.filter(item => item.code !== "formTrack");
+    mobileActions = mobileActions.filter((item) => item.code !== "formTrack");
     return mobileActions;
   }
 
@@ -331,7 +353,11 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
 
   @Provide()
   layoutTypeFn() {
-    return this.formObj && this.formObj.bizSheet && this.formObj.bizSheet.layoutType === "vertical";
+    return (
+      this.formObj &&
+      this.formObj.bizSheet &&
+      this.formObj.bizSheet.layoutType === "vertical"
+    );
   }
   // @Provide()
   // message() {
@@ -342,7 +368,7 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
     (this as any).$h3.toast.show({
       text,
       autoHide: false,
-      iconType: "loading"
+      iconType: "loading",
     });
   }
 
@@ -350,7 +376,7 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
     (this as any).$h3.toast.show({
       text,
       autoHide: true,
-      iconType: text.length < 8 ? "close" : ""
+      iconType: text.length < 8 ? "close" : "",
     });
   }
 
@@ -359,7 +385,7 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
       text,
       autoHide: true,
       iconType: "check",
-      duration: 1000
+      duration: 1000,
     });
   }
   showInfo(text: string) {
@@ -367,7 +393,7 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
       text,
       autoHide: true,
       iconType: "info",
-      duration: 1000
+      duration: 1000,
     });
   }
   hideToast() {
@@ -381,7 +407,8 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
       if (formBody) {
         let height = "";
         if (actions.length > 0) {
-          height = this.nodes.length > 0 ? "calc(100% - 88px)" : "calc(100% - 44px)";
+          height =
+            this.nodes.length > 0 ? "calc(100% - 88px)" : "calc(100% - 44px)";
         } else {
           height = this.nodes.length > 0 ? "calc(100% - 44px)" : "100%";
         }
@@ -416,7 +443,10 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
     let valid = false;
 
     const formControls: renderer.RendererFormControl[] = [];
-    renderer.components.FormRendererHelper.findFormControl(this.controls, formControls);
+    renderer.components.FormRendererHelper.findFormControl(
+      this.controls,
+      formControls
+    );
 
     if (!onlyUpload) {
       if (this.approval) {
@@ -425,11 +455,17 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
         valid = formRenderer.validate();
       }
 
-      const rowEmpty = (this as any).$t("cloudpivot.form.runtime.modal.rowEmpty");
+      const rowEmpty = (this as any).$t(
+        "cloudpivot.form.runtime.modal.rowEmpty"
+      );
       let isEmptyRow: boolean = formControls
-        .filter(c => c.type === schema.FormControlType.Sheet && c.options.isEmptyRow)
-        .some(c => {
-          const ctrl = this.formRenderer.controller.findChild(c.key) as FormSheet;
+        .filter(
+          (c) => c.type === schema.FormControlType.Sheet && c.options.isEmptyRow
+        )
+        .some((c) => {
+          const ctrl = this.formRenderer.controller.findChild(
+            c.key
+          ) as FormSheet;
           const name =
             (this as any).$i18n.locale === "zh"
               ? c.options.name
@@ -455,15 +491,21 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
         return false;
       }
 
-      const pleaseInput = (this as any).$t("cloudpivot.form.runtime.modal.pleaseInput");
+      const pleaseInput = (this as any).$t(
+        "cloudpivot.form.runtime.modal.pleaseInput"
+      );
 
       // this.formControls = formControls;
       let isRequire: boolean = formControls
-        .filter(c => c.type === renderer.FormControlType.Address)
+        .filter((c) => c.type === renderer.FormControlType.Address)
         .some((c: any) => {
           const ctrl = this.formRenderer.controller.findChild(c.key);
           // const val: any = c.controller.value;
-          if (ctrl && ctrl.required && (!ctrl.value || !ctrl.value.provinceAdcode)) {
+          if (
+            ctrl &&
+            ctrl.required &&
+            (!ctrl.value || !ctrl.value.provinceAdcode)
+          ) {
             this.$message.error(`${pleaseInput}${c.options.name}`);
             return true;
           }
@@ -473,9 +515,11 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
 
       if (!isRequire) {
         isRequire = formControls
-          .filter(c => c.type === schema.FormControlType.Sheet && c.required)
-          .some(c => {
-            const ctrl = this.formRenderer.controller.findChild(c.key) as FormSheet;
+          .filter((c) => c.type === schema.FormControlType.Sheet && c.required)
+          .some((c) => {
+            const ctrl = this.formRenderer.controller.findChild(
+              c.key
+            ) as FormSheet;
             if (ctrl && ctrl.rows.length === 0) {
               this.$message.error(`${pleaseInput}${c.options.name}`);
               return true;
@@ -506,20 +550,28 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
           if (keys.length > 0) {
             let key = keys[0];
 
-            const control = formControls.find(c => c.key === key);
+            const control = formControls.find((c) => c.key === key);
 
             if (control && control.type === schema.FormControlType.Sheet) {
               const map = errors[key];
               keys = Object.keys(map);
               const keys2 = Object.keys(map[keys[0]]);
-              const err = formRenderer.getErrorMessage(keys2[0], map[keys[0]][keys2[0]][0], key);
+              const err = formRenderer.getErrorMessage(
+                keys2[0],
+                map[keys[0]][keys2[0]][0],
+                key
+              );
               this.error = err;
               key += keys[0];
             } else {
               this.error = formRenderer.getErrorMessage(key, errors[key][0]);
               // 校验失败获取赋予输入框焦点
-              let input: any = document.querySelector("#" + key + " input") as any;
-              let textarea: any = document.querySelector("#" + key + " textarea") as any;
+              let input: any = document.querySelector(
+                "#" + key + " input"
+              ) as any;
+              let textarea: any = document.querySelector(
+                "#" + key + " textarea"
+              ) as any;
               input && input.focus();
               textarea && textarea.focus();
             }
@@ -594,10 +646,10 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
     console.log("load");
     // const closeLoading = (this.$message as any).loading();
     this.loadding = true;
-    let resTest=''
+    let resTest = "";
     try {
       const res = await super.load(edit);
-      resTest=res
+      resTest = res;
       const title = this.formObj.instanceName || this.formObj.bizSheet.name;
       if (platform && platform.service && platform.service.setTitle) {
         // 外链和从列表中打开的表单的新建、查看、编辑状态 移动端表单顶部 表单 去掉 #34950 迭代30
@@ -614,7 +666,9 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
 
       if (this.approval) {
         setTimeout(() => {
-          this.approval.controller = (this.formRenderer as any).findController(this.approval.key);
+          this.approval.controller = (this.formRenderer as any).findController(
+            this.approval.key
+          );
         }, 500);
       }
       if (!this.isEL) {
@@ -638,17 +692,17 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
         this.goPermission();
         return;
       }
-      if (platform.IS_DINGTALK && !localStorage.getItem("token")) {       
-
-           
+      if (platform.IS_DINGTALK && !localStorage.getItem("token")) {
         if (window.location.href.indexOf("#/login") == -1) {
           localStorage.setItem("wyyurl", window.location.href);
         }
-        window.location.href = `${env.portalHost}/mobile/#/login`;
+        window.location.href = `${env.portalHost}/mobile/#/login?accessToken=${localStorage.getItem(
+          "accessToken"
+        )}`;
         window.location.reload();
         return;
-      }else if(!localStorage.getItem("token")){
-           if (window.location.href.indexOf("#/login") == -1) {
+      } else if (!localStorage.getItem("token")) {
+        if (window.location.href.indexOf("#/login") == -1) {
           localStorage.setItem("wyyurl", window.location.href);
         }
         window.location.href = `${env.portalHost}/mobile/#/login`;
@@ -690,15 +744,28 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
   async onAction(ac: runtime.FormActionButton) {
     await super.onAction(ac);
   }
- invoke(method, params) {    
+  invoke(method, params) {
+    if (window.flutter_inappwebview) {
       const message = {
-        module: 'JSCall',
+        module: "JSCallNative",
         method: method,
         params: params,
-      }
-      // eslint-disable-next-line no-undef
-      ZjClientBridge.postMessage(JSON.stringify(message))
+      };
+      window.flutter_inappwebview.callHandler(
+        "ZjClientBridge",
+        JSON.stringify(message)
+      );
     }
+    if (window.ZjClientBridge) {
+      const message = {
+        module: "JSCall",
+        method: method,
+        params: params,
+      };
+      // eslint-disable-next-line no-undef
+      ZjClientBridge.postMessage(JSON.stringify(message));
+    }
+  }
   async goto(ac: runtime.FormActionButton, res: Common.Data) {
     //
     // switch(ac.code) {
@@ -707,13 +774,15 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
     // this.onScrollLock(true);
     if (ac.code === runtime.FormAction.Save) {
       if (this.isNew) {
-        this.$message.success((this as any).$t(
-          `cloudpivot.form.runtime.actionTip.${ac.code}`
-        ) as string);
+        this.$message.success(
+          (this as any).$t(
+            `cloudpivot.form.runtime.actionTip.${ac.code}`
+          ) as string
+        );
       } else {
-        this.$message.success((this as any).$t(
-          `cloudpivot.form.runtime.actionTip.save2`
-        ) as string);
+        this.$message.success(
+          (this as any).$t(`cloudpivot.form.runtime.actionTip.save2`) as string
+        );
       }
       setTimeout(() => {
         this.hideToast();
@@ -746,49 +815,53 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
 
       // this.retrieveCallBack();
     } else {
-      this.$message.success((this as any).$t(
-        `cloudpivot.form.runtime.actionTip.${ac.code}`
-      ) as string);
+      this.$message.success(
+        (this as any).$t(
+          `cloudpivot.form.runtime.actionTip.${ac.code}`
+        ) as string
+      );
 
       setTimeout(() => {
-        let url = (this.$route.query.return as string) || window.sessionStorage.getItem("fullPath");
- 
+        let url =
+          (this.$route.query.return as string) ||
+          window.sessionStorage.getItem("fullPath");
+
         if (url) {
           this.$router.replace({
-            path: url
+            path: url,
           });
           // this.$router.push(url)
         } else {
           // this.goEmptyPage(res);
           // 钉钉
-    if (platform.IS_DINGTALK) {
-      dd.biz.navigation.close({});
-      return true;
-    }else{
-      this.invoke('close',{})      
-    }
-    if (navigator.userAgent.indexOf('MSIE') > 0) {
-      if (navigator.userAgent.indexOf('MSIE 6.0') > 0) {
-        window.opener = null;
-        window.close();
-      } else {
-        window.open('', '_top');
-        window.top.close();
-      }
-    } else if (
-      navigator.userAgent.indexOf('Firefox') > 0 ||
-      navigator.userAgent.indexOf('Chrome') > 0
-    ) {
-      window.location.href = 'about:blank';
-      window.close();
-      //window.history.go(-2);
-    } else if (navigator.userAgent.indexOf('DingTalk') > 0) {
-      window.close();
-    } else {
-      window.opener = null;
-      window.open('', '_self', '');
-      window.close();
-    }
+          if (platform.IS_DINGTALK) {
+            dd.biz.navigation.close({});
+            return true;
+          } else {
+            this.invoke("close", {});
+          }
+          if (navigator.userAgent.indexOf("MSIE") > 0) {
+            if (navigator.userAgent.indexOf("MSIE 6.0") > 0) {
+              window.opener = null;
+              window.close();
+            } else {
+              window.open("", "_top");
+              window.top.close();
+            }
+          } else if (
+            navigator.userAgent.indexOf("Firefox") > 0 ||
+            navigator.userAgent.indexOf("Chrome") > 0
+          ) {
+            window.location.href = "about:blank";
+            window.close();
+            //window.history.go(-2);
+          } else if (navigator.userAgent.indexOf("DingTalk") > 0) {
+            window.close();
+          } else {
+            window.opener = null;
+            window.open("", "_self", "");
+            window.close();
+          }
         }
       }, 1000);
     }
@@ -835,8 +908,8 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
         sheetCode: this.formObj.bizSheet.code,
         objectId: this.formObj.bizObject.id,
         return: url,
-        t: new Date().getSeconds().toString() || ""
-      }
+        t: new Date().getSeconds().toString() || "",
+      },
     });
     this.clean();
     // this.reload();
@@ -850,18 +923,19 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
         workitemId,
         workflowInstanceId,
         return: url,
-        t: new Date().getSeconds().toString() || ""
-      } as any
+        t: new Date().getSeconds().toString() || "",
+      } as any,
     });
   }
 
   goEmptyPage(backData?: any) {
     if ((window as any).externalLinkToken && backData) {
-      const { formCode, objectId, schemaCode, workflowInstanceId } = backData.data;
+      const { formCode, objectId, schemaCode, workflowInstanceId } =
+        backData.data;
       let param: any = {
         formCode,
         objectId,
-        schemaCode
+        schemaCode,
       };
       if ((window as any).isStartWorkflow) {
         param = { objectId, workflowInstanceId };
@@ -870,7 +944,7 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
         if (res.errcode === 0) {
           this.$router.replace({
             name: "shared-success",
-            params: { shortCode: res.data.pairCode }
+            params: { shortCode: res.data.pairCode },
           });
           console.log("url", (window as any).location.href);
         }
@@ -879,8 +953,8 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
       this.$router.replace({
         name: "form-empty",
         query: {
-          return: this.$route.query.return
-        }
+          return: this.$route.query.return,
+        },
       });
     }
   }
@@ -888,7 +962,7 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
   goUnpublished() {
     this.$router
       .push({
-        name: "formUnpublished"
+        name: "formUnpublished",
       })
       .catch((err: any) => {
         err;
@@ -917,11 +991,11 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
         name: "FormApproval",
         params: {
           workflowInstanceId: this.workflowInstanceId,
-          workItemId: this.workItemId
+          workItemId: this.workItemId,
         },
         query: {
-          return: this.$route.query.return
-        }
+          return: this.$route.query.return,
+        },
       })
       .catch((err: any) => {
         err;
@@ -936,26 +1010,30 @@ export default class MobileFormDetail extends mobileForm.runtime.FormDetail {
     if (!this.formObj) return;
     const params: FormCommentIns.formCommentParams.CommentList = {
       bizObjectId: id,
-      schemaCode
+      schemaCode,
     };
 
-    const res: any = await FormCommentIns.FormCommentApi.getCommentListNum(params);
+    const res: any = await FormCommentIns.FormCommentApi.getCommentListNum(
+      params
+    );
     if (res.errcode === 0) {
       const { data } = res;
       if (!this.isSsubmited || !this.isLoadComment) return;
-      const item: any = this.actions.find((ac: any) => ac.code === runtime.FormAction.Comment);
+      const item: any = this.actions.find(
+        (ac: any) => ac.code === runtime.FormAction.Comment
+      );
       if (item) {
         item.text = `${(this as any).$t("languages.common.comment", {
-          data: data
+          data: data,
         })}`;
       } else {
         this.actions.push({
           code: runtime.FormAction.Comment,
           text: `${(this as any).$t("languages.common.comment", {
-            data: data
+            data: data,
           })}`,
           disabled: false,
-          visible: true
+          visible: true,
         });
       }
     } else {

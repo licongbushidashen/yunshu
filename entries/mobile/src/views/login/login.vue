@@ -386,7 +386,7 @@ export default class LoginAccount extends Vue {
 
       const wyyurl = localStorage.getItem("wyyurl");
       if (wyyurl) {
-        localStorage.removeItem('wyyurl')
+        // localStorage.removeItem('wyyurl')
         window.location.href = wyyurl;
       } else if (isShowEmailResquest) {
         window.location.href = isShowEmailResquest;
